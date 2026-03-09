@@ -414,7 +414,7 @@ export function useSkillsEngine() {
       await pause(600);
       addMessage({ type: 'read-checklist', content: '读取待办清单' });
       await pause(400);
-      addMessage({ type: 'create-agent', content: '创建记忆库信息和Prompt设计专家代理' });
+      addMessage({ type: 'create-agent', content: '创建记忆库信息和Prompt设计专家代理', agentNames: [{ name: '记忆库专家', avatar: 'memory' }, { name: 'Prompt专家', avatar: 'strategist' }] });
       await pause(400);
 
       // Agent 02 + 03 cluster
