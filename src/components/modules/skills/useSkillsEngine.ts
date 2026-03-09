@@ -338,7 +338,8 @@ export function useSkillsEngine() {
         setState(prev => ({
           ...prev,
           agents: prev.agents.map(a => a.id === 'agent-01' ? agent01 : a),
-          activeRightView: 'agent-01',
+          activeRightView: 'agents',
+          activeAgentTab: '01',
         }));
 
         addMessage({ type: 'agent-cluster', content: '', agents: [agent01] });
