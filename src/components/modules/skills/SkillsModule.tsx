@@ -16,6 +16,7 @@ import pixelMemory from '@/assets/pixel-memory.svg';
 import pixelPrompt from '@/assets/pixel-prompt.svg';
 import pixelVideo from '@/assets/pixel-video.svg';
 import pixelCreate from '@/assets/pixel-create.svg';
+import pixelTrend from '@/assets/pixel-trend.svg';
 import expertCrawler from '@/assets/expert-crawler.png';
 import expertDesigner from '@/assets/expert-designer.png';
 
