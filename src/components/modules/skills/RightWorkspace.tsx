@@ -266,7 +266,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
             {/* Document header with close button */}
             <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border/30 bg-muted/30 shrink-0">
               <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
-              <span className="text-sm text-muted-foreground">阅读</span>
+              <span className="text-sm text-muted-foreground font-normal">阅读</span>
               <span className="text-sm text-muted-foreground/40">|</span>
               <span className="text-sm truncate text-[#5c5c5c] font-normal">{props.memoryTitle || '记忆库'}.md</span>
               {props.memoryCategory &&
