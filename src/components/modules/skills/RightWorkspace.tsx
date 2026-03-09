@@ -94,29 +94,29 @@ function SubTaskList({ task }: {task: SkillTask;}) {
     <div className="space-y-0">
       {task.children.map((child) => {
         const avatarSrc = child.expert ? expertAvatars[child.expert.avatar] : undefined;
-        return (
-          <div key={child.id} className="flex items-center gap-3 px-3 py-3 border-b border-border/10 last:border-b-0">
-            {avatarSrc ?
-            <div className={cn('w-6 h-6 shrink-0 transition-opacity', child.status === 'queued' && 'opacity-30')}>
-                <img src={avatarSrc} alt={child.expert?.name || ''} className="w-full h-full object-contain" />
-              </div> :
-            <div className="w-6 h-6 shrink-0" />
-            }
-            <span className={cn(
-              'text-sm flex-1',
-              child.status === 'done' && 'text-foreground/70',
-              child.status === 'running' && 'text-foreground',
-              child.status === 'queued' && 'text-muted-foreground/50'
-            )}>{child.title}</span>
-            <div className="w-4 h-4 shrink-0">
-              {child.status === 'done' ?
-              <img src={pixelCheck} alt="done" className="w-full h-full object-contain" /> :
-              child.status === 'running' ?
-              <img src={pixelWait} alt="running" className="w-full h-full object-contain animate-pulse" /> :
-              <img src={pixelWait} alt="queued" className="w-full h-full object-contain opacity-20" />
-              }
-            </div>
-          </div>);
+        return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       })}
     </div>);
 }
