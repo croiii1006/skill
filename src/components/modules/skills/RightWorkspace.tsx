@@ -99,7 +99,7 @@ function SubTaskList({ task }: {task: SkillTask;}) {
         return (
           <div key={i} className="flex items-center gap-2 py-1.5 px-1">
             {avatarSrc && <img src={avatarSrc} alt="" className="w-5 h-5 rounded-full shrink-0" />}
-            <span className="text-xs text-foreground/70 flex-1">{child.label}</span>
+            <span className="text-xs text-foreground/70 flex-1">{child.title}</span>
             {isDone && <img src={pixelCheck} alt="done" className="w-4 h-4" />}
             {isRunning && <img src={pixelWait} alt="running" className="w-4 h-4 animate-pulse" />}
           </div>
