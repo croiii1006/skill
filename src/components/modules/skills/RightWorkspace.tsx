@@ -323,9 +323,8 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       <div className="px-5 py-3 border-b border-border/20 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             
-            {view === 'agent-04' ?
-          <span className="font-pixel text-base font-medium text-foreground">Agent04</span> :
-
+            {pixelTitles[view] ?
+          <span className="font-pixel text-base font-medium text-foreground">{pixelTitles[view]}</span> :
           <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
           }
           </div>
