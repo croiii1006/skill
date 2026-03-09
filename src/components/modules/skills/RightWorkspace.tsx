@@ -300,7 +300,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           '04': props.agent04
         };
         return (
-          <div className="border-t border-border/20 shrink-0 flex-row gap-[35px] flex items-center justify-center py-[6px] px-[64px]">
+          <div className="border-t border-border/20 shrink-0 flex items-center justify-center gap-3 py-2 px-5">
           {agentTabs.map((tab) => {
               const agent = agentStatusMap[tab.id];
               const status = agent?.status || 'idle';
@@ -309,34 +309,22 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <button
                   key={tab.id}
                   onClick={() => onAgentTabChange?.(tab.id)}
-                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 gap-[31px] my-0 py-0 px-[2px]",
-
-                  isActive ?
-                  'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
-                  'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
+                  className={cn(
+                    "flex flex-col items-center gap-1 px-4 py-2 text-xs transition-all border-2 border-foreground/80",
+                    isActive
+                      ? 'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]'
+                      : 'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
                   )}>
-                <div className="w-6 h-6 shrink-0 relative">
-                  
-                  
-
-
-
-
-                    
-                </div>
-                <div className="flex-col flex items-end justify-center gap-[5px]">
-                  <span className="font-pixel leading-none font-light text-2xl text-right mx-0 px-0">{tab.label}</span>
-                  <span className={cn("leading-none text-xs text-[#4d4d4d] font-thin text-right px-0",
-
+                  <span className="font-pixel text-base leading-none">{tab.label}</span>
+                  <span className={cn(
+                    "text-[10px] leading-none",
                     status === 'running' && 'text-amber-600',
                     status === 'done' && 'text-emerald-600',
                     status === 'idle' && 'text-muted-foreground/40'
-                    )}>
+                  )}>
                     {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
                   </span>
-                </div>
-              </button>);
-
+                </button>);
             })}
         </div>);
       })()
