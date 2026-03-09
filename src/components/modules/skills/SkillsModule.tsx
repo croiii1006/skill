@@ -24,7 +24,7 @@ const avatarMap: Record<string, string> = {
 };
 
 /* ─── Agent rows inside flow-step card ─── */
-function AgentClusterSteps({ agents, isLast, msgId }: { agents: AgentInfo[]; isLast: boolean; msgId: string }) {
+function AgentClusterSteps({ agents, isLast, msgId }: { agents: import('./AgentCard').AgentInfo[]; isLast: boolean; msgId: string }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
