@@ -198,7 +198,8 @@ export function RightWorkspace(props: RightWorkspaceProps) {
               onConfirm={() => props.onPromptConfirm?.()}
               onBack={() => props.onBackToVideoSelect?.()}
               memoryEnabled={props.memoryEnabled ?? false}
-              disabled={props.isProcessing} />
+              disabled={props.isProcessing}
+              readonly={props.agent04?.status !== undefined && props.agent04.status !== 'idle'} />
             }
           </div>);
       case '04':
