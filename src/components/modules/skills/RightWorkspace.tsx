@@ -317,12 +317,12 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   )}>
                 <div className="w-6 h-6 shrink-0 relative">
                   <img src={expertAvatars[tab.avatar]} alt={tab.name} className={cn("w-full h-full object-contain rounded-none", status === 'idle' && 'opacity-40')} />
-                  <span className={cn(
-                      'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background',
-                      status === 'running' && 'bg-amber-400 animate-pulse',
-                      status === 'done' && 'bg-emerald-500',
-                      status === 'idle' && 'bg-muted-foreground/30'
-                    )} />
+                  
+
+
+
+
+                    
                 </div>
                 <div className="flex-col flex items-end justify-center gap-[5px]">
                   <span className="font-pixel leading-none font-light text-2xl text-right mx-0 px-0">{tab.label}</span>
