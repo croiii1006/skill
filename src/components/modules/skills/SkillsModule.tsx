@@ -11,16 +11,17 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
-import expertMemory from '@/assets/expert-memory.png';
+import pixelSearch from '@/assets/pixel-search.svg';
+import pixelMemory from '@/assets/pixel-memory.svg';
+import pixelPrompt from '@/assets/pixel-prompt.svg';
+import pixelVideo from '@/assets/pixel-video.svg';
+import pixelCreate from '@/assets/pixel-create.svg';
 import expertCrawler from '@/assets/expert-crawler.png';
-import expertVideo from '@/assets/expert-video.png';
 import expertDesigner from '@/assets/expert-designer.png';
-import expertStrategist from '@/assets/expert-strategist.png';
-import expertSearch from '@/assets/expert-search.png';
 
 const avatarMap: Record<string, string> = {
-  memory: expertMemory, crawler: expertCrawler, video: expertVideo,
-  designer: expertDesigner, strategist: expertStrategist, search: expertSearch,
+  memory: pixelMemory, crawler: expertCrawler, video: pixelVideo,
+  designer: expertDesigner, strategist: pixelPrompt, search: pixelSearch,
 };
 
 /* ─── Agent task background descriptions ─── */
@@ -48,7 +49,7 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
               className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors"
               onClick={() => setExpandedId(isExpanded ? null : agent.id)}
             >
-              <Users className="w-4 h-4 text-foreground/60 shrink-0" />
+              <img src={pixelCreate} alt="创建助手" className="w-4 h-4 shrink-0" />
               <span className="text-sm text-foreground/80">创建助手</span>
               <div className="w-px h-4 bg-border/30" />
               <div className={cn(
@@ -74,7 +75,7 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
             {isExpanded && (
               <div className="px-4 pb-4 animate-fade-in">
                 <div className="flex items-start gap-3">
-                  <Users className="w-4 h-4 shrink-0 invisible" />
+                  <img src={pixelCreate} alt="" className="w-4 h-4 shrink-0 invisible" />
                   <span className="text-sm invisible">创建助手</span>
                   <div className="w-px h-4 invisible" />
                   <div className={cn('shrink-0 invisible', isExpanded ? 'w-8' : 'w-5')} />
