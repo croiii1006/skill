@@ -79,26 +79,24 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
           </div>
 
           {!compact && (
-            <div className="flex items-end justify-between mt-1">
-              <p className={cn(
-                'text-xs leading-relaxed',
-                agent.status === 'running'
-                  ? 'text-foreground/70'
-                  : 'text-muted-foreground/60'
-              )}>
-                <span className="mr-1">└</span>
-                {agent.statusText}
-              </p>
-              <span className="shrink-0 ml-2">
-                <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'running' ? 'running' : 'idle'} />
-              </span>
-            </div>
+            <p className={cn(
+              'text-xs leading-relaxed mt-1',
+              agent.status === 'running'
+                ? 'text-foreground/70'
+                : 'text-muted-foreground/60'
+            )}>
+              <span className="mr-1">└</span>
+              {agent.statusText}
+            </p>
           )}
         </div>
 
-        {/* Number badge on right */}
-        <div className="shrink-0 flex items-start gap-1">
+        {/* Right column: number + progress aligned */}
+        <div className="shrink-0 flex flex-col items-end gap-1">
           <span className="font-pixel text-lg font-bold text-foreground/15">{agent.number}</span>
+          {!compact && (
+            <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'running' ? 'running' : 'idle'} />
+          )}
         </div>
       </div>
     </div>
