@@ -20,6 +20,7 @@ import expertSearch from '@/assets/expert-search.png';
 import expertAudio from '@/assets/expert-audio.png';
 import pixelCheck from '@/assets/pixel-check.png';
 import pixelWait from '@/assets/pixel-wait.png';
+import pixelInfo from '@/assets/pixel-info.svg';
 
 const expertAvatars: Record<string, string> = {
   memory: expertMemory,
