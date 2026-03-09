@@ -694,7 +694,8 @@ export function useSkillsEngine() {
       ...prev,
       resultVideo: null,
       isProcessing: false,
-      activeRightView: 'agent-04',
+      activeRightView: 'agents',
+      activeAgentTab: '04',
       agents: prev.agents.map(a => a.id === 'agent-04' ? { ...a, status: 'idle' as const, progress: 0, statusText: '等待启动' } : a),
       messages: prev.messages.filter(m =>
         !(m.type === 'agent-cluster' && m.agents?.some(a => a.id === 'agent-04')) &&
