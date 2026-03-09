@@ -494,7 +494,8 @@ export function useSkillsEngine() {
         updateAgent('agent-02', { progress: 80, statusText: '正在构建特征向量...' });
         await subDelay();
         updateChild('task-memory', 'task-memory-context', { status: 'done', progress: 100, title: '数据专家完成构建上下文向量' });
-        addTaskLog('task-memory', '数据专家完成构建上下文向量 → 生成 512 维特征向量');
+        const vectorDim = Math.floor(Math.random() * 50) + 1;
+        addTaskLog('task-memory', `数据专家完成构建上下文向量 → 生成 ${vectorDim} 维特征向量`);
 
         updateTask('task-memory', { status: 'done', progress: 100, endAt: now(), output: `已检索 ${memoryCount} 条记忆，构建上下文完成` });
         updateAgentInMessages('agent-02', { status: 'done', progress: 100, statusText: `已完成，检索到 ${memoryCount} 条记忆` });
