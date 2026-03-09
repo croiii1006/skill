@@ -544,7 +544,7 @@ export function useSkillsEngine() {
     (async () => {
       addMessage({ type: 'read-checklist', content: '读取待办清单' });
       await pause(400);
-      addMessage({ type: 'create-agent', content: '创建视频生成专家代理' });
+      addMessage({ type: 'create-agent', content: '创建视频生成专家代理', agentNames: [{ name: '视频专家', avatar: 'video' }] });
       await pause(400);
 
       const agent04: AgentInfo = {
