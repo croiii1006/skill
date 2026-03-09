@@ -256,7 +256,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
             </div>
             <div className="flex-1 overflow-auto relative">
               <CopyButton text={props.memoryContent || '暂无内容'} />
-              <div className="px-5 py-4 font-mono text-sm leading-7">
+              <div className="px-5 pt-10 pb-4 font-mono text-sm leading-7">
                 {lines.map((line, i) =>
                   <div key={i} className="flex">
                     <span className="w-10 shrink-0 text-right pr-4 text-muted-foreground/30 select-none">{i + 1}</span>
