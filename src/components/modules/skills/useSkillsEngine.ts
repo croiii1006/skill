@@ -455,7 +455,8 @@ export function useSkillsEngine() {
           if (a.id === 'agent-03') return agent03;
           return a;
         }),
-        activeRightView: 'agent-02-03',
+        activeRightView: 'agents',
+        activeAgentTab: '02',
       }));
 
       addMessage({ type: 'agent-cluster', content: '', agents: [agent02, agent03] });
