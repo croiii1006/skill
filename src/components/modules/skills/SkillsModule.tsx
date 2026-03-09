@@ -389,7 +389,7 @@ export function SkillsModule() {
         let icon = null;
         let cleanContent = content;
         if (content.startsWith('✅')) {
-          icon = <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
+          icon = <img src={pixelTrend} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
           cleanContent = content.slice(2).trim();
         } else if (content.startsWith('🎉')) {
           icon = <PartyPopper className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
