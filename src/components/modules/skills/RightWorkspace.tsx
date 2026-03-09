@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, ScrollText, ChevronRight } from 'lucide-react';
+import { X, ScrollText, ChevronRight, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
