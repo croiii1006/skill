@@ -143,7 +143,6 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       case '01':
         return (
           <div className="p-5 space-y-5">
-            {props.agent01Task && <SubTaskList task={props.agent01Task} />}
             {props.agent01Task && <WorkLog logs={props.agent01Task.logs} />}
             {props.candidateVideos && props.candidateVideos.length > 0 &&
             <div className="space-y-3">
@@ -167,13 +166,11 @@ export function RightWorkspace(props: RightWorkspaceProps) {
         }
         return (
           <div className="p-5 space-y-5">
-            {props.agent02Task && <SubTaskList task={props.agent02Task} />}
             {props.agent02Task && <WorkLog logs={props.agent02Task.logs} />}
           </div>);
       case '03':
         return (
           <div className="p-5 space-y-5">
-            {props.agent03Task && <SubTaskList task={props.agent03Task} />}
             {props.agent03Task && <WorkLog logs={props.agent03Task.logs} />}
             {props.generatedPrompt &&
             <PromptEditorBlock
@@ -188,7 +185,6 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       case '04':
         return (
           <div className="p-5 space-y-5">
-            {props.agent04Task && <SubTaskList task={props.agent04Task} />}
             {props.agent04Task && <WorkLog logs={props.agent04Task.logs} />}
             {props.resultVideo &&
             <ResultPreviewBlock onRegenerate={props.onRegenerate} disabled={props.isProcessing} />
