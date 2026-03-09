@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { PixelProgress } from './PixelProgress';
 import { ChevronRight } from 'lucide-react';
 import pixelAgent from '@/assets/pixel-agent.svg';
+import pixelCross from '@/assets/pixel-cross.png';
 
 import pixelSearch from '@/assets/pixel-search.svg';
 import pixelMemory from '@/assets/pixel-memory.svg';
@@ -31,7 +32,7 @@ export interface AgentInfo {
   avatar: string;
   statusText: string;
   progress: number;
-  status: 'idle' | 'running' | 'done' | 'skipped';
+  status: 'idle' | 'running' | 'done' | 'skipped' | 'error';
 }
 
 interface AgentCardProps {
@@ -51,6 +52,7 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
       onClick && 'cursor-pointer hover:bg-muted/30',
       agent.status === 'running' && 'border-border/40',
       agent.status === 'done' && 'border-border/20',
+      agent.status === 'error' && 'border-destructive/40 bg-destructive/5',
       agent.status === 'skipped' && 'border-border/10 opacity-40 grayscale',
       agent.status === 'idle' && 'border-border/10 opacity-50'
       )}>
@@ -75,8 +77,8 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-pixel text-sm font-semibold text-foreground">{agent.name}</span>
-            {/* Pixel number badge */}
+            <span className={cn("font-pixel text-sm font-semibold text-foreground", agent.status === 'error' && 'text-destructive')}>{agent.name}</span>
+            {agent.status === 'error' && <img src={pixelCross} className="w-4 h-4 shrink-0" alt="error" />}
             
           </div>
 
@@ -97,7 +99,7 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
         <div className="shrink-0 flex flex-col items-end gap-1">
           <span className="font-pixel text-lg font-medium text-[#3d3d3d]">{agent.number}</span>
           {!compact &&
-          <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'running' ? 'running' : 'idle'} />
+          <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'error' ? 'error' : agent.status === 'running' ? 'running' : 'idle'} />
           }
         </div>
       </div>

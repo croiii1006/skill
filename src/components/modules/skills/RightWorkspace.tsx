@@ -21,6 +21,7 @@ import expertAudio from '@/assets/expert-audio.png';
 import pixelCheck from '@/assets/pixel-check.png';
 import pixelWait from '@/assets/pixel-wait.png';
 import pixelInfo from '@/assets/pixel-info.svg';
+import pixelCross from '@/assets/pixel-cross.png';
 
 const expertAvatars: Record<string, string> = {
   memory: pixelMemory,
@@ -139,6 +140,24 @@ export function RightWorkspace(props: RightWorkspaceProps) {
   if (view === 'none') return null;
 
   const renderAgentContent = () => {
+    // Check if current agent has error status
+    const agentStatusMap: Record<AgentTab, AgentInfo | undefined> = {
+      '01': props.agent01,
+      '02': props.agent02,
+      '03': props.agent03,
+      '04': props.agent04,
+    };
+    const currentAgent = agentStatusMap[activeAgentTab];
+    if (currentAgent?.status === 'error') {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-5 text-center min-h-[300px]">
+          <img src={pixelCross} className="w-10 h-10" alt="" />
+          <p className="text-sm text-destructive font-medium">状态异常</p>
+          <p className="text-xs text-muted-foreground/60">{currentAgent.statusText || '任务执行过程中出现错误'}</p>
+        </div>
+      );
+    }
+
     switch (activeAgentTab) {
       case '01':
         return (
@@ -310,13 +329,13 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   )}>
                   <span className="font-pixel leading-none text-lg">{tab.label}</span>
                   <span className={cn("text-[10px] leading-none text-[#8a8a8a]",
-
                   status === 'running' && 'text-amber-600',
                   status === 'done' && 'text-emerald-600',
+                  status === 'error' && 'text-destructive',
                   status === 'skipped' && 'text-muted-foreground/50',
                   status === 'idle' && 'text-muted-foreground/40'
                   )}>
-                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : status === 'skipped' ? '已跳过' : '等待中'}
+                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : status === 'error' ? '异常' : status === 'skipped' ? '已跳过' : '等待中'}
                   </span>
                 </button>);
             })}

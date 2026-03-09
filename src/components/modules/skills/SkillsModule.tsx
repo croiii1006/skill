@@ -10,6 +10,8 @@ import {
   Loader2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight, Users, FileText,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useToast } from '@/hooks/use-toast';
+import pixelCross from '@/assets/pixel-cross.png';
 
 import pixelSearch from '@/assets/pixel-search.svg';
 import pixelMemory from '@/assets/pixel-memory.svg';
@@ -141,6 +143,7 @@ export function SkillsModule() {
     setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState,
   } = useSkillsEngine();
 
+  const { toast } = useToast();
   const { entries } = useMemory();
   const memoryItems = useMemo(() => entries.map(e => ({
     id: e.id,
@@ -166,7 +169,18 @@ export function SkillsModule() {
     }
   }, [state.messages.length]);
 
-  // Auto-save snapshot
+  // Show toast when agents hit error status
+  useEffect(() => {
+    const errorAgent = state.agents.find(a => a.status === 'error');
+    if (errorAgent) {
+      toast({
+        title: '网络异常，请重试',
+        description: `${errorAgent.name} 执行过程中出现错误`,
+        variant: 'destructive',
+      });
+    }
+  }, [state.agents.map(a => a.status).join(',')]);
+
   useEffect(() => {
     if (!activeHistoryId || !state.setupCompleted || state.isProcessing) return;
     setHistory(prev => {
@@ -397,9 +411,12 @@ export function SkillsModule() {
         } else if (content.startsWith('🔄')) {
           icon = <RefreshCw className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
           cleanContent = content.slice(2).trim();
+        } else if (content.startsWith('❌')) {
+          icon = <img src={pixelCross} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
+          cleanContent = content.slice(2).trim();
         }
         return (
-          <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed animate-fade-in">
+          <div key={msg.id} className={cn("flex items-start gap-2 text-sm leading-relaxed animate-fade-in", content.startsWith('❌') ? 'text-destructive' : 'text-foreground/80')}>
             {icon}
             <span>{cleanContent}</span>
           </div>
