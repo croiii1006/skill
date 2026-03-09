@@ -140,6 +140,24 @@ export function RightWorkspace(props: RightWorkspaceProps) {
   if (view === 'none') return null;
 
   const renderAgentContent = () => {
+    // Check if current agent has error status
+    const agentStatusMap: Record<AgentTab, AgentInfo | undefined> = {
+      '01': props.agent01,
+      '02': props.agent02,
+      '03': props.agent03,
+      '04': props.agent04,
+    };
+    const currentAgent = agentStatusMap[activeAgentTab];
+    if (currentAgent?.status === 'error') {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-5 text-center min-h-[300px]">
+          <img src={pixelCross} className="w-10 h-10" alt="" />
+          <p className="text-sm text-destructive font-medium">状态异常</p>
+          <p className="text-xs text-muted-foreground/60">{currentAgent.statusText || '任务执行过程中出现错误'}</p>
+        </div>
+      );
+    }
+
     switch (activeAgentTab) {
       case '01':
         return (
