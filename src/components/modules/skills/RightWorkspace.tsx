@@ -20,6 +20,7 @@ import expertSearch from '@/assets/expert-search.png';
 import expertAudio from '@/assets/expert-audio.png';
 import pixelCheck from '@/assets/pixel-check.png';
 import pixelWait from '@/assets/pixel-wait.png';
+import pixelInfo from '@/assets/pixel-info.svg';
 
 const expertAvatars: Record<string, string> = {
   memory: expertMemory,
@@ -158,6 +159,14 @@ export function RightWorkspace(props: RightWorkspaceProps) {
             }
           </div>);
       case '02':
+        if (!props.memoryEnabled) {
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 p-5 text-center min-h-[300px]">
+              <img src={pixelInfo} className="w-10 h-10 opacity-40" alt="" />
+              <p className="text-sm text-muted-foreground/60">未选择记忆库</p>
+            </div>
+          );
+        }
         return (
           <div className="p-5 space-y-5">
             {props.agent02Task && <SubTaskList task={props.agent02Task} />}
@@ -310,9 +319,10 @@ export function RightWorkspace(props: RightWorkspaceProps) {
 
                   status === 'running' && 'text-amber-600',
                   status === 'done' && 'text-emerald-600',
+                  status === 'skipped' && 'text-muted-foreground/50',
                   status === 'idle' && 'text-muted-foreground/40'
                   )}>
-                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
+                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : status === 'skipped' ? '已跳过' : '等待中'}
                   </span>
                 </button>);
             })}
