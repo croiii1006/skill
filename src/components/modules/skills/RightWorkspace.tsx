@@ -260,8 +260,9 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            {/* Content with line numbers */}
-            <div className="flex-1 overflow-auto">
+            {/* Content with line numbers and copy button */}
+            <div className="flex-1 overflow-auto relative">
+              <CopyButton text={props.memoryContent || '暂无内容'} />
               <div className="px-4 py-3 font-mono text-xs leading-6">
                 {lines.map((line, i) => (
                   <div key={i} className="flex">
