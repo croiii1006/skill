@@ -31,7 +31,7 @@ export interface AgentInfo {
   avatar: string;
   statusText: string;
   progress: number;
-  status: 'idle' | 'running' | 'done' | 'skipped';
+  status: 'idle' | 'running' | 'done' | 'skipped' | 'error';
 }
 
 interface AgentCardProps {
