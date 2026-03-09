@@ -49,7 +49,7 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
               className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors"
               onClick={() => setExpandedId(isExpanded ? null : agent.id)}
             >
-              <Users className="w-4 h-4 text-foreground/60 shrink-0" />
+              <img src={pixelCreate} alt="创建助手" className="w-4 h-4 shrink-0" />
               <span className="text-sm text-foreground/80">创建助手</span>
               <div className="w-px h-4 bg-border/30" />
               <div className={cn(
