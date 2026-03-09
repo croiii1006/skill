@@ -594,8 +594,50 @@ export function SkillsModule() {
                 </div>
               </div>
 
-              {/* Chat input */}
-              <ChatInputBar onSend={handleSend} disabled={state.isProcessing} memoryItems={memoryItems} />
+              {/* Chat input – after setup completed, show simplified text-only input */}
+              {!state.setupCompleted ? (
+                <ChatInputBar onSend={handleSend} disabled={state.isProcessing} memoryItems={memoryItems} />
+              ) : (
+                <div className="border-t border-border/20 bg-transparent px-6 py-3">
+                  <div className="max-w-3xl mx-auto flex items-center gap-3">
+                    <textarea
+                      value={chatOnlyInput}
+                      onChange={e => setChatOnlyInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          if (chatOnlyInput.trim() && !state.isProcessing) {
+                            handleUserInput(chatOnlyInput.trim());
+                            setChatOnlyInput('');
+                          }
+                        }
+                      }}
+                      placeholder="输入消息..."
+                      disabled={state.isProcessing}
+                      rows={1}
+                      className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50 leading-relaxed py-2"
+                      style={{ minHeight: '36px', maxHeight: '120px' }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (chatOnlyInput.trim() && !state.isProcessing) {
+                          handleUserInput(chatOnlyInput.trim());
+                          setChatOnlyInput('');
+                        }
+                      }}
+                      disabled={!chatOnlyInput.trim() || state.isProcessing}
+                      className={cn(
+                        'w-9 h-9 rounded-full flex items-center justify-center transition-colors shrink-0',
+                        chatOnlyInput.trim() && !state.isProcessing
+                          ? 'bg-foreground text-background hover:bg-foreground/90'
+                          : 'bg-muted/60 text-muted-foreground/40 cursor-not-allowed'
+                      )}
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
