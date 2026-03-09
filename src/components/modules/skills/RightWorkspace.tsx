@@ -333,7 +333,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
                   )}>
                   <span className="font-pixel leading-none text-lg">{tab.label}</span>
-                  <span className={cn("text-[10px] leading-none text-[#8a8a8a]",
+                  <span className={cn("font-pixel text-[10px] leading-none text-[#8a8a8a]",
                   status === 'running' && 'text-amber-600',
                   status === 'done' && 'text-emerald-600',
                   status === 'error' && 'text-destructive',
