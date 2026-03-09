@@ -309,7 +309,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <button
                   key={tab.id}
                   onClick={() => onAgentTabChange?.(tab.id)}
-                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 gap-[31px] my-0 px-0 py-[7px]",
+                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 gap-[31px] my-0 py-0 px-[2px]",
 
                   isActive ?
                   'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
