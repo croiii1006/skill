@@ -78,7 +78,7 @@ function AgentClusterSteps({ agents, isLast, msgId }: { agents: import('./AgentC
                   <div className="w-px h-4 invisible" />
                   <div className={cn('shrink-0 invisible', isExpanded ? 'w-8' : 'w-5')} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground/60 mb-1">{agent.name}</p>
+                    <p className="text-xs text-muted-foreground/60 mb-1">任务背景</p>
                     <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
                       {agentDescriptions[agent.id] || agent.statusText}
                     </p>
