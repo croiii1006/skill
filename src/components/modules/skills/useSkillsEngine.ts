@@ -64,6 +64,7 @@ export type StreamMessageType =
   | 'agent-status'
   | 'create-agent'
   | 'read-checklist'
+  | 'read-memory'
   | 'video-candidates'
   | 'prompt-editor'
   | 'result-preview'
