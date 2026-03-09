@@ -292,24 +292,53 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       </ScrollArea>
 
       {/* Bottom agent tab switcher */}
-      {isAgents &&
-        <div className="border-t border-border/20 px-3 py-2 flex items-center gap-1 shrink-0">
-          {agentTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onAgentTabChange?.(tab.id)}
-              className={cn(
-                'flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs transition-colors',
-                activeAgentTab === tab.id ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
-              )}>
-              <div className="w-5 h-5 shrink-0">
-                <img src={expertAvatars[tab.avatar]} alt={tab.name} className="w-full h-full object-contain" />
-              </div>
-              <span className="font-pixel">{tab.label}</span>
-              <span className="hidden sm:inline">{tab.name}</span>
-            </button>
-          ))}
-        </div>
+      {isAgents && (() => {
+        const agentStatusMap: Record<AgentTab, AgentInfo | undefined> = {
+          '01': props.agent01,
+          '02': props.agent02,
+          '03': props.agent03,
+          '04': props.agent04,
+        };
+        return (
+        <div className="border-t border-border/20 px-3 py-2.5 flex items-center gap-1.5 shrink-0">
+          {agentTabs.map((tab) => {
+            const agent = agentStatusMap[tab.id];
+            const status = agent?.status || 'idle';
+            const isActive = activeAgentTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onAgentTabChange?.(tab.id)}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs transition-all flex-1 justify-center',
+                  isActive ? 'bg-muted text-foreground font-medium shadow-sm' : 'text-muted-foreground hover:bg-muted/30'
+                )}>
+                <div className="w-6 h-6 shrink-0 relative">
+                  <img src={expertAvatars[tab.avatar]} alt={tab.name} className={cn("w-full h-full object-contain", status === 'idle' && 'opacity-40')} />
+                  {/* Status dot */}
+                  <span className={cn(
+                    'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background',
+                    status === 'running' && 'bg-amber-400 animate-pulse',
+                    status === 'done' && 'bg-emerald-500',
+                    status === 'idle' && 'bg-muted-foreground/30',
+                  )} />
+                </div>
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="font-pixel text-xs leading-none">{tab.label}</span>
+                  <span className={cn(
+                    'text-[10px] leading-none',
+                    status === 'running' && 'text-amber-600',
+                    status === 'done' && 'text-emerald-600',
+                    status === 'idle' && 'text-muted-foreground/40',
+                  )}>
+                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>);
+      })()
       }
     </div>);
 }
