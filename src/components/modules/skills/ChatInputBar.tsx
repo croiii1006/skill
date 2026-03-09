@@ -51,7 +51,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
-    if ((!input.trim() && !image) || disabled) return;
+    if (!input.trim() || !image || !category || disabled) return;
     onSend(input.trim(), image, category || undefined, selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined);
     setInput('');
     setImage(null);
