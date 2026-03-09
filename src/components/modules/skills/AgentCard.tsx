@@ -77,8 +77,8 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-pixel text-sm font-semibold text-foreground">{agent.name}</span>
-            {/* Pixel number badge */}
+            <span className={cn("font-pixel text-sm font-semibold text-foreground", agent.status === 'error' && 'text-destructive')}>{agent.name}</span>
+            {agent.status === 'error' && <img src={pixelCross} className="w-4 h-4 shrink-0" alt="error" />}
             
           </div>
 
