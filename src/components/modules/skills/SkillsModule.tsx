@@ -271,6 +271,8 @@ export function SkillsModule() {
                 agents={agents}
                 isLast={isLast}
                 msgId={msg.id}
+                category={state.setup.category}
+                sellingPoints={state.setup.sellingPoints}
               />
             );
           }
