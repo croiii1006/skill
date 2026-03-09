@@ -96,11 +96,14 @@ function SubTaskList({ task }: {task: SkillTask;}) {
         const avatarSrc = child.expert ? expertAvatars[child.expert.avatar] : undefined;
         const isDone = child.status === 'done';
         const isRunning = child.status === 'running';
-        return;
-
-
-
-
+        return (
+          <div key={i} className="flex items-center gap-2 py-1.5 px-1">
+            {avatarSrc && <img src={avatarSrc} className="w-5 h-5 rounded-full shrink-0" alt="" />}
+            <span className="text-xs text-foreground/70 flex-1">{child.title}</span>
+            {isDone && <img src={pixelCheck} className="w-4 h-4" alt="" />}
+            {isRunning && <img src={pixelWait} className="w-4 h-4 animate-pulse" alt="" />}
+          </div>
+        );
 
 
 
