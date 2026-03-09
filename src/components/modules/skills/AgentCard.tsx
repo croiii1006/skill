@@ -45,7 +45,7 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
   return (
     <div
       onClick={onClick}
-      className={cn("rounded-xl border p-3 transition-all bg-neutral-100",
+      className={cn("rounded-xl border p-3 transition-all bg-sidebar",
 
       onClick && 'cursor-pointer hover:bg-muted/30',
       agent.status === 'running' && 'border-border/40',
