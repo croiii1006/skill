@@ -627,6 +627,10 @@ export function SkillsModule() {
               agent04Task={taskGenVideo}
               resultVideo={state.resultVideo}
               onRegenerate={regenerate}
+              // Memory
+              memoryTitle={activeMemoryEntry?.title}
+              memoryContent={activeMemoryEntry?.content}
+              memoryCategory={activeMemoryEntry?.category}
             />
           </div>
         )}
