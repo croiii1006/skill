@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import type { AgentInfo } from './AgentCard';
 
-export type TaskStatus = 'queued' | 'running' | 'done' | 'skipped';
+export type TaskStatus = 'queued' | 'running' | 'done' | 'skipped' | 'error';
 
 export interface TaskLog {
   time: string;
