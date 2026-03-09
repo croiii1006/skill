@@ -23,6 +23,73 @@ const avatarMap: Record<string, string> = {
   designer: expertDesigner, strategist: expertStrategist, search: expertSearch,
 };
 
+/* ─── Agent rows inside flow-step card ─── */
+function AgentClusterSteps({ agents, isLast, msgId }: { agents: AgentInfo[]; isLast: boolean; msgId: string }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  return (
+    <div>
+      {agents.map((agent) => {
+        const avatarSrc = avatarMap[agent.avatar];
+        const isExpanded = expandedId === agent.id;
+
+        return (
+          <div key={agent.id}>
+            <div
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors border-b border-border/10 last:border-b-0"
+              onClick={() => setExpandedId(isExpanded ? null : agent.id)}
+            >
+              <Users className="w-4 h-4 text-foreground/60 shrink-0" />
+              <span className="text-sm text-foreground/80">创建助手</span>
+              <div className="w-px h-4 bg-border/30" />
+              <div className="w-5 h-5 shrink-0">
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" />
+                ) : (
+                  <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[9px] font-medium">{agent.name[0]}</div>
+                )}
+              </div>
+              <span className="text-sm text-foreground/70 flex-1">{agent.role}</span>
+              <ChevronRight className={cn(
+                'w-4 h-4 text-muted-foreground/30 transition-transform',
+                isExpanded && 'rotate-90'
+              )} />
+            </div>
+
+            {isExpanded && (
+              <div className="px-4 py-4 bg-muted/10 border-b border-border/10 animate-fade-in">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 shrink-0">
+                    {avatarSrc ? (
+                      <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center font-pixel text-sm">{agent.name[0]}</div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">{agent.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{agent.role}</p>
+                    {agent.statusText && (
+                      <div className="mt-3 text-xs text-foreground/70 leading-relaxed whitespace-pre-wrap">
+                        {agent.statusText}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {!isLast && (
+        <div className="flex justify-start pl-[26px]">
+          <div className="w-px h-5 border-l border-dashed border-border/40" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── History helpers ─── */
 interface SkillsHistoryItem {
   id: string;
