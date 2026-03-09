@@ -306,6 +306,36 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       <ScrollArea className="flex-1">
         {renderContent()}
       </ScrollArea>
+
+      {/* Bottom tab switcher - fixed at bottom for agent-02-03 */}
+      {view === 'agent-02-03' &&
+        <div className="border-t border-border/20 px-4 py-2 flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setAgent0203Tab('02')}
+            className={cn(
+              'flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors',
+              agent0203Tab === '02' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
+            )}>
+            <div className="w-5 h-5">
+              <img src={expertMemory} alt="记忆库专家" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-pixel">02</span>
+            <span>记忆库专家</span>
+          </button>
+          <button
+            onClick={() => setAgent0203Tab('03')}
+            className={cn(
+              'flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors',
+              agent0203Tab === '03' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
+            )}>
+            <div className="w-5 h-5">
+              <img src={expertStrategist} alt="Prompt专家" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-pixel">03</span>
+            <span>Prompt专家</span>
+          </button>
+        </div>
+      }
     </div>);
 
 }
