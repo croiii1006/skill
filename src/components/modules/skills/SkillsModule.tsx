@@ -63,11 +63,19 @@ function AgentClusterSteps({ agents, isLast, msgId }: { agents: import('./AgentC
             </div>
 
             {isExpanded && (
-              <div className="px-4 pb-4 pl-[72px] animate-fade-in">
-                <p className="text-xs text-muted-foreground/60 mb-1">{agent.role}</p>
-                <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
-                  {agent.statusText}
-                </p>
+              <div className="px-4 pb-4 animate-fade-in">
+                <div className="flex items-start gap-3">
+                  <Users className="w-4 h-4 shrink-0 invisible" />
+                  <span className="text-sm invisible">创建助手</span>
+                  <div className="w-px h-4 invisible" />
+                  <div className={cn('shrink-0 invisible', isExpanded ? 'w-8' : 'w-5')} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground/60 mb-1">{agent.role}</p>
+                    <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+                      {agent.statusText}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
