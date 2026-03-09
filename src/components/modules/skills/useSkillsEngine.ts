@@ -365,7 +365,9 @@ export function useSkillsEngine() {
         updateAgent('agent-01', { progress: 50, statusText: '正在分析卖点匹配度...' });
         await backendDelay();
         updateChild('task-crawl', 'task-crawl-analyze', { status: 'done', progress: 100, title: '数据专家完成分析卖点匹配度' });
-        addTaskLog('task-crawl', '数据专家完成分析 → 平均匹配度 73.2%，高匹配 28 条');
+        const matchRate = (Math.random() * 50 + 50).toFixed(1);
+        const highMatchCount = Math.floor(Math.random() * 21) + 10;
+        addTaskLog('task-crawl', `数据专家完成分析 → 平均匹配度 ${matchRate}%，高匹配 ${highMatchCount} 条`);
 
         // Sub 3: Rank
         updateChild('task-crawl', 'task-crawl-rank', { status: 'running', title: '策略专家正在排序生成 Top 20' });
