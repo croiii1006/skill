@@ -245,9 +245,9 @@ export function RightWorkspace(props: RightWorkspaceProps) {
         const lines = (props.memoryContent || '暂无内容').split('\n');
         return (
           <div className="flex flex-col h-full">
-            {/* Document header */}
-            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-muted/30">
-              <ScrollText className="w-4 h-4 text-muted-foreground" />
+            {/* Document header with close button */}
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-muted/30 shrink-0">
+              <ScrollText className="w-4 h-4 text-muted-foreground shrink-0" />
               <span className="text-xs text-muted-foreground">阅读</span>
               <span className="text-xs text-muted-foreground/40">|</span>
               <span className="text-xs text-foreground/80 font-medium truncate">{props.memoryTitle || '记忆库'}.md</span>
@@ -256,6 +256,9 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   {props.memoryCategory}
                 </span>
               )}
+              <Button variant="ghost" size="icon" onClick={onClose} className={cn("h-7 w-7 shrink-0", !props.memoryCategory && "ml-auto")}>
+                <X className="w-4 h-4" />
+              </Button>
             </div>
             {/* Content with line numbers */}
             <div className="flex-1 overflow-auto">
