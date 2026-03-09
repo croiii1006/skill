@@ -32,11 +32,14 @@ const expertAvatars: Record<string, string> = {
   audio: expertAudio
 };
 
-export type RightView = 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04' | 'read-memory';
+export type RightView = 'none' | 'checklist' | 'agents' | 'read-memory';
+export type AgentTab = '01' | '02' | '03' | '04';
 
 interface RightWorkspaceProps {
   view: RightView;
   onClose: () => void;
+  activeAgentTab?: AgentTab;
+  onAgentTabChange?: (tab: AgentTab) => void;
   // Checklist data
   checklistItems?: string[];
   checklistDone?: boolean[];
@@ -83,7 +86,6 @@ function WorkLog({ logs, task }: {logs: TaskLog[];task?: SkillTask;}) {
         )}
       </div>
     </div>);
-
 }
 
 function SubTaskList({ task }: {task: SkillTask;}) {
@@ -98,7 +100,6 @@ function SubTaskList({ task }: {task: SkillTask;}) {
             <div className={cn('w-6 h-6 shrink-0 transition-opacity', child.status === 'queued' && 'opacity-30')}>
                 <img src={avatarSrc} alt={child.expert?.name || ''} className="w-full h-full object-contain" />
               </div> :
-
             <div className="w-6 h-6 shrink-0" />
             }
             <span className={cn(
@@ -112,15 +113,12 @@ function SubTaskList({ task }: {task: SkillTask;}) {
               <img src={pixelCheck} alt="done" className="w-full h-full object-contain" /> :
               child.status === 'running' ?
               <img src={pixelWait} alt="running" className="w-full h-full object-contain animate-pulse" /> :
-
               <img src={pixelWait} alt="queued" className="w-full h-full object-contain opacity-20" />
               }
             </div>
           </div>);
-
       })}
     </div>);
-
 }
 
 function CopyButton({ text }: {text: string;}) {
@@ -135,17 +133,74 @@ function CopyButton({ text }: {text: string;}) {
       onClick={handleCopy}
       className="absolute top-2 right-3 p-1.5 rounded-md hover:bg-muted/60 text-muted-foreground/40 hover:text-muted-foreground transition-colors z-10"
       title="复制全部内容">
-      
       {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
     </button>);
-
 }
 
+const agentTabs: { id: AgentTab; label: string; avatar: string; name: string }[] = [
+  { id: '01', label: '01', avatar: 'search', name: 'TikTok爆款专家' },
+  { id: '02', label: '02', avatar: 'memory', name: '记忆库专家' },
+  { id: '03', label: '03', avatar: 'strategist', name: 'Prompt专家' },
+  { id: '04', label: '04', avatar: 'video', name: '视频专家' },
+];
+
 export function RightWorkspace(props: RightWorkspaceProps) {
-  const { view, onClose } = props;
-  const [agent0203Tab, setAgent0203Tab] = useState<'02' | '03'>('02');
+  const { view, onClose, activeAgentTab = '01', onAgentTabChange } = props;
 
   if (view === 'none') return null;
+
+  const renderAgentContent = () => {
+    switch (activeAgentTab) {
+      case '01':
+        return (
+          <div className="p-5 space-y-5">
+            {props.agent01Task && <SubTaskList task={props.agent01Task} />}
+            {props.agent01Task && <WorkLog logs={props.agent01Task.logs} />}
+            {props.candidateVideos && props.candidateVideos.length > 0 &&
+            <div className="space-y-3">
+                <p className="text-xs font-medium text-foreground">爆款参考视频</p>
+                <VideoCandidateRow
+                videos={props.candidateVideos}
+                onSelect={(v) => props.onVideoSelect?.(v)}
+                selectedVideoId={props.selectedVideoId}
+                disabled={props.videoSelectDisabled} />
+              </div>
+            }
+          </div>);
+      case '02':
+        return (
+          <div className="p-5 space-y-5">
+            {props.agent02Task && <SubTaskList task={props.agent02Task} />}
+            {props.agent02Task && <WorkLog logs={props.agent02Task.logs} />}
+          </div>);
+      case '03':
+        return (
+          <div className="p-5 space-y-5">
+            {props.agent03Task && <SubTaskList task={props.agent03Task} />}
+            {props.agent03Task && <WorkLog logs={props.agent03Task.logs} />}
+            {props.generatedPrompt &&
+            <PromptEditorBlock
+              prompt={props.generatedPrompt}
+              onChange={(val) => props.onPromptChange?.(val)}
+              onConfirm={() => props.onPromptConfirm?.()}
+              onBack={() => props.onBackToVideoSelect?.()}
+              memoryEnabled={props.memoryEnabled ?? false}
+              disabled={props.isProcessing} />
+            }
+          </div>);
+      case '04':
+        return (
+          <div className="p-5 space-y-5">
+            {props.agent04Task && <SubTaskList task={props.agent04Task} />}
+            {props.agent04Task && <WorkLog logs={props.agent04Task.logs} />}
+            {props.resultVideo &&
+            <ResultPreviewBlock onRegenerate={props.onRegenerate} disabled={props.isProcessing} />
+            }
+          </div>);
+      default:
+        return null;
+    }
+  };
 
   const renderContent = () => {
     switch (view) {
@@ -166,73 +221,13 @@ export function RightWorkspace(props: RightWorkspaceProps) {
             )}
           </div>);
 
+      case 'agents':
+        return renderAgentContent();
 
-      case 'agent-01':
-        return (
-          <div className="p-5 space-y-5">
-            {/* Sub-tasks */}
-            {props.agent01Task && <SubTaskList task={props.agent01Task} />}
-            {/* Work log */}
-            {props.agent01Task && <WorkLog logs={props.agent01Task.logs} />}
-            {/* Video candidates */}
-            {props.candidateVideos && props.candidateVideos.length > 0 &&
-            <div className="space-y-3">
-                <p className="text-xs font-medium text-foreground">爆款参考视频</p>
-                <VideoCandidateRow
-                videos={props.candidateVideos}
-                onSelect={(v) => props.onVideoSelect?.(v)}
-                selectedVideoId={props.selectedVideoId}
-                disabled={props.videoSelectDisabled} />
-              
-              </div>
-            }
-          </div>);
-
-
-      case 'agent-02-03':
-        return (
-          <div className="p-5 space-y-5">
-            {agent0203Tab === '02' ?
-            <>
-                {props.agent02Task && <SubTaskList task={props.agent02Task} />}
-                {props.agent02Task && <WorkLog logs={props.agent02Task.logs} />}
-              </> :
-
-            <>
-                {props.agent03Task && <SubTaskList task={props.agent03Task} />}
-                {props.agent03Task && <WorkLog logs={props.agent03Task.logs} />}
-                {/* Prompt editor */}
-                {props.generatedPrompt &&
-              <PromptEditorBlock
-                prompt={props.generatedPrompt}
-                onChange={(val) => props.onPromptChange?.(val)}
-                onConfirm={() => props.onPromptConfirm?.()}
-                onBack={() => props.onBackToVideoSelect?.()}
-                memoryEnabled={props.memoryEnabled ?? false}
-                disabled={props.isProcessing} />
-
-              }
-              </>
-            }
-          </div>);
-
-
-      case 'agent-04':
-        return (
-          <div className="p-5 space-y-5">
-            {props.agent04Task && <SubTaskList task={props.agent04Task} />}
-            {props.agent04Task && <WorkLog logs={props.agent04Task.logs} />}
-            {props.resultVideo &&
-            <ResultPreviewBlock onRegenerate={props.onRegenerate} disabled={props.isProcessing} />
-            }
-          </div>);
-
-
-      case 'read-memory':{
+      case 'read-memory': {
           const lines = (props.memoryContent || '暂无内容').split('\n');
           return (
             <div className="flex flex-col h-full">
-            {/* Document header with close button */}
             <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border/30 bg-muted/30 shrink-0">
               <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
               <span className="text-sm text-muted-foreground font-normal">阅读</span>
@@ -247,7 +242,6 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            {/* Content with line numbers and copy button */}
             <div className="flex-1 overflow-auto relative">
               <CopyButton text={props.memoryContent || '暂无内容'} />
               <div className="px-5 py-4 font-mono text-sm leading-7">
@@ -260,7 +254,6 @@ export function RightWorkspace(props: RightWorkspaceProps) {
               </div>
             </div>
           </div>);
-
         }
 
       default:
@@ -268,33 +261,24 @@ export function RightWorkspace(props: RightWorkspaceProps) {
     }
   };
 
-  const pixelTitles: Record<string, string> = {
-    'agent-01': 'Agent01',
-    'agent-02-03': agent0203Tab === '02' ? 'Agent02' : 'Agent03',
-    'agent-04': 'Agent04',
-  };
-
-  const viewTitles: Record<RightView, string> = {
-    none: '',
-    checklist: '编写待办清单',
-    'agent-01': '',
-    'agent-02-03': '',
-    'agent-04': '',
-    'read-memory': props.memoryTitle || '记忆库'
-  };
-
   const isReadMemory = view === 'read-memory';
+  const isAgents = view === 'agents';
+
+  const headerTitle = isAgents
+    ? `Agent${activeAgentTab}`
+    : view === 'checklist'
+    ? '编写待办清单'
+    : props.memoryTitle || '记忆库';
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header - hidden for read-memory since it has its own document header */}
+      {/* Header */}
       {!isReadMemory &&
       <div className="px-5 py-3 border-b border-border/20 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
-            
-            {pixelTitles[view] ?
-          <span className="font-pixel text-base font-medium text-foreground">{pixelTitles[view]}</span> :
-          <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
+            {isAgents ?
+          <span className="font-pixel text-base font-medium text-foreground">{headerTitle}</span> :
+          <span className="text-sm font-medium text-foreground">{headerTitle}</span>
           }
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7">
@@ -307,35 +291,25 @@ export function RightWorkspace(props: RightWorkspaceProps) {
         {renderContent()}
       </ScrollArea>
 
-      {/* Bottom tab switcher - fixed at bottom for agent-02-03 */}
-      {view === 'agent-02-03' &&
-        <div className="border-t border-border/20 px-4 py-2 flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setAgent0203Tab('02')}
-            className={cn(
-              'flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors',
-              agent0203Tab === '02' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
-            )}>
-            <div className="w-5 h-5">
-              <img src={expertMemory} alt="记忆库专家" className="w-full h-full object-contain" />
-            </div>
-            <span className="font-pixel">02</span>
-            <span>记忆库专家</span>
-          </button>
-          <button
-            onClick={() => setAgent0203Tab('03')}
-            className={cn(
-              'flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors',
-              agent0203Tab === '03' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
-            )}>
-            <div className="w-5 h-5">
-              <img src={expertStrategist} alt="Prompt专家" className="w-full h-full object-contain" />
-            </div>
-            <span className="font-pixel">03</span>
-            <span>Prompt专家</span>
-          </button>
+      {/* Bottom agent tab switcher */}
+      {isAgents &&
+        <div className="border-t border-border/20 px-3 py-2 flex items-center gap-1 shrink-0">
+          {agentTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => onAgentTabChange?.(tab.id)}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs transition-colors',
+                activeAgentTab === tab.id ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
+              )}>
+              <div className="w-5 h-5 shrink-0">
+                <img src={expertAvatars[tab.avatar]} alt={tab.name} className="w-full h-full object-contain" />
+              </div>
+              <span className="font-pixel">{tab.label}</span>
+              <span className="hidden sm:inline">{tab.name}</span>
+            </button>
+          ))}
         </div>
       }
     </div>);
-
 }

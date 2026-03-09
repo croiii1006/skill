@@ -366,9 +366,10 @@ export function SkillsModule() {
             key={msg.id}
             agents={msg.agents || []}
             onAgentClick={(agentId) => {
-              if (agentId === 'agent-01') setActiveRightView('agent-01');
-              else if (agentId === 'agent-02' || agentId === 'agent-03') setActiveRightView('agent-02-03');
-              else if (agentId === 'agent-04') setActiveRightView('agent-04');
+              if (agentId === 'agent-01') setActiveRightView('agents', '01');
+              else if (agentId === 'agent-02') setActiveRightView('agents', '02');
+              else if (agentId === 'agent-03') setActiveRightView('agents', '03');
+              else if (agentId === 'agent-04') setActiveRightView('agents', '04');
             }}
           />
         );
@@ -551,9 +552,10 @@ export function SkillsModule() {
                                 <AgentClusterCard
                                   agents={acMsg.agents || []}
                                   onAgentClick={(agentId) => {
-                                    if (agentId === 'agent-01') setActiveRightView('agent-01');
-                                    else if (agentId === 'agent-02' || agentId === 'agent-03') setActiveRightView('agent-02-03');
-                                    else if (agentId === 'agent-04') setActiveRightView('agent-04');
+                                    if (agentId === 'agent-01') setActiveRightView('agents', '01');
+                                    else if (agentId === 'agent-02') setActiveRightView('agents', '02');
+                                    else if (agentId === 'agent-03') setActiveRightView('agents', '03');
+                                    else if (agentId === 'agent-04') setActiveRightView('agents', '04');
                                   }}
                                 />
                               </div>
@@ -585,6 +587,8 @@ export function SkillsModule() {
             <RightWorkspace
               view={state.activeRightView as RightView}
               onClose={() => setActiveRightView('none')}
+              activeAgentTab={state.activeAgentTab || '01'}
+              onAgentTabChange={(tab) => setActiveRightView('agents', tab)}
               // Checklist
               checklistItems={state.checklistItems}
               checklistDone={state.checklistDone}

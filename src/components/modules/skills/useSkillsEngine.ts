@@ -101,7 +101,9 @@ export interface SkillsState {
   /** Agents state */
   agents: AgentInfo[];
   /** Active right panel view */
-  activeRightView: 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04' | 'read-memory';
+  activeRightView: 'none' | 'checklist' | 'agents' | 'read-memory';
+  /** Which agent tab is active in the agents panel */
+  activeAgentTab?: '01' | '02' | '03' | '04';
   /** Checklist items */
   checklistItems: string[];
   checklistDone: boolean[];
@@ -336,7 +338,8 @@ export function useSkillsEngine() {
         setState(prev => ({
           ...prev,
           agents: prev.agents.map(a => a.id === 'agent-01' ? agent01 : a),
-          activeRightView: 'agent-01',
+          activeRightView: 'agents',
+          activeAgentTab: '01',
         }));
 
         addMessage({ type: 'agent-cluster', content: '', agents: [agent01] });
@@ -395,7 +398,8 @@ export function useSkillsEngine() {
           ...prev,
           candidateVideos: videos,
           isProcessing: false,
-          activeRightView: 'agent-01',
+          activeRightView: 'agents',
+          activeAgentTab: '01',
         }));
 
         addMessage({ type: 'video-gen-status', content: '请从右侧面板选择一条对标视频进行复刻 →' });
@@ -451,7 +455,8 @@ export function useSkillsEngine() {
           if (a.id === 'agent-03') return agent03;
           return a;
         }),
-        activeRightView: 'agent-02-03',
+        activeRightView: 'agents',
+        activeAgentTab: '02',
       }));
 
       addMessage({ type: 'agent-cluster', content: '', agents: [agent02, agent03] });
@@ -570,7 +575,8 @@ export function useSkillsEngine() {
       setState(prev => ({
         ...prev,
         agents: prev.agents.map(a => a.id === 'agent-04' ? agent04 : a),
-        activeRightView: 'agent-04',
+        activeRightView: 'agents',
+        activeAgentTab: '04',
       }));
 
       addMessage({ type: 'agent-cluster', content: '', agents: [agent04] });
@@ -653,7 +659,8 @@ export function useSkillsEngine() {
       resultVideo: null,
       selectedVideo: null,
       isProcessing: false,
-      activeRightView: 'agent-01',
+      activeRightView: 'agents',
+      activeAgentTab: '01',
       // Reset agents 02-04
       agents: prev.agents.map(a => {
         if (['agent-02', 'agent-03', 'agent-04'].includes(a.id)) {
@@ -687,7 +694,8 @@ export function useSkillsEngine() {
       ...prev,
       resultVideo: null,
       isProcessing: false,
-      activeRightView: 'agent-04',
+      activeRightView: 'agents',
+      activeAgentTab: '04',
       agents: prev.agents.map(a => a.id === 'agent-04' ? { ...a, status: 'idle' as const, progress: 0, statusText: '等待启动' } : a),
       messages: prev.messages.filter(m =>
         !(m.type === 'agent-cluster' && m.agents?.some(a => a.id === 'agent-04')) &&
@@ -709,8 +717,8 @@ export function useSkillsEngine() {
     setState(prev => ({ ...prev, activeTaskId: id }));
   }, []);
 
-  const setActiveRightView = useCallback((view: SkillsState['activeRightView']) => {
-    setState(prev => ({ ...prev, activeRightView: view }));
+  const setActiveRightView = useCallback((view: SkillsState['activeRightView'], agentTab?: SkillsState['activeAgentTab']) => {
+    setState(prev => ({ ...prev, activeRightView: view, ...(agentTab ? { activeAgentTab: agentTab } : {}) }));
   }, []);
 
   const handleUserInput = useCallback((text: string) => {
