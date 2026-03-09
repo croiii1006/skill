@@ -16,6 +16,7 @@ import pixelMemory from '@/assets/pixel-memory.svg';
 import pixelPrompt from '@/assets/pixel-prompt.svg';
 import pixelVideo from '@/assets/pixel-video.svg';
 import pixelCreate from '@/assets/pixel-create.svg';
+import pixelTrend from '@/assets/pixel-trend.svg';
 import expertCrawler from '@/assets/expert-crawler.png';
 import expertDesigner from '@/assets/expert-designer.png';
 
@@ -378,7 +379,7 @@ export function SkillsModule() {
       case 'selection-confirm':
         return (
           <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed animate-fade-in">
-            <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
+            <img src={pixelTrend} className="w-4 h-4 shrink-0 mt-0.5" alt="" />
             <span>{msg.content}</span>
           </div>
         );
