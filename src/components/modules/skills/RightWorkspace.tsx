@@ -340,7 +340,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   status === 'skipped' && 'text-muted-foreground/50',
                   status === 'idle' && 'text-muted-foreground/40'
                   )}>
-                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : status === 'error' ? '异常' : status === 'skipped' ? '已跳过' : '等待中'}
+                    {status === 'running' ? 'LOADING' : status === 'done' ? 'DONE' : status === 'error' ? 'ERROR' : status === 'skipped' ? 'SKIP' : 'WAITING'}
                   </span>
                 </button>);
             })}
