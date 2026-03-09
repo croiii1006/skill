@@ -299,11 +299,17 @@ export function RightWorkspace(props: RightWorkspaceProps) {
     }
   };
 
+  const pixelTitles: Record<string, string> = {
+    'agent-01': 'Agent01',
+    'agent-02-03': 'Agent02-03',
+    'agent-04': 'Agent04',
+  };
+
   const viewTitles: Record<RightView, string> = {
     none: '',
     checklist: '编写待办清单',
-    'agent-01': 'TikTok爆款专家工作台',
-    'agent-02-03': '专家工作台',
+    'agent-01': '',
+    'agent-02-03': '',
     'agent-04': '',
     'read-memory': props.memoryTitle || '记忆库'
   };
