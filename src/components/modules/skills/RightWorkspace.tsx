@@ -10,26 +10,26 @@ import { VideoCandidateRow } from './VideoCandidateRow';
 import type { AgentInfo } from './AgentCard';
 import type { CandidateVideo, SkillTask, TaskLog } from './useSkillsEngine';
 
-import expertMemory from '@/assets/expert-memory.png';
+import pixelMemory from '@/assets/pixel-memory.svg';
+import pixelSearch from '@/assets/pixel-search.svg';
+import pixelVideo from '@/assets/pixel-video.svg';
+import pixelPrompt from '@/assets/pixel-prompt.svg';
 import expertCrawler from '@/assets/expert-crawler.png';
-import expertVideo from '@/assets/expert-video.png';
 import expertDesigner from '@/assets/expert-designer.png';
-import expertStrategist from '@/assets/expert-strategist.png';
 import expertAnalyst from '@/assets/expert-analyst.png';
-import expertSearch from '@/assets/expert-search.png';
 import expertAudio from '@/assets/expert-audio.png';
 import pixelCheck from '@/assets/pixel-check.png';
 import pixelWait from '@/assets/pixel-wait.png';
 import pixelInfo from '@/assets/pixel-info.svg';
 
 const expertAvatars: Record<string, string> = {
-  memory: expertMemory,
+  memory: pixelMemory,
   crawler: expertCrawler,
-  video: expertVideo,
+  video: pixelVideo,
   designer: expertDesigner,
-  strategist: expertStrategist,
+  strategist: pixelPrompt,
   analyst: expertAnalyst,
-  search: expertSearch,
+  search: pixelSearch,
   audio: expertAudio
 };
 
