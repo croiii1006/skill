@@ -523,7 +523,7 @@ export function useSkillsEngine() {
         updateAgent('agent-03', { progress: 50, statusText: '正在提取风格特征...' });
         await randDelay();
         updateChild('task-reverse-prompt', 'rp-style', { status: 'done', progress: 100, title: '设计专家完成风格特征提取' });
-        addTaskLog('task-reverse-prompt', '设计专家完成风格特征提取 → 暖色调、近景特写、快节奏剪辑');
+        addTaskLog('task-reverse-prompt', '设计专家完成风格特征提取');
 
         updateChild('task-reverse-prompt', 'rp-prompt', { status: 'running', title: '策略专家正在生成提示词' });
         updateAgentInMessages('agent-03', { progress: 80, statusText: '正在生成Prompt...' });
