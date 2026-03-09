@@ -147,7 +147,7 @@ export function SkillsModule() {
   const showRightPanel = state.activeRightView !== 'none';
 
   /* ─── Flow-step types that get grouped into one card ─── */
-  const FLOW_STEP_TYPES = new Set<StreamMessageType>(['checklist', 'create-agent', 'read-checklist']);
+  const FLOW_STEP_TYPES = new Set<StreamMessageType>(['checklist', 'create-agent', 'read-checklist', 'agent-cluster']);
 
   /** Group consecutive flow-step messages into clusters */
   const groupedMessages = useMemo(() => {
@@ -180,14 +180,34 @@ export function SkillsModule() {
         {msgs.map((msg, i) => {
           const isLast = i === msgs.length - 1;
 
-          // agent-cluster → render as "分配专家代理" step
+          // agent-cluster → render as a clickable summary step
           if (msg.type === 'agent-cluster') {
+            const agents = msg.agents || [];
             return (
               <div key={msg.id}>
-                <div className="flex items-center justify-between px-4 py-3 text-sm text-foreground/80">
+                <div
+                  className="flex items-center justify-between px-4 py-3 text-sm text-foreground/80 cursor-pointer hover:bg-muted/20 transition-colors"
+                  onClick={() => {
+                    // scroll to the AgentClusterCard below
+                    const el = document.getElementById(`agent-cluster-card-${msg.id}`);
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                  }}
+                >
                   <div className="flex items-center gap-2.5">
-                    <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>
-                    <span>分配专家代理设计方案与执行方案</span>
+                    <Users className="w-4 h-4 text-foreground/60" />
+                    <span>分配专家代理</span>
+                    <div className="flex -space-x-1.5 ml-1.5">
+                      {agents.slice(0, 4).map((a, ai) => (
+                        <div key={ai} className="w-5 h-5 rounded-full border border-background overflow-hidden bg-muted">
+                          {avatarMap[a.avatar] ? (
+                            <img src={avatarMap[a.avatar]} alt={a.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[8px] font-medium">{a.name[0]}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground/50 ml-0.5">{agents.length}位专家</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
                 </div>
@@ -474,7 +494,25 @@ export function SkillsModule() {
                   <div className="max-w-3xl mx-auto space-y-4">
                     {groupedMessages.map((group, gi) => {
                       if (group.kind === 'flow-group') {
-                        return renderFlowGroup(group.msgs, `flow-group-${gi}`);
+                        // Extract agent-cluster messages to render as standalone cards after the flow card
+                        const agentClusterMsgs = group.msgs.filter(m => m.type === 'agent-cluster');
+                        return (
+                          <div key={`flow-group-${gi}`} className="space-y-4">
+                            {renderFlowGroup(group.msgs, `flow-group-${gi}`)}
+                            {agentClusterMsgs.map(acMsg => (
+                              <div key={`ac-${acMsg.id}`} id={`agent-cluster-card-${acMsg.id}`}>
+                                <AgentClusterCard
+                                  agents={acMsg.agents || []}
+                                  onAgentClick={(agentId) => {
+                                    if (agentId === 'agent-01') setActiveRightView('agent-01');
+                                    else if (agentId === 'agent-02' || agentId === 'agent-03') setActiveRightView('agent-02-03');
+                                    else if (agentId === 'agent-04') setActiveRightView('agent-04');
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        );
                       }
                       return renderMessage(group.msg);
                     })}
