@@ -64,6 +64,7 @@ export type StreamMessageType =
   | 'agent-status'
   | 'create-agent'
   | 'read-checklist'
+  | 'read-memory'
   | 'video-candidates'
   | 'prompt-editor'
   | 'result-preview'
@@ -414,6 +415,19 @@ export function useSkillsEngine() {
       await pause(600);
       addMessage({ type: 'read-checklist', content: '读取待办清单' });
       await pause(400);
+
+      // Show memory files if enabled
+      if (state.setup.memoryEnabled && state.setup.selectedMemoryIds.length > 0) {
+        // We use generic memory file names based on selected count
+        const memoryNames = ['品牌调性指南', '核心产品卖点', '竞品分析', 'TikTok内容策略'];
+        const selectedCount = Math.min(state.setup.selectedMemoryIds.length, memoryNames.length);
+        for (let i = 0; i < selectedCount; i++) {
+          addMessage({ type: 'read-memory', content: memoryNames[i] });
+          await pause(300);
+        }
+        await pause(200);
+      }
+
       addMessage({ type: 'create-agent', content: '创建记忆库信息和Prompt设计专家代理', agentNames: [{ name: '记忆库专家', avatar: 'memory' }, { name: 'Prompt专家', avatar: 'strategist' }] });
       await pause(400);
 

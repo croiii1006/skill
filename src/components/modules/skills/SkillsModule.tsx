@@ -7,7 +7,7 @@ import { AgentCard, AgentClusterCard } from './AgentCard';
 import { RightWorkspace, type RightView } from './RightWorkspace';
 import { ChatInputBar } from './ChatInputBar';
 import {
-  Loader2, CheckCircle2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight, Users,
+  Loader2, CheckCircle2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight, Users, FileText,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
@@ -214,7 +214,7 @@ export function SkillsModule() {
   const showRightPanel = state.activeRightView !== 'none';
 
   /* ─── Flow-step types that get grouped into one card ─── */
-  const FLOW_STEP_TYPES = new Set<StreamMessageType>(['checklist', 'create-agent', 'read-checklist', 'agent-cluster']);
+  const FLOW_STEP_TYPES = new Set<StreamMessageType>(['checklist', 'create-agent', 'read-checklist', 'read-memory', 'agent-cluster']);
 
   /** Group consecutive flow-step messages into clusters */
   const groupedMessages = useMemo(() => {
@@ -276,6 +276,9 @@ export function SkillsModule() {
             icon = <ListChecks className="w-4 h-4 text-foreground/60" />;
             label = msg.content;
             onClick = () => setActiveRightView('checklist');
+          } else if (msg.type === 'read-memory') {
+            icon = <FileText className="w-4 h-4 text-foreground/60" />;
+            label = `阅读`;
           } else {
             icon = <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>;
             label = msg.content;
@@ -295,6 +298,12 @@ export function SkillsModule() {
                 <div className="flex items-center gap-2.5">
                   {icon}
                   <span>{label}</span>
+                  {msg.type === 'read-memory' && (
+                    <>
+                      <div className="w-px h-4 bg-border/30" />
+                      <span className="text-foreground/70">{msg.content}</span>
+                    </>
+                  )}
                   {msg.type === 'checklist' && (
                     <span className="text-[10px] text-muted-foreground/50 ml-1">
                       {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length}
