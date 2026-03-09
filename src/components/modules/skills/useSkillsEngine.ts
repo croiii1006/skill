@@ -596,7 +596,7 @@ export function useSkillsEngine() {
       updateAgentInMessages('agent-04', { progress: 20, statusText: '正在渲染场景...' });
       updateAgent('agent-04', { progress: 20, statusText: '正在渲染场景...' });
       await backendDelay();
-      addTaskLog(genTaskId, '设计专家渲染场景 3/5...');
+      addTaskLog(genTaskId, '设计专家渲染场景');
       await pause(800);
       updateChild(genTaskId, 'sub-scene', { status: 'done', progress: 100, title: '设计专家完成渲染场景' });
       addTaskLog(genTaskId, '设计专家完成场景渲染 → 5 个场景段，总时长 30s');
