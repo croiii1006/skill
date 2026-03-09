@@ -344,7 +344,7 @@ export function useSkillsEngine() {
 
         // Run crawl task
         updateTask('task-crawl', { status: 'running', startAt: now() });
-        addTaskLog('task-crawl', '爆款专家启动 TikTok 爬虫...');
+        addTaskLog('task-crawl', 'TikTok爆款专家启动 TikTok 爬虫...');
 
         // Sub 1: Spider
         updateChild('task-crawl', 'task-crawl-spider', { status: 'running', title: '爬虫专家正在启动 TikTok 爬虫' });
