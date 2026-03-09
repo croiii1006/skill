@@ -311,9 +311,14 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           '03': props.agent03,
           '04': props.agent04
         };
+        const visibleTabs = agentTabs.filter(tab => {
+          const agent = agentStatusMap[tab.id];
+          return agent && agent.status !== 'idle';
+        });
+        if (visibleTabs.length === 0) return null;
         return (
           <div className="border-t border-border/20 shrink-0 flex items-center justify-center gap-3 px-[13px] py-[5px]">
-          {agentTabs.map((tab) => {
+          {visibleTabs.map((tab) => {
               const agent = agentStatusMap[tab.id];
               const status = agent?.status || 'idle';
               const isActive = activeAgentTab === tab.id;
@@ -322,7 +327,6 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   key={tab.id}
                   onClick={() => onAgentTabChange?.(tab.id)}
                   className={cn("flex flex-col items-center gap-1 px-4 text-xs transition-all border-foreground/80 border border-solid py-[2px]",
-
                   isActive ?
                   'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
                   'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
