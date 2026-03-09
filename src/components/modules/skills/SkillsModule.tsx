@@ -298,6 +298,12 @@ export function SkillsModule() {
                 <div className="flex items-center gap-2.5">
                   {icon}
                   <span>{label}</span>
+                  {msg.type === 'read-memory' && (
+                    <>
+                      <div className="w-px h-4 bg-border/30" />
+                      <span className="text-foreground/70">{msg.content}</span>
+                    </>
+                  )}
                   {msg.type === 'checklist' && (
                     <span className="text-[10px] text-muted-foreground/50 ml-1">
                       {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length}
