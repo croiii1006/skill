@@ -19,7 +19,7 @@ const expertAvatars: Record<string, string> = {
   strategist: expertStrategist,
   analyst: expertAnalyst,
   search: expertSearch,
-  audio: expertAudio,
+  audio: expertAudio
 };
 
 export interface AgentInfo {
@@ -50,9 +50,9 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
         onClick && 'cursor-pointer hover:bg-muted/30',
         agent.status === 'running' && 'border-border/40',
         agent.status === 'done' && 'border-border/20',
-        agent.status === 'idle' && 'border-border/10 opacity-50',
-      )}
-    >
+        agent.status === 'idle' && 'border-border/10 opacity-50'
+      )}>
+      
       <div className="flex items-start gap-3">
         {/* Pixel avatar */}
         <div className="relative shrink-0">
@@ -60,13 +60,13 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
             'w-10 h-10 flex items-center justify-center',
             agent.status === 'running' && 'animate-pulse'
           )}>
-            {avatarSrc ? (
-              <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" />
-            ) : (
-              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center font-pixel text-sm">
+            {avatarSrc ?
+            <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" /> :
+
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center font-pixel text-sm">
                 {agent.name[0]}
               </div>
-            )}
+            }
           </div>
         </div>
 
@@ -75,32 +75,32 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
           <div className="flex items-center gap-2">
             <span className="font-pixel text-sm font-semibold text-foreground">{agent.name}</span>
             {/* Pixel number badge */}
-            <span className="font-pixel text-xs text-muted-foreground/60 tabular-nums">{agent.number}</span>
+            
           </div>
 
-          {!compact && (
-            <p className={cn(
-              'text-xs leading-relaxed mt-1',
-              agent.status === 'running'
-                ? 'text-foreground/70'
-                : 'text-muted-foreground/60'
-            )}>
+          {!compact &&
+          <p className={cn(
+            'text-xs leading-relaxed mt-1',
+            agent.status === 'running' ?
+            'text-foreground/70' :
+            'text-muted-foreground/60'
+          )}>
               <span className="mr-1">└</span>
               {agent.statusText}
             </p>
-          )}
+          }
         </div>
 
         {/* Right column: number + progress aligned */}
         <div className="shrink-0 flex flex-col items-end gap-1">
           <span className="font-pixel text-lg font-bold text-foreground/15">{agent.number}</span>
-          {!compact && (
-            <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'running' ? 'running' : 'idle'} />
-          )}
+          {!compact &&
+          <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'running' ? 'running' : 'idle'} />
+          }
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 interface AgentClusterCardProps {
@@ -110,7 +110,7 @@ interface AgentClusterCardProps {
 }
 
 export function AgentClusterCard({ agents, title, onAgentClick }: AgentClusterCardProps) {
-  const runningCount = agents.filter(a => a.status === 'running').length;
+  const runningCount = agents.filter((a) => a.status === 'running').length;
   const totalCount = agents.length;
 
   return (
@@ -126,14 +126,14 @@ export function AgentClusterCard({ agents, title, onAgentClick }: AgentClusterCa
 
       {/* Agent cards */}
       <div className="p-3 space-y-2">
-        {agents.map(agent => (
-          <AgentCard
-            key={agent.id}
-            agent={agent}
-            onClick={onAgentClick ? () => onAgentClick(agent.id) : undefined}
-          />
-        ))}
+        {agents.map((agent) =>
+        <AgentCard
+          key={agent.id}
+          agent={agent}
+          onClick={onAgentClick ? () => onAgentClick(agent.id) : undefined} />
+
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
