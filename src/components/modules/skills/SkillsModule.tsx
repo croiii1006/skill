@@ -23,6 +23,14 @@ const avatarMap: Record<string, string> = {
   designer: expertDesigner, strategist: expertStrategist, search: expertSearch,
 };
 
+/* ─── Agent task background descriptions ─── */
+const agentDescriptions: Record<string, string> = {
+  'agent-01': '任务背景\n你是一名TikTok爆款视频专家，需要为用户收集（品类）下最符合（卖点）的对标爆款视频，并生成一个可供复刻的视频列表。',
+  'agent-02': '任务背景\n你是一名记忆库专家，需要根据品牌记忆库中的核心信息，提取关键特征向量，为后续内容生成提供品牌一致性保障。',
+  'agent-03': '任务背景\n你是一名Prompt设计专家，需要基于爆款视频结构和品牌记忆，设计出高质量的TikTok视频生成Prompt。',
+  'agent-04': '任务背景\n你是一名视频生成专家，需要根据Prompt和素材，生成高质量的TikTok短视频内容。',
+};
+
 /* ─── Agent rows inside flow-step card ─── */
 function AgentClusterSteps({ agents, isLast, msgId }: { agents: import('./AgentCard').AgentInfo[]; isLast: boolean; msgId: string }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -54,8 +62,8 @@ function AgentClusterSteps({ agents, isLast, msgId }: { agents: import('./AgentC
               </div>
               <span className={cn(
                 'flex-1 text-foreground/70 transition-all duration-200',
-                isExpanded ? 'text-base font-semibold text-foreground' : 'text-sm'
-              )}>{agent.role}</span>
+                isExpanded ? 'text-base font-semibold text-foreground' : 'text-sm font-medium'
+              )}>{agent.name}</span>
               <ChevronRight className={cn(
                 'w-4 h-4 text-muted-foreground/30 transition-transform duration-200',
                 isExpanded && 'rotate-90'
@@ -70,9 +78,9 @@ function AgentClusterSteps({ agents, isLast, msgId }: { agents: import('./AgentC
                   <div className="w-px h-4 invisible" />
                   <div className={cn('shrink-0 invisible', isExpanded ? 'w-8' : 'w-5')} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground/60 mb-1">{agent.role}</p>
+                    <p className="text-xs text-muted-foreground/60 mb-1">{agent.name}</p>
                     <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
-                      {agent.statusText}
+                      {agentDescriptions[agent.id] || agent.statusText}
                     </p>
                   </div>
                 </div>
