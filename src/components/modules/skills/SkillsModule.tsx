@@ -7,9 +7,21 @@ import { AgentCard, AgentClusterCard } from './AgentCard';
 import { RightWorkspace, type RightView } from './RightWorkspace';
 import { ChatInputBar } from './ChatInputBar';
 import {
-  Loader2, CheckCircle2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight,
+  Loader2, CheckCircle2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight, Users,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+
+import expertMemory from '@/assets/expert-memory.png';
+import expertCrawler from '@/assets/expert-crawler.png';
+import expertVideo from '@/assets/expert-video.png';
+import expertDesigner from '@/assets/expert-designer.png';
+import expertStrategist from '@/assets/expert-strategist.png';
+import expertSearch from '@/assets/expert-search.png';
+
+const avatarMap: Record<string, string> = {
+  memory: expertMemory, crawler: expertCrawler, video: expertVideo,
+  designer: expertDesigner, strategist: expertStrategist, search: expertSearch,
+};
 
 /* ─── History helpers ─── */
 interface SkillsHistoryItem {
