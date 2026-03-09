@@ -235,10 +235,23 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           <div className="p-5 space-y-5">
             {props.agent04Task && <SubTaskList task={props.agent04Task} />}
             {props.agent04Task && <WorkLog logs={props.agent04Task.logs} />}
-            {/* Final result */}
             {props.resultVideo && (
               <ResultPreviewBlock onRegenerate={props.onRegenerate} disabled={props.isProcessing} />
             )}
+          </div>
+        );
+
+      case 'read-memory':
+        return (
+          <div className="p-5 space-y-4">
+            {props.memoryCategory && (
+              <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                {props.memoryCategory}
+              </span>
+            )}
+            <div className="prose prose-sm max-w-none text-foreground/80 leading-relaxed whitespace-pre-wrap text-sm">
+              {props.memoryContent || '暂无内容'}
+            </div>
           </div>
         );
 
@@ -253,6 +266,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
     'agent-01': '爆款专家工作台',
     'agent-02-03': '专家工作台',
     'agent-04': '视频生成工作台',
+    'read-memory': props.memoryTitle || '记忆库',
   };
 
   return (
