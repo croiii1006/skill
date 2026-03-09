@@ -276,6 +276,9 @@ export function SkillsModule() {
             icon = <ListChecks className="w-4 h-4 text-foreground/60" />;
             label = msg.content;
             onClick = () => setActiveRightView('checklist');
+          } else if (msg.type === 'read-memory') {
+            icon = <FileText className="w-4 h-4 text-foreground/60" />;
+            label = `阅读`;
           } else {
             icon = <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>;
             label = msg.content;
