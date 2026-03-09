@@ -157,6 +157,7 @@ export function SkillsModule() {
   const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
+  const [chatOnlyInput, setChatOnlyInput] = useState('');
 
   const activeMemoryEntry = useMemo(() => {
     if (!activeMemoryId) return null;
