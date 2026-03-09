@@ -317,7 +317,11 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       <div className="px-5 py-3 border-b border-border/20 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <ScrollText className="w-4 h-4 text-foreground/50" />
-            <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
+            {view === 'agent-04' ? (
+              <span className="font-pixel text-base font-medium text-foreground">Agent04</span>
+            ) : (
+              <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
+            )}
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7">
             <X className="w-4 h-4" />
