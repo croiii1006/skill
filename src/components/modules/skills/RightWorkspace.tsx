@@ -93,21 +93,19 @@ function SubTaskList({ task }: {task: SkillTask;}) {
   if (!task || task.children.length === 0) return null;
   return (
     <div className="space-y-0">
+      <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider mb-3">子任务</p>
       {task.children.map((child, i) => {
         const avatarSrc = child.expert ? expertAvatars[child.expert.avatar] : undefined;
         const isDone = child.status === 'done';
         const isRunning = child.status === 'running';
         return (
-          <div key={i} className="flex items-center gap-2 py-1.5 px-1">
-            {avatarSrc && <img src={avatarSrc} className="w-5 h-5 rounded-full shrink-0" alt="" />}
-            <span className="text-xs text-foreground/70 flex-1">{child.title}</span>
-            {isDone && <img src={pixelCheck} className="w-4 h-4" alt="" />}
-            {isRunning && <img src={pixelWait} className="w-4 h-4 animate-pulse" alt="" />}
+          <div key={i} className="flex items-center gap-3 py-3 border-b border-border/10 last:border-b-0">
+            {avatarSrc && <img src={avatarSrc} className="w-5 h-5 shrink-0 object-contain" alt="" />}
+            <span className="text-sm text-foreground/70 flex-1">{child.title}</span>
+            {isDone && <Check className="w-4 h-4 text-foreground/40" />}
+            {isRunning && <Loader2 className="w-4 h-4 text-muted-foreground/40 animate-spin" />}
           </div>
         );
-
-
-
       })}
     </div>);
 }
