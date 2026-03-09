@@ -350,7 +350,7 @@ export function SkillsModule() {
                     </span>
                   )}
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
+                {onClick && <ChevronRight className="w-4 h-4 text-muted-foreground/30" />}
               </div>
 
               {/* Inline agent rows removed – agent-cluster handles collapsible detail */}
