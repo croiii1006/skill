@@ -10,6 +10,8 @@ import {
   Loader2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight, Users, FileText,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useToast } from '@/hooks/use-toast';
+import pixelCross from '@/assets/pixel-cross.png';
 
 import pixelSearch from '@/assets/pixel-search.svg';
 import pixelMemory from '@/assets/pixel-memory.svg';
