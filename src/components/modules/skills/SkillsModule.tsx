@@ -11,16 +11,17 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
-import expertMemory from '@/assets/expert-memory.png';
+import pixelSearch from '@/assets/pixel-search.svg';
+import pixelMemory from '@/assets/pixel-memory.svg';
+import pixelPrompt from '@/assets/pixel-prompt.svg';
+import pixelVideo from '@/assets/pixel-video.svg';
+import pixelCreate from '@/assets/pixel-create.svg';
 import expertCrawler from '@/assets/expert-crawler.png';
-import expertVideo from '@/assets/expert-video.png';
 import expertDesigner from '@/assets/expert-designer.png';
-import expertStrategist from '@/assets/expert-strategist.png';
-import expertSearch from '@/assets/expert-search.png';
 
 const avatarMap: Record<string, string> = {
-  memory: expertMemory, crawler: expertCrawler, video: expertVideo,
-  designer: expertDesigner, strategist: expertStrategist, search: expertSearch,
+  memory: pixelMemory, crawler: expertCrawler, video: pixelVideo,
+  designer: expertDesigner, strategist: pixelPrompt, search: pixelSearch,
 };
 
 /* ─── Agent task background descriptions ─── */
