@@ -75,7 +75,7 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
             {isExpanded && (
               <div className="px-4 pb-4 animate-fade-in">
                 <div className="flex items-start gap-3">
-                  <Users className="w-4 h-4 shrink-0 invisible" />
+                  <img src={pixelCreate} alt="" className="w-4 h-4 shrink-0 invisible" />
                   <span className="text-sm invisible">创建助手</span>
                   <div className="w-px h-4 invisible" />
                   <div className={cn('shrink-0 invisible', isExpanded ? 'w-8' : 'w-5')} />
