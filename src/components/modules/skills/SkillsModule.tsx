@@ -1,13 +1,13 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useMemory } from '@/contexts/MemoryContext';
-import { useSkillsEngine, SessionSetup, SkillsState } from './useSkillsEngine';
+import { useSkillsEngine, SessionSetup, SkillsState, StreamMessageType } from './useSkillsEngine';
 import { SetupSummary } from './SetupSummary';
 import { AgentCard, AgentClusterCard } from './AgentCard';
 import { RightWorkspace, type RightView } from './RightWorkspace';
 import { ChatInputBar } from './ChatInputBar';
 import {
-  Loader2, CheckCircle2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History,
+  Loader2, CheckCircle2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
