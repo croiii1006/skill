@@ -301,7 +301,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
 
   const pixelTitles: Record<string, string> = {
     'agent-01': 'Agent01',
-    'agent-02-03': 'Agent02-03',
+    'agent-02-03': agent0203Tab === '02' ? 'Agent02' : 'Agent03',
     'agent-04': 'Agent04',
   };
 
