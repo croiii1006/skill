@@ -101,7 +101,9 @@ export interface SkillsState {
   /** Agents state */
   agents: AgentInfo[];
   /** Active right panel view */
-  activeRightView: 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04' | 'read-memory';
+  activeRightView: 'none' | 'checklist' | 'agents' | 'read-memory';
+  /** Which agent tab is active in the agents panel */
+  activeAgentTab?: '01' | '02' | '03' | '04';
   /** Checklist items */
   checklistItems: string[];
   checklistDone: boolean[];
