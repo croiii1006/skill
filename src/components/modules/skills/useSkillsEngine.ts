@@ -81,6 +81,8 @@ export interface StreamMessage {
   agents?: AgentInfo[];
   /** For create-agent messages – inline agent names with avatars */
   agentNames?: { name: string; avatar: string }[];
+  /** For read-memory messages – memory entry id */
+  memoryId?: string;
 }
 
 export interface SkillsState {
@@ -99,7 +101,7 @@ export interface SkillsState {
   /** Agents state */
   agents: AgentInfo[];
   /** Active right panel view */
-  activeRightView: 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04';
+  activeRightView: 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04' | 'read-memory';
   /** Checklist items */
   checklistItems: string[];
   checklistDone: boolean[];
@@ -418,11 +420,8 @@ export function useSkillsEngine() {
 
       // Show memory files if enabled
       if (state.setup.memoryEnabled && state.setup.selectedMemoryIds.length > 0) {
-        // We use generic memory file names based on selected count
-        const memoryNames = ['品牌调性指南', '核心产品卖点', '竞品分析', 'TikTok内容策略'];
-        const selectedCount = Math.min(state.setup.selectedMemoryIds.length, memoryNames.length);
-        for (let i = 0; i < selectedCount; i++) {
-          addMessage({ type: 'read-memory', content: memoryNames[i] });
+        for (const memId of state.setup.selectedMemoryIds) {
+          addMessage({ type: 'read-memory', content: '', memoryId: memId });
           await pause(300);
         }
         await pause(200);

@@ -142,6 +142,12 @@ export function SkillsModule() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
+  const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
+
+  const activeMemoryEntry = useMemo(() => {
+    if (!activeMemoryId) return null;
+    return entries.find(e => e.id === activeMemoryId) || null;
+  }, [activeMemoryId, entries]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -277,8 +283,14 @@ export function SkillsModule() {
             label = msg.content;
             onClick = () => setActiveRightView('checklist');
           } else if (msg.type === 'read-memory') {
+            const memEntry = entries.find(e => e.id === msg.memoryId);
+            const memTitle = memEntry?.title || msg.content || '记忆库';
             icon = <FileText className="w-4 h-4 text-foreground/60" />;
             label = `阅读`;
+            onClick = () => {
+              setActiveMemoryId(msg.memoryId || null);
+              setActiveRightView('read-memory');
+            };
           } else {
             icon = <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>;
             label = msg.content;
@@ -301,7 +313,7 @@ export function SkillsModule() {
                   {msg.type === 'read-memory' && (
                     <>
                       <div className="w-px h-4 bg-border/30" />
-                      <span className="text-foreground/70">{msg.content}</span>
+                      <span className="text-foreground/70">{entries.find(e => e.id === msg.memoryId)?.title || msg.content}</span>
                     </>
                   )}
                   {msg.type === 'checklist' && (
@@ -615,6 +627,10 @@ export function SkillsModule() {
               agent04Task={taskGenVideo}
               resultVideo={state.resultVideo}
               onRegenerate={regenerate}
+              // Memory
+              memoryTitle={activeMemoryEntry?.title}
+              memoryContent={activeMemoryEntry?.content}
+              memoryCategory={activeMemoryEntry?.category}
             />
           </div>
         )}
