@@ -78,6 +78,8 @@ export interface StreamMessage {
   isStreaming?: boolean;
   /** For agent-cluster messages */
   agents?: AgentInfo[];
+  /** For create-agent messages – inline agent names with avatars */
+  agentNames?: { name: string; avatar: string }[];
 }
 
 export interface SkillsState {
