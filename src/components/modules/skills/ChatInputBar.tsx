@@ -51,7 +51,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
-    if ((!input.trim() && !image) || disabled) return;
+    if (!input.trim() || !image || !category || disabled) return;
     onSend(input.trim(), image, category || undefined, selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined);
     setInput('');
     setImage(null);
@@ -89,7 +89,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
     el.style.height = Math.min(el.scrollHeight, 200) + 'px';
   };
 
-  const hasContent = input.trim() || image;
+  const hasContent = input.trim() && image && category;
 
   return (
     <div className="border-t border-border/20 bg-transparent px-6 py-3">
