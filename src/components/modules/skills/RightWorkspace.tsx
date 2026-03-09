@@ -32,7 +32,7 @@ const expertAvatars: Record<string, string> = {
   audio: expertAudio,
 };
 
-export type RightView = 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04';
+export type RightView = 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04' | 'read-memory';
 
 interface RightWorkspaceProps {
   view: RightView;
@@ -63,6 +63,10 @@ interface RightWorkspaceProps {
   agent04Task?: SkillTask;
   resultVideo?: { url: string; cover: string } | null;
   onRegenerate?: () => void;
+  // Memory data
+  memoryTitle?: string;
+  memoryContent?: string;
+  memoryCategory?: string;
 }
 
 function WorkLog({ logs, task }: { logs: TaskLog[]; task?: SkillTask }) {
