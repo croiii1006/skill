@@ -88,11 +88,9 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
               )}>
                 <span className="mr-1">└</span>
                 {agent.statusText}
-                {agent.status === 'running' && (
-                  <span className="ml-1.5">
-                    <PixelProgress progress={agent.progress} />
-                  </span>
-                )}
+                <span className="ml-1.5">
+                  <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'running' ? 'running' : 'idle'} />
+                </span>
               </p>
             </>
           )}
