@@ -398,7 +398,8 @@ export function useSkillsEngine() {
           ...prev,
           candidateVideos: videos,
           isProcessing: false,
-          activeRightView: 'agent-01',
+          activeRightView: 'agents',
+          activeAgentTab: '01',
         }));
 
         addMessage({ type: 'video-gen-status', content: '请从右侧面板选择一条对标视频进行复刻 →' });
