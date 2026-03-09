@@ -401,7 +401,12 @@ export function SkillsModule() {
               <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin">
                 <div className="px-6 py-6">
                   <div className="max-w-3xl mx-auto space-y-4">
-                    {state.messages.map(renderMessage)}
+                    {groupedMessages.map((group, gi) => {
+                      if (group.kind === 'flow-group') {
+                        return renderFlowGroup(group.msgs, `flow-group-${gi}`);
+                      }
+                      return renderMessage(group.msg);
+                    })}
                     {state.isProcessing && state.messages.length > 0 && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
                         <Loader2 className="w-3 h-3 animate-spin" />
