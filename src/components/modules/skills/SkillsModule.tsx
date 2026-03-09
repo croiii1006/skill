@@ -178,16 +178,19 @@ export function SkillsModule() {
     return (
       <div key={groupKey} className="rounded-xl border border-border/30 bg-background overflow-hidden animate-fade-in">
         {msgs.map((msg, i) => {
+          const isLast = i === msgs.length - 1;
+
+          // Determine icon, label, onClick
           let icon: React.ReactNode;
           let label: string;
           let onClick: (() => void) | undefined;
 
           if (msg.type === 'checklist') {
             icon = <ListChecks className="w-4 h-4 text-foreground/60" />;
-            label = `编写待办清单`;
+            label = '编写待办清单';
             onClick = () => setActiveRightView('checklist');
           } else if (msg.type === 'create-agent') {
-            icon = <span className="font-pixel text-sm text-foreground/60">⊞</span>;
+            icon = <Users className="w-4 h-4 text-foreground/60" />;
             label = msg.content;
           } else if (msg.type === 'read-checklist') {
             icon = <ListChecks className="w-4 h-4 text-foreground/60" />;
@@ -199,26 +202,56 @@ export function SkillsModule() {
           }
 
           return (
-            <div
-              key={msg.id}
-              onClick={onClick}
-              className={cn(
-                'flex items-center justify-between px-4 py-2.5 text-sm text-foreground/80',
-                onClick && 'cursor-pointer hover:bg-muted/20',
-                i < msgs.length - 1 && 'border-b border-border/10',
-                'transition-colors'
-              )}
-            >
-              <div className="flex items-center gap-2.5">
-                {icon}
-                <span>{label}</span>
-                {msg.type === 'checklist' && (
-                  <span className="text-[10px] text-muted-foreground/50 ml-1">
-                    {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length}
-                  </span>
+            <div key={msg.id}>
+              {/* Main step row */}
+              <div
+                onClick={onClick}
+                className={cn(
+                  'flex items-center justify-between px-4 py-3 text-sm text-foreground/80',
+                  onClick && 'cursor-pointer hover:bg-muted/20',
+                  'transition-colors'
                 )}
+              >
+                <div className="flex items-center gap-2.5">
+                  {icon}
+                  <span>{label}</span>
+                  {msg.type === 'checklist' && (
+                    <span className="text-[10px] text-muted-foreground/50 ml-1">
+                      {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length}
+                    </span>
+                  )}
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
+
+              {/* Inline agent names for create-agent */}
+              {msg.type === 'create-agent' && msg.agentNames && msg.agentNames.length > 0 && (
+                <div className="px-4 pb-1">
+                  {msg.agentNames.map((an, ai) => (
+                    <div key={ai} className="flex items-center gap-2.5 py-2 pl-6 text-sm text-foreground/80">
+                      <Users className="w-3.5 h-3.5 text-muted-foreground/50" />
+                      <span className="text-muted-foreground/60">创建助手</span>
+                      <span className="text-muted-foreground/30">|</span>
+                      <div className="w-5 h-5 shrink-0">
+                        {avatarMap[an.avatar] ? (
+                          <img src={avatarMap[an.avatar]} alt={an.name} className="w-full h-full object-contain" />
+                        ) : (
+                          <div className="w-5 h-5 rounded bg-muted flex items-center justify-center font-pixel text-[10px]">{an.name[0]}</div>
+                        )}
+                      </div>
+                      <span className="font-medium">{an.name}</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 ml-auto" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Dotted connecting line */}
+              {!isLast && (
+                <div className="flex justify-start pl-[26px] py-0">
+                  <div className="w-px h-5 border-l border-dashed border-border/40" />
+                </div>
+              )}
             </div>
           );
         })}
