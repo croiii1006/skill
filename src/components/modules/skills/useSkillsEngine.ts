@@ -81,6 +81,8 @@ export interface StreamMessage {
   agents?: AgentInfo[];
   /** For create-agent messages – inline agent names with avatars */
   agentNames?: { name: string; avatar: string }[];
+  /** For read-memory messages – memory entry id */
+  memoryId?: string;
 }
 
 export interface SkillsState {
