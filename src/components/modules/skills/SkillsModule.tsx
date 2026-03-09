@@ -134,61 +134,93 @@ export function SkillsModule() {
 
   const showRightPanel = state.activeRightView !== 'none';
 
-  /* ─── Render message ─── */
+  /* ─── Flow-step types that get grouped into one card ─── */
+  const FLOW_STEP_TYPES = new Set<StreamMessageType>(['checklist', 'create-agent', 'read-checklist']);
+
+  /** Group consecutive flow-step messages into clusters */
+  const groupedMessages = useMemo(() => {
+    const groups: { type: 'flow-group'; msgs: typeof state.messages } | typeof state.messages[0][] = [];
+    const result: Array<{ kind: 'single'; msg: typeof state.messages[0] } | { kind: 'flow-group'; msgs: typeof state.messages }> = [];
+    
+    let currentFlowGroup: typeof state.messages = [];
+    
+    for (const msg of state.messages) {
+      if (FLOW_STEP_TYPES.has(msg.type)) {
+        currentFlowGroup.push(msg);
+      } else {
+        if (currentFlowGroup.length > 0) {
+          result.push({ kind: 'flow-group', msgs: [...currentFlowGroup] });
+          currentFlowGroup = [];
+        }
+        result.push({ kind: 'single', msg });
+      }
+    }
+    if (currentFlowGroup.length > 0) {
+      result.push({ kind: 'flow-group', msgs: currentFlowGroup });
+    }
+    return result;
+  }, [state.messages]);
+
+  /* ─── Render a flow-step group as a single card ─── */
+  const renderFlowGroup = (msgs: typeof state.messages, groupKey: string) => {
+    return (
+      <div key={groupKey} className="rounded-xl border border-border/30 bg-background overflow-hidden animate-fade-in">
+        {msgs.map((msg, i) => {
+          let icon: React.ReactNode;
+          let label: string;
+          let onClick: (() => void) | undefined;
+
+          if (msg.type === 'checklist') {
+            icon = <ListChecks className="w-4 h-4 text-foreground/60" />;
+            label = `编写待办清单`;
+            onClick = () => setActiveRightView('checklist');
+          } else if (msg.type === 'create-agent') {
+            icon = <span className="font-pixel text-sm text-foreground/60">⊞</span>;
+            label = msg.content;
+          } else if (msg.type === 'read-checklist') {
+            icon = <ListChecks className="w-4 h-4 text-foreground/60" />;
+            label = msg.content;
+            onClick = () => setActiveRightView('checklist');
+          } else {
+            icon = <span className="w-4 h-4 text-foreground/60">•</span>;
+            label = msg.content;
+          }
+
+          return (
+            <div
+              key={msg.id}
+              onClick={onClick}
+              className={cn(
+                'flex items-center justify-between px-4 py-2.5 text-sm text-foreground/80',
+                onClick && 'cursor-pointer hover:bg-muted/20',
+                i < msgs.length - 1 && 'border-b border-border/10',
+                'transition-colors'
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                {icon}
+                <span>{label}</span>
+                {msg.type === 'checklist' && (
+                  <span className="text-[10px] text-muted-foreground/50 ml-1">
+                    {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length}
+                  </span>
+                )}
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  /* ─── Render single message ─── */
   const renderMessage = (msg: typeof state.messages[0]) => {
     switch (msg.type) {
       case 'setup-summary': {
         const setup = JSON.parse(msg.content);
         return <SetupSummary key={msg.id} setup={setup} />;
       }
-
-      case 'checklist':
-        return (
-          <div
-            key={msg.id}
-            onClick={() => setActiveRightView('checklist')}
-            className="rounded-xl border border-border/30 bg-background px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <ListChecks className="w-4 h-4 text-foreground/60" />
-              <span className="text-xs font-medium text-foreground">编写待办清单</span>
-              <span className="text-[10px] text-muted-foreground/50 ml-auto">
-                {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length} 完成
-              </span>
-            </div>
-            <div className="space-y-1 pl-1">
-              {state.checklistItems.map((item, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs">
-                  <span className="text-muted-foreground/40">•</span>
-                  <span className={cn(
-                    state.checklistDone[i] ? 'text-foreground/60' : 'text-muted-foreground/50'
-                  )}>{item}</span>
-                  {state.checklistDone[i] && <Check className="w-3 h-3 text-foreground/40" />}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'create-agent':
-        return (
-          <div key={msg.id} className="flex items-center gap-2 text-xs text-muted-foreground/60 animate-fade-in">
-            <span className="font-pixel text-[10px]">⊞</span>
-            <span>{msg.content}</span>
-          </div>
-        );
-
-      case 'read-checklist':
-        return (
-          <div
-            key={msg.id}
-            onClick={() => setActiveRightView('checklist')}
-            className="flex items-center gap-2 text-xs text-muted-foreground/60 cursor-pointer hover:text-foreground/60 transition-colors animate-fade-in"
-          >
-            <ListChecks className="w-3.5 h-3.5" />
-            <span>{msg.content}</span>
-          </div>
-        );
 
       case 'agent-cluster':
         return (
