@@ -7,8 +7,8 @@ import { AgentCard, AgentClusterCard } from './AgentCard';
 import { RightWorkspace, type RightView } from './RightWorkspace';
 import { ChatInputBar } from './ChatInputBar';
 import {
-  Loader2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight, Users, FileText, ArrowUp,
-} from 'lucide-react';
+  Loader2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History, ChevronRight, Users, FileText, ArrowUp } from
+'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
 import pixelCross from '@/assets/pixel-cross.png';
@@ -24,7 +24,7 @@ import expertDesigner from '@/assets/expert-designer.png';
 
 const avatarMap: Record<string, string> = {
   memory: pixelMemory, crawler: expertCrawler, video: pixelVideo,
-  designer: expertDesigner, strategist: pixelPrompt, search: pixelSearch,
+  designer: expertDesigner, strategist: pixelPrompt, search: pixelSearch
 };
 
 /* ─── Agent task background descriptions ─── */
@@ -32,11 +32,11 @@ const getAgentDescriptions = (category: string, sellingPoints: string, memoryNam
   'agent-01': `你是一名TikTok爆款视频专家，需要为用户收集「${category}」品类下最符合「${sellingPoints}」卖点的对标爆款视频，并生成一个可供复刻的视频列表。`,
   'agent-02': `你是一名记忆库专家，需要根据「${memoryNames || '品牌记忆库'}」中的核心信息，提取关键特征向量，为后续内容生成提供品牌一致性保障。`,
   'agent-03': '你是一名Prompt设计专家，需要基于用户选择的爆款视频结构和上述所有品牌信息，设计出高质量的TikTok视频复刻Prompt。',
-  'agent-04': '你是一名视频生成专家，需要根据Prompt和素材图，生成高质量的TikTok短视频内容。',
+  'agent-04': '你是一名视频生成专家，需要根据Prompt和素材图，生成高质量的TikTok短视频内容。'
 });
 
 /* ─── Agent rows inside flow-step card ─── */
-function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, memoryNames }: { agents: import('./AgentCard').AgentInfo[]; isLast: boolean; msgId: string; category?: string; sellingPoints?: string; memoryNames?: string }) {
+function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, memoryNames }: {agents: import('./AgentCard').AgentInfo[];isLast: boolean;msgId: string;category?: string;sellingPoints?: string;memoryNames?: string;}) {
   const agentDescriptions = getAgentDescriptions(category || '', sellingPoints || '', memoryNames || '');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -50,8 +50,8 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
           <div key={agent.id} className="border-b border-border/10 last:border-b-0">
             <div
               className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors"
-              onClick={() => setExpandedId(isExpanded ? null : agent.id)}
-            >
+              onClick={() => setExpandedId(isExpanded ? null : agent.id)}>
+              
               <img src={pixelCreate} alt="创建助手" className="w-4 h-4 shrink-0" />
               <span className="text-sm text-foreground/80">创建助手</span>
               <div className="w-px h-4 bg-border/30" />
@@ -59,11 +59,11 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
                 'shrink-0 transition-all duration-200',
                 isExpanded ? 'w-8 h-8' : 'w-5 h-5'
               )}>
-                {avatarSrc ? (
-                  <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" />
-                ) : (
-                  <div className="w-full h-full rounded bg-muted flex items-center justify-center text-[9px] font-medium">{agent.name[0]}</div>
-                )}
+                {avatarSrc ?
+                <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" /> :
+
+                <div className="w-full h-full rounded bg-muted flex items-center justify-center text-[9px] font-medium">{agent.name[0]}</div>
+                }
               </div>
               <span className={cn(
                 'flex-1 text-foreground/70 transition-all duration-200',
@@ -75,8 +75,8 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
               )} />
             </div>
 
-            {isExpanded && (
-              <div className="px-4 pb-4 animate-fade-in">
+            {isExpanded &&
+            <div className="px-4 pb-4 animate-fade-in">
                 <div className="flex items-start gap-3">
                   <img src={pixelCreate} alt="" className="w-4 h-4 shrink-0 invisible" />
                   <span className="text-sm invisible">创建助手</span>
@@ -90,17 +90,17 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        );
+            }
+          </div>);
+
       })}
-      {!isLast && (
-        <div className="flex justify-start pl-[26px]">
+      {!isLast &&
+      <div className="flex justify-start pl-[26px]">
           <div className="w-px h-5 border-l border-dashed border-border/40" />
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 /* ─── History helpers ─── */
@@ -121,7 +121,7 @@ function loadSkillsHistory(): SkillsHistoryItem[] {
   try {
     const raw = localStorage.getItem(SKILLS_HISTORY_KEY);
     return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+  } catch {return [];}
 }
 
 function saveSkillsHistory(items: SkillsHistoryItem[]) {
@@ -140,17 +140,17 @@ export function SkillsModule() {
   const {
     state, CATEGORIES, completeSetup, refreshCandidates, selectVideo,
     updatePrompt, confirmGenerate, regenerate, backToVideoSelect,
-    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState,
+    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState
   } = useSkillsEngine();
 
   const { toast } = useToast();
   const { entries } = useMemory();
-  const memoryItems = useMemo(() => entries.map(e => ({
+  const memoryItems = useMemo(() => entries.map((e) => ({
     id: e.id,
     name: e.title,
     desc: e.content.slice(0, 60) + (e.content.length > 60 ? '...' : ''),
     tag: e.category,
-    charCount: e.content.length,
+    charCount: e.content.length
   })), [entries]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -161,7 +161,7 @@ export function SkillsModule() {
 
   const activeMemoryEntry = useMemo(() => {
     if (!activeMemoryId) return null;
-    return entries.find(e => e.id === activeMemoryId) || null;
+    return entries.find((e) => e.id === activeMemoryId) || null;
   }, [activeMemoryId, entries]);
 
   useEffect(() => {
@@ -172,20 +172,20 @@ export function SkillsModule() {
 
   // Show toast when agents hit error status
   useEffect(() => {
-    const errorAgent = state.agents.find(a => a.status === 'error');
+    const errorAgent = state.agents.find((a) => a.status === 'error');
     if (errorAgent) {
       toast({
         title: '网络异常，请重试',
         description: `${errorAgent.name} 执行过程中出现错误`,
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
-  }, [state.agents.map(a => a.status).join(',')]);
+  }, [state.agents.map((a) => a.status).join(',')]);
 
   useEffect(() => {
     if (!activeHistoryId || !state.setupCompleted || state.isProcessing) return;
-    setHistory(prev => {
-      const updated = prev.map(h => h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h);
+    setHistory((prev) => {
+      const updated = prev.map((h) => h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h);
       saveSkillsHistory(updated);
       return updated;
     });
@@ -200,7 +200,7 @@ export function SkillsModule() {
       memoryEnabled: setup.memoryEnabled,
       selectedMemoryIds: setup.selectedMemoryIds,
       date: new Date().toISOString(),
-      snapshot: { ...state },
+      snapshot: { ...state }
     };
     const updated = [newItem, ...history].slice(0, 20);
     setHistory(updated);
@@ -210,7 +210,7 @@ export function SkillsModule() {
   }, [history, state]);
 
   const deleteHistory = useCallback((id: string) => {
-    const updated = history.filter(h => h.id !== id);
+    const updated = history.filter((h) => h.id !== id);
     setHistory(updated);
     saveSkillsHistory(updated);
     if (activeHistoryId === id) setActiveHistoryId(null);
@@ -224,7 +224,7 @@ export function SkillsModule() {
         memoryEnabled: memoryIds && memoryIds.length > 0 || false,
         selectedMemoryIds: memoryIds || [],
         sellingPoints: text || '',
-        category: category || '其它',
+        category: category || '其它'
       };
       addHistory(setup);
       completeSetup(setup);
@@ -250,11 +250,11 @@ export function SkillsModule() {
 
   /** Group consecutive flow-step messages into clusters */
   const groupedMessages = useMemo(() => {
-    const groups: { type: 'flow-group'; msgs: typeof state.messages } | typeof state.messages[0][] = [];
-    const result: Array<{ kind: 'single'; msg: typeof state.messages[0] } | { kind: 'flow-group'; msgs: typeof state.messages }> = [];
-    
+    const groups: {type: 'flow-group';msgs: typeof state.messages;} | typeof state.messages[0][] = [];
+    const result: Array<{kind: 'single';msg: typeof state.messages[0];} | {kind: 'flow-group';msgs: typeof state.messages;}> = [];
+
     let currentFlowGroup: typeof state.messages = [];
-    
+
     for (const msg of state.messages) {
       if (FLOW_STEP_TYPES.has(msg.type)) {
         currentFlowGroup.push(msg);
@@ -290,9 +290,9 @@ export function SkillsModule() {
                 msgId={msg.id}
                 category={state.setup.category}
                 sellingPoints={state.setup.sellingPoints}
-                memoryNames={state.setup.selectedMemoryIds.map(id => entries.find(e => e.id === id)?.title).filter(Boolean).join('、')}
-              />
-            );
+                memoryNames={state.setup.selectedMemoryIds.map((id) => entries.find((e) => e.id === id)?.title).filter(Boolean).join('、')} />);
+
+
           }
 
           let icon: React.ReactNode;
@@ -312,7 +312,7 @@ export function SkillsModule() {
             label = msg.content;
             onClick = () => setActiveRightView('checklist');
           } else if (msg.type === 'read-memory') {
-            const memEntry = entries.find(e => e.id === msg.memoryId);
+            const memEntry = entries.find((e) => e.id === msg.memoryId);
             const memTitle = memEntry?.title || msg.content || '记忆库';
             icon = <FileText className="w-4 h-4 text-foreground/60" />;
             label = `阅读`;
@@ -334,22 +334,22 @@ export function SkillsModule() {
                   'flex items-center justify-between px-4 py-3 text-sm text-foreground/80',
                   onClick && 'cursor-pointer hover:bg-muted/20',
                   'transition-colors'
-                )}
-              >
+                )}>
+                
                 <div className="flex items-center gap-2.5">
                   {icon}
                   <span>{label}</span>
-                  {msg.type === 'read-memory' && (
-                    <>
+                  {msg.type === 'read-memory' &&
+                  <>
                       <div className="w-px h-4 bg-border/30" />
-                      <span className="text-foreground/70">{entries.find(e => e.id === msg.memoryId)?.title || msg.content}</span>
+                      <span className="text-foreground/70">{entries.find((e) => e.id === msg.memoryId)?.title || msg.content}</span>
                     </>
-                  )}
-                  {msg.type === 'checklist' && (
-                    <span className="text-[10px] text-muted-foreground/50 ml-1">
+                  }
+                  {msg.type === 'checklist' &&
+                  <span className="text-[10px] text-muted-foreground/50 ml-1">
                       {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length}
                     </span>
-                  )}
+                  }
                 </div>
                 {onClick && <ChevronRight className="w-4 h-4 text-muted-foreground/30" />}
               </div>
@@ -357,25 +357,25 @@ export function SkillsModule() {
               {/* Inline agent rows removed – agent-cluster handles collapsible detail */}
 
               {/* Dotted connecting line to next step */}
-              {!isLast && !(msg.type === 'create-agent' && msg.agentNames && msg.agentNames.length > 0) && (
-                <div className="flex justify-start pl-[26px]">
+              {!isLast && !(msg.type === 'create-agent' && msg.agentNames && msg.agentNames.length > 0) &&
+              <div className="flex justify-start pl-[26px]">
                   <div className="w-px h-5 border-l border-dashed border-border/40" />
                 </div>
-              )}
-            </div>
-          );
+              }
+            </div>);
+
         })}
-      </div>
-    );
+      </div>);
+
   };
 
   /* ─── Render single message ─── */
   const renderMessage = (msg: typeof state.messages[0]) => {
     switch (msg.type) {
-      case 'setup-summary': {
-        const setup = JSON.parse(msg.content);
-        return <SetupSummary key={msg.id} setup={setup} />;
-      }
+      case 'setup-summary':{
+          const setup = JSON.parse(msg.content);
+          return <SetupSummary key={msg.id} setup={setup} />;
+        }
 
       case 'agent-cluster':
         return (
@@ -383,77 +383,77 @@ export function SkillsModule() {
             key={msg.id}
             agents={msg.agents || []}
             onAgentClick={(agentId) => {
-              if (agentId === 'agent-01') setActiveRightView('agents', '01');
-              else if (agentId === 'agent-02') setActiveRightView('agents', '02');
-              else if (agentId === 'agent-03') setActiveRightView('agents', '03');
-              else if (agentId === 'agent-04') setActiveRightView('agents', '04');
-            }}
-          />
-        );
+              if (agentId === 'agent-01') setActiveRightView('agents', '01');else
+              if (agentId === 'agent-02') setActiveRightView('agents', '02');else
+              if (agentId === 'agent-03') setActiveRightView('agents', '03');else
+              if (agentId === 'agent-04') setActiveRightView('agents', '04');
+            }} />);
+
+
 
       case 'selection-confirm':
         return (
           <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed animate-fade-in">
             <img src={pixelTrend} className="w-4 h-4 shrink-0 mt-0.5" alt="" />
             <span>{msg.content}</span>
-          </div>
-        );
+          </div>);
 
-      case 'video-gen-status': {
-        const content = msg.content;
-        let icon = null;
-        let cleanContent = content;
-        if (content.startsWith('✅')) {
-          icon = <img src={pixelTrend} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
-          cleanContent = content.slice(2).trim();
-        } else if (content.startsWith('🎉')) {
-          icon = <PartyPopper className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
-          cleanContent = content.slice(2).trim();
-        } else if (content.startsWith('🔄')) {
-          icon = <RefreshCw className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
-          cleanContent = content.slice(2).trim();
-        } else if (content.startsWith('❌')) {
-          icon = <img src={pixelCross} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
-          cleanContent = content.slice(2).trim();
-        }
-        return (
-          <div key={msg.id} className={cn("flex items-start gap-2 text-sm leading-relaxed animate-fade-in", content.startsWith('❌') ? 'text-destructive' : 'text-foreground/80')}>
+
+      case 'video-gen-status':{
+          const content = msg.content;
+          let icon = null;
+          let cleanContent = content;
+          if (content.startsWith('✅')) {
+            icon = <img src={pixelTrend} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
+            cleanContent = content.slice(2).trim();
+          } else if (content.startsWith('🎉')) {
+            icon = <PartyPopper className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
+            cleanContent = content.slice(2).trim();
+          } else if (content.startsWith('🔄')) {
+            icon = <RefreshCw className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
+            cleanContent = content.slice(2).trim();
+          } else if (content.startsWith('❌')) {
+            icon = <img src={pixelCross} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
+            cleanContent = content.slice(2).trim();
+          }
+          return (
+            <div key={msg.id} className={cn("flex items-start gap-2 text-sm leading-relaxed animate-fade-in", content.startsWith('❌') ? 'text-destructive' : 'text-foreground/80')}>
             {icon}
             <span>{cleanContent}</span>
-          </div>
-        );
-      }
+          </div>);
+
+        }
 
       case 'text':
-      default: {
-        const content = msg.content;
-        let icon = null;
-        let cleanContent = content;
-        if (content.startsWith('✅')) {
-          icon = <img src={pixelTrend} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
-          cleanContent = content.slice(2).trim();
-        } else if (content.startsWith('🔍') || content.startsWith('🎯')) {
-          icon = <Search className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
-          cleanContent = content.slice(2).trim();
-        }
-        return (
-          <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed">
+      default:{
+          const content = msg.content;
+          let icon = null;
+          let cleanContent = content;
+          if (content.startsWith('✅')) {
+            icon = <img src={pixelTrend} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
+            cleanContent = content.slice(2).trim();
+          } else if (content.startsWith('🔍') || content.startsWith('🎯')) {
+            icon = <Search className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
+            cleanContent = content.slice(2).trim();
+          }
+          return (
+            <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed">
             {icon}
             <span className={cn(
-              msg.isStreaming && 'after:inline-block after:w-1 after:h-3.5 after:bg-foreground/50 after:ml-0.5 after:animate-pulse after:rounded-sm'
-            )}>
+                msg.isStreaming && 'after:inline-block after:w-1 after:h-3.5 after:bg-foreground/50 after:ml-0.5 after:animate-pulse after:rounded-sm'
+              )}>
               {cleanContent}
             </span>
-          </div>
-        );
-      }
+          </div>);
+
+        }
     }
   };
 
   const isEmpty = !state.setupCompleted && state.messages.length === 0;
 
-  const historySheet = (
-    <Sheet>
+  const historySheet =
+  <Sheet>
       <SheetTrigger asChild>
         <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
           <History className="w-3.5 h-3.5" />
@@ -465,18 +465,18 @@ export function SkillsModule() {
           <SheetTitle className="text-base font-medium">历史记录</SheetTitle>
         </SheetHeader>
         <div className="mt-4 space-y-3 overflow-y-auto max-h-[calc(100vh-6rem)]">
-          {history.map(item => {
-            const statusLabel = deriveStatusLabel(item.snapshot);
-            const isActive = activeHistoryId === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleRestoreHistory(item)}
-                className={cn(
-                  "w-full text-left p-3 rounded-xl border transition-all group relative",
-                  isActive ? "border-primary/40 bg-primary/5" : "border-border/30 hover:border-border/60 hover:bg-muted/20"
-                )}
-              >
+          {history.map((item) => {
+          const statusLabel = deriveStatusLabel(item.snapshot);
+          const isActive = activeHistoryId === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleRestoreHistory(item)}
+              className={cn(
+                "w-full text-left p-3 rounded-xl border transition-all group relative",
+                isActive ? "border-primary/40 bg-primary/5" : "border-border/30 hover:border-border/60 hover:bg-muted/20"
+              )}>
+              
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-foreground">{item.category}</span>
                   <span className="text-[10px] text-muted-foreground">
@@ -486,34 +486,34 @@ export function SkillsModule() {
                 <p className="text-xs text-muted-foreground truncate">{item.sellingPoints}</p>
                 <div className="flex gap-1 mt-1.5 flex-wrap">
                   <span className={cn(
-                    "text-[10px] px-1.5 py-0.5 rounded-full",
-                    statusLabel === '已完成' ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400" : "bg-muted/40 text-muted-foreground"
-                  )}>
+                  "text-[10px] px-1.5 py-0.5 rounded-full",
+                  statusLabel === '已完成' ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400" : "bg-muted/40 text-muted-foreground"
+                )}>
                     {statusLabel}
                   </span>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); deleteHistory(item.id); }}
-                  className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-muted/40 transition-all"
-                >
+                onClick={(e) => {e.stopPropagation();deleteHistory(item.id);}}
+                className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-muted/40 transition-all">
+                
                   <X className="w-3.5 h-3.5 text-muted-foreground/50" />
                 </button>
-              </button>
-            );
-          })}
-          {history.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">暂无历史记录</p>
-          )}
+              </button>);
+
+        })}
+          {history.length === 0 &&
+        <p className="text-sm text-muted-foreground text-center py-8">暂无历史记录</p>
+        }
         </div>
       </SheetContent>
-    </Sheet>
-  );
+    </Sheet>;
+
 
   // Get task refs for right panel
-  const taskCrawl = state.tasks.find(t => t.id === 'task-crawl');
-  const taskMemory = state.tasks.find(t => t.id === 'task-memory');
-  const taskPrompt = state.tasks.find(t => t.id === 'task-reverse-prompt');
-  const taskGenVideo = state.tasks.find(t => t.id === 'task-generate-video');
+  const taskCrawl = state.tasks.find((t) => t.id === 'task-crawl');
+  const taskMemory = state.tasks.find((t) => t.id === 'task-memory');
+  const taskPrompt = state.tasks.find((t) => t.id === 'task-reverse-prompt');
+  const taskGenVideo = state.tasks.find((t) => t.id === 'task-generate-video');
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col bg-background">
@@ -523,8 +523,8 @@ export function SkillsModule() {
           'flex flex-col transition-all duration-300',
           showRightPanel ? 'w-1/2 border-r border-border/20' : 'w-full'
         )}>
-          {isEmpty ? (
-            <div className="relative min-h-full flex flex-col items-center p-6 md:p-8 pt-[80px]">
+          {isEmpty ?
+          <div className="relative min-h-full flex flex-col items-center p-6 md:p-8 pt-[80px]">
               <div className="absolute top-4 right-4 z-20">{historySheet}</div>
               <div className="w-full max-w-2xl animate-fade-in my-[120px]">
                 <div className="text-center mb-10">
@@ -539,9 +539,9 @@ export function SkillsModule() {
                   <ChatInputBar onSend={handleSend} disabled={state.isProcessing} memoryItems={memoryItems} />
                 </div>
               </div>
-            </div>
-          ) : (
-            <>
+            </div> :
+
+          <>
               {/* Top bar */}
               <div className="px-4 py-2 border-b border-border/10 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
@@ -554,95 +554,95 @@ export function SkillsModule() {
 
               {/* Messages area */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto">
-                <div className="px-6 py-6">
+                <div className="px-6 py-6 pb-[60px]">
                   <div className="max-w-3xl mx-auto space-y-4">
                     {groupedMessages.map((group, gi) => {
-                      if (group.kind === 'flow-group') {
-                        // Extract agent-cluster messages to render as standalone cards after the flow card
-                        const agentClusterMsgs = group.msgs.filter(m => m.type === 'agent-cluster');
-                        return (
-                          <div key={`flow-group-${gi}`} className="space-y-4">
+                    if (group.kind === 'flow-group') {
+                      // Extract agent-cluster messages to render as standalone cards after the flow card
+                      const agentClusterMsgs = group.msgs.filter((m) => m.type === 'agent-cluster');
+                      return (
+                        <div key={`flow-group-${gi}`} className="space-y-4">
                             {renderFlowGroup(group.msgs, `flow-group-${gi}`)}
-                            {agentClusterMsgs.map(acMsg => (
-                              <div key={`ac-${acMsg.id}`} id={`agent-cluster-card-${acMsg.id}`}>
+                            {agentClusterMsgs.map((acMsg) =>
+                          <div key={`ac-${acMsg.id}`} id={`agent-cluster-card-${acMsg.id}`}>
                                 <AgentClusterCard
-                                  agents={acMsg.agents || []}
-                                  onAgentClick={(agentId) => {
-                                    if (agentId === 'agent-01') setActiveRightView('agents', '01');
-                                    else if (agentId === 'agent-02') setActiveRightView('agents', '02');
-                                    else if (agentId === 'agent-03') setActiveRightView('agents', '03');
-                                    else if (agentId === 'agent-04') setActiveRightView('agents', '04');
-                                  }}
-                                />
+                              agents={acMsg.agents || []}
+                              onAgentClick={(agentId) => {
+                                if (agentId === 'agent-01') setActiveRightView('agents', '01');else
+                                if (agentId === 'agent-02') setActiveRightView('agents', '02');else
+                                if (agentId === 'agent-03') setActiveRightView('agents', '03');else
+                                if (agentId === 'agent-04') setActiveRightView('agents', '04');
+                              }} />
+                            
                               </div>
-                            ))}
-                          </div>
-                        );
-                      }
-                      return renderMessage(group.msg);
-                    })}
-                    {state.isProcessing && state.messages.length > 0 && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
+                          )}
+                          </div>);
+
+                    }
+                    return renderMessage(group.msg);
+                  })}
+                    {state.isProcessing && state.messages.length > 0 &&
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
                         <Loader2 className="w-3 h-3 animate-spin" />
                         <span>正在处理中...</span>
                       </div>
-                    )}
+                  }
                   </div>
                 </div>
               </div>
 
               {/* Chat input – only show setup input before setup is completed */}
-              {!state.setupCompleted && (
-                <ChatInputBar onSend={handleSend} disabled={state.isProcessing} memoryItems={memoryItems} />
-              )}
+              {!state.setupCompleted &&
+            <ChatInputBar onSend={handleSend} disabled={state.isProcessing} memoryItems={memoryItems} />
+            }
             </>
-          )}
+          }
         </div>
 
         {/* Right: Workspace panel */}
-        {showRightPanel && (
-          <div className="w-1/2 animate-in slide-in-from-right-4 duration-300">
+        {showRightPanel &&
+        <div className="w-1/2 animate-in slide-in-from-right-4 duration-300">
             <RightWorkspace
-              view={state.activeRightView as RightView}
-              onClose={() => setActiveRightView('none')}
-              activeAgentTab={state.activeAgentTab || '01'}
-              onAgentTabChange={(tab) => setActiveRightView('agents', tab)}
-              // Checklist
-              checklistItems={state.checklistItems}
-              checklistDone={state.checklistDone}
-              // Agent 01
-              agent01={state.agents.find(a => a.id === 'agent-01')}
-              agent01Task={taskCrawl}
-              candidateVideos={state.candidateVideos}
-              selectedVideoId={state.selectedVideo?.id}
-              onVideoSelect={selectVideo}
-              videoSelectDisabled={!!state.selectedVideo}
-              // Agent 02/03
-              agent02={state.agents.find(a => a.id === 'agent-02')}
-              agent03={state.agents.find(a => a.id === 'agent-03')}
-              agent02Task={taskMemory}
-              agent03Task={taskPrompt}
-              generatedPrompt={state.generatedPrompt}
-              onPromptChange={updatePrompt}
-              onPromptConfirm={confirmGenerate}
-              onBackToVideoSelect={() => {
-                backToVideoSelect();
-              }}
-              memoryEnabled={state.setup.memoryEnabled}
-              isProcessing={state.isProcessing}
-              // Agent 04
-              agent04={state.agents.find(a => a.id === 'agent-04')}
-              agent04Task={taskGenVideo}
-              resultVideo={state.resultVideo}
-              onRegenerate={regenerate}
-              // Memory
-              memoryTitle={activeMemoryEntry?.title}
-              memoryContent={activeMemoryEntry?.content}
-              memoryCategory={activeMemoryEntry?.category}
-            />
+            view={state.activeRightView as RightView}
+            onClose={() => setActiveRightView('none')}
+            activeAgentTab={state.activeAgentTab || '01'}
+            onAgentTabChange={(tab) => setActiveRightView('agents', tab)}
+            // Checklist
+            checklistItems={state.checklistItems}
+            checklistDone={state.checklistDone}
+            // Agent 01
+            agent01={state.agents.find((a) => a.id === 'agent-01')}
+            agent01Task={taskCrawl}
+            candidateVideos={state.candidateVideos}
+            selectedVideoId={state.selectedVideo?.id}
+            onVideoSelect={selectVideo}
+            videoSelectDisabled={!!state.selectedVideo}
+            // Agent 02/03
+            agent02={state.agents.find((a) => a.id === 'agent-02')}
+            agent03={state.agents.find((a) => a.id === 'agent-03')}
+            agent02Task={taskMemory}
+            agent03Task={taskPrompt}
+            generatedPrompt={state.generatedPrompt}
+            onPromptChange={updatePrompt}
+            onPromptConfirm={confirmGenerate}
+            onBackToVideoSelect={() => {
+              backToVideoSelect();
+            }}
+            memoryEnabled={state.setup.memoryEnabled}
+            isProcessing={state.isProcessing}
+            // Agent 04
+            agent04={state.agents.find((a) => a.id === 'agent-04')}
+            agent04Task={taskGenVideo}
+            resultVideo={state.resultVideo}
+            onRegenerate={regenerate}
+            // Memory
+            memoryTitle={activeMemoryEntry?.title}
+            memoryContent={activeMemoryEntry?.content}
+            memoryCategory={activeMemoryEntry?.category} />
+          
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
