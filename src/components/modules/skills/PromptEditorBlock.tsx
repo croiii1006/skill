@@ -11,9 +11,10 @@ interface PromptEditorBlockProps {
   onBack: () => void;
   memoryEnabled: boolean;
   disabled?: boolean;
+  readonly?: boolean;
 }
 
-export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryEnabled, disabled }: PromptEditorBlockProps) {
+export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryEnabled, disabled, readonly }: PromptEditorBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -25,7 +26,7 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-foreground">生成的爆款复刻 Prompt（可编辑）</h4>
+        <h4 className="text-sm font-semibold text-foreground">生成的爆款复刻 Prompt</h4>
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopy}
@@ -34,13 +35,13 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
           >
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
-          
         </div>
       </div>
 
       <Textarea
         value={prompt}
         onChange={e => onChange(e.target.value)}
+        readOnly={readonly}
         className="min-h-[160px] rounded-xl border-border/40 bg-background text-sm font-mono leading-relaxed resize-none"
       />
 
@@ -63,16 +64,18 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
         </Badge>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-3">
-        <Button
-          onClick={onConfirm}
-          disabled={disabled}
-          className="flex-1 rounded-xl h-10 bg-foreground text-background hover:bg-foreground/90 font-medium disabled:opacity-50"
-        >
-          确认并生成
-        </Button>
-      </div>
+      {/* Actions - hidden in readonly mode */}
+      {!readonly && (
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={onConfirm}
+            disabled={disabled}
+            className="flex-1 rounded-xl h-10 bg-foreground text-background hover:bg-foreground/90 font-medium disabled:opacity-50"
+          >
+            确认并生成
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
