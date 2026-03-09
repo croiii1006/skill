@@ -137,12 +137,12 @@ function CopyButton({ text }: {text: string;}) {
     </button>);
 }
 
-const agentTabs: { id: AgentTab; label: string; avatar: string; name: string }[] = [
-  { id: '01', label: '01', avatar: 'search', name: 'TikTok爆款专家' },
-  { id: '02', label: '02', avatar: 'memory', name: '记忆库专家' },
-  { id: '03', label: '03', avatar: 'strategist', name: 'Prompt专家' },
-  { id: '04', label: '04', avatar: 'video', name: '视频专家' },
-];
+const agentTabs: {id: AgentTab;label: string;avatar: string;name: string;}[] = [
+{ id: '01', label: '01', avatar: 'search', name: 'TikTok爆款专家' },
+{ id: '02', label: '02', avatar: 'memory', name: '记忆库专家' },
+{ id: '03', label: '03', avatar: 'strategist', name: 'Prompt专家' },
+{ id: '04', label: '04', avatar: 'video', name: '视频专家' }];
+
 
 export function RightWorkspace(props: RightWorkspaceProps) {
   const { view, onClose, activeAgentTab = '01', onAgentTabChange } = props;
@@ -224,7 +224,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       case 'agents':
         return renderAgentContent();
 
-      case 'read-memory': {
+      case 'read-memory':{
           const lines = (props.memoryContent || '暂无内容').split('\n');
           return (
             <div className="flex flex-col h-full">
@@ -264,11 +264,11 @@ export function RightWorkspace(props: RightWorkspaceProps) {
   const isReadMemory = view === 'read-memory';
   const isAgents = view === 'agents';
 
-  const headerTitle = isAgents
-    ? `Agent${activeAgentTab}`
-    : view === 'checklist'
-    ? '编写待办清单'
-    : props.memoryTitle || '记忆库';
+  const headerTitle = isAgents ?
+  `Agent${activeAgentTab}` :
+  view === 'checklist' ?
+  '编写待办清单' :
+  props.memoryTitle || '记忆库';
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -297,47 +297,47 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           '01': props.agent01,
           '02': props.agent02,
           '03': props.agent03,
-          '04': props.agent04,
+          '04': props.agent04
         };
         return (
-        <div className="border-t border-border/20 px-3 py-3 flex items-center gap-2 shrink-0">
+          <div className="border-t border-border/20 py-3 flex items-center shrink-0 px-[35px] gap-[15px]">
           {agentTabs.map((tab) => {
-            const agent = agentStatusMap[tab.id];
-            const status = agent?.status || 'idle';
-            const isActive = activeAgentTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => onAgentTabChange?.(tab.id)}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-3 text-xs transition-all flex-1 justify-center border-2 border-foreground/80',
-                  isActive
-                    ? 'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]'
-                    : 'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
-                )}>
+              const agent = agentStatusMap[tab.id];
+              const status = agent?.status || 'idle';
+              const isActive = activeAgentTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onAgentTabChange?.(tab.id)}
+                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 py-[20px] px-[5px] gap-[31px]",
+
+                  isActive ?
+                  'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
+                  'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
+                  )}>
                 <div className="w-6 h-6 shrink-0 relative">
-                  <img src={expertAvatars[tab.avatar]} alt={tab.name} className={cn("w-full h-full object-contain", status === 'idle' && 'opacity-40')} />
+                  <img src={expertAvatars[tab.avatar]} alt={tab.name} className={cn("w-full h-full object-contain rounded-none", status === 'idle' && 'opacity-40')} />
                   <span className={cn(
-                    'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background',
-                    status === 'running' && 'bg-amber-400 animate-pulse',
-                    status === 'done' && 'bg-emerald-500',
-                    status === 'idle' && 'bg-muted-foreground/30',
-                  )} />
+                      'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background',
+                      status === 'running' && 'bg-amber-400 animate-pulse',
+                      status === 'done' && 'bg-emerald-500',
+                      status === 'idle' && 'bg-muted-foreground/30'
+                    )} />
                 </div>
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="font-pixel text-xs leading-none">{tab.label}</span>
+                  <span className="font-pixel leading-none text-3xl text-right">{tab.label}</span>
                   <span className={cn(
-                    'text-[10px] leading-none',
-                    status === 'running' && 'text-amber-600',
-                    status === 'done' && 'text-emerald-600',
-                    status === 'idle' && 'text-muted-foreground/40',
-                  )}>
+                      'text-[10px] leading-none',
+                      status === 'running' && 'text-amber-600',
+                      status === 'done' && 'text-emerald-600',
+                      status === 'idle' && 'text-muted-foreground/40'
+                    )}>
                     {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
                   </span>
                 </div>
-              </button>
-            );
-          })}
+              </button>);
+
+            })}
         </div>);
       })()
       }
