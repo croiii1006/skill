@@ -286,18 +286,22 @@ export function RightWorkspace(props: RightWorkspaceProps) {
     'read-memory': props.memoryTitle || '记忆库',
   };
 
+  const isReadMemory = view === 'read-memory';
+
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header */}
-      <div className="px-5 py-3 border-b border-border/20 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <ScrollText className="w-4 h-4 text-foreground/50" />
-          <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
+      {/* Header - hidden for read-memory since it has its own document header */}
+      {!isReadMemory && (
+        <div className="px-5 py-3 border-b border-border/20 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <ScrollText className="w-4 h-4 text-foreground/50" />
+            <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7">
+            <X className="w-4 h-4" />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7">
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
+      )}
 
       <ScrollArea className="flex-1">
         {renderContent()}
