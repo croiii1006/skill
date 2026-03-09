@@ -366,9 +366,10 @@ export function SkillsModule() {
             key={msg.id}
             agents={msg.agents || []}
             onAgentClick={(agentId) => {
-              if (agentId === 'agent-01') setActiveRightView('agent-01');
-              else if (agentId === 'agent-02' || agentId === 'agent-03') setActiveRightView('agent-02-03');
-              else if (agentId === 'agent-04') setActiveRightView('agent-04');
+              if (agentId === 'agent-01') setActiveRightView('agents', '01');
+              else if (agentId === 'agent-02') setActiveRightView('agents', '02');
+              else if (agentId === 'agent-03') setActiveRightView('agents', '03');
+              else if (agentId === 'agent-04') setActiveRightView('agents', '04');
             }}
           />
         );
