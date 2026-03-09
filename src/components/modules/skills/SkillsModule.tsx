@@ -587,6 +587,8 @@ export function SkillsModule() {
             <RightWorkspace
               view={state.activeRightView as RightView}
               onClose={() => setActiveRightView('none')}
+              activeAgentTab={state.activeAgentTab || '01'}
+              onAgentTabChange={(tab) => setActiveRightView('agents', tab)}
               // Checklist
               checklistItems={state.checklistItems}
               checklistDone={state.checklistDone}
