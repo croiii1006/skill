@@ -7,21 +7,29 @@ interface PixelProgressProps {
 }
 
 export function PixelProgress({ progress, status = 'running', className }: PixelProgressProps) {
-  const totalBlocks = 12;
-  const filledBlocks = Math.round((progress / 100) * totalBlocks);
-  const filled = '▓'.repeat(filledBlocks);
-  const empty = '░'.repeat(totalBlocks - filledBlocks);
+  if (status === 'done') {
+    return <span className={cn("font-pixel text-[12px] tracking-widest text-emerald-500", className)}>DONE</span>;
+  }
+  if (status === 'error') {
+    return <span className={cn("font-pixel text-[12px] tracking-widest text-destructive", className)}>ERROR</span>;
+  }
+  if (status === 'idle') {
+    return <span className={cn("font-pixel text-[12px] tracking-widest text-muted-foreground/40", className)}>WAIT</span>;
+  }
 
-  const filledColor = status === 'error'
-    ? 'text-red-500'
-    : status === 'done'
-      ? 'text-emerald-500'
-      : 'text-emerald-500';
-
+  // Running: pixel loading animation
   return (
-    <span className={cn("font-pixel text-[13px] tracking-wider", className)}>
-      <span className={filledColor}>{filled}</span>
-      <span className="text-muted-foreground/20">{empty}</span>
+    <span className={cn("font-pixel text-[13px] tracking-wider inline-flex gap-[2px]", className)}>
+      {[0, 1, 2, 3].map((i) => (
+        <span
+          key={i}
+          className="inline-block w-[6px] h-[6px] bg-emerald-500"
+          style={{
+            animation: 'pixel-blink 1.2s step-end infinite',
+            animationDelay: `${i * 0.3}s`,
+          }}
+        />
+      ))}
     </span>
   );
 }
