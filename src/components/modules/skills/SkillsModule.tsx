@@ -168,7 +168,18 @@ export function SkillsModule() {
     }
   }, [state.messages.length]);
 
-  // Auto-save snapshot
+  // Show toast when agents hit error status
+  useEffect(() => {
+    const errorAgent = state.agents.find(a => a.status === 'error');
+    if (errorAgent) {
+      toast({
+        title: '网络异常，请重试',
+        description: `${errorAgent.name} 执行过程中出现错误`,
+        variant: 'destructive',
+      });
+    }
+  }, [state.agents.map(a => a.status).join(',')]);
+
   useEffect(() => {
     if (!activeHistoryId || !state.setupCompleted || state.isProcessing) return;
     setHistory(prev => {
