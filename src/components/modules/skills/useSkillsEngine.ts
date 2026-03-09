@@ -672,6 +672,7 @@ export function useSkillsEngine() {
       messages: prev.messages.filter(m =>
         !(m.type === 'selection-confirm') &&
         !(m.type === 'read-checklist') &&
+        !(m.type === 'read-memory') &&
         !(m.type === 'create-agent' && m.content.includes('记忆库')) &&
         !(m.type === 'create-agent' && m.content.includes('视频生成')) &&
         !(m.type === 'agent-cluster' && m.agents?.some(a => ['agent-02', 'agent-03', 'agent-04'].includes(a.id))) &&
