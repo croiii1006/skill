@@ -123,6 +123,24 @@ function SubTaskList({ task }: { task: SkillTask }) {
   );
 }
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute top-2 right-3 p-1.5 rounded-md hover:bg-muted/60 text-muted-foreground/40 hover:text-muted-foreground transition-colors z-10"
+      title="复制全部内容"
+    >
+      {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
+  );
+}
+
 export function RightWorkspace(props: RightWorkspaceProps) {
   const { view, onClose } = props;
   const [agent0203Tab, setAgent0203Tab] = useState<'02' | '03'>('02');
