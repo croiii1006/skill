@@ -536,7 +536,7 @@ export function SkillsModule() {
               </div>
 
               {/* Messages area */}
-              <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto">
                 <div className="px-6 py-6">
                   <div className="max-w-3xl mx-auto space-y-4">
                     {groupedMessages.map((group, gi) => {
