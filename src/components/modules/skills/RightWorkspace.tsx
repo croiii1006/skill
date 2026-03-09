@@ -324,22 +324,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   )}>
                     {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
                   </span>
-
-                    
-                </div>
-                <div className="flex-col flex items-end justify-center gap-[5px]">
-                  <span className="font-pixel leading-none font-light text-2xl text-right mx-0 px-0">{tab.label}</span>
-                  <span className={cn("leading-none text-xs text-[#4d4d4d] font-thin text-right px-0",
-
-                    status === 'running' && 'text-amber-600',
-                    status === 'done' && 'text-emerald-600',
-                    status === 'idle' && 'text-muted-foreground/40'
-                    )}>
-                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
-                  </span>
-                </div>
-              </button>);
-
+                </button>);
             })}
         </div>);
       })()
