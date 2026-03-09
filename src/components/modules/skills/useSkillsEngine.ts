@@ -355,7 +355,8 @@ export function useSkillsEngine() {
         updateAgent('agent-01', { progress: 25, statusText: '正在抓取TikTok视频数据...' });
         await backendDelay();
         updateChild('task-crawl', 'task-crawl-spider', { status: 'done', progress: 100, title: '爬虫专家完成启动 TikTok 爬虫' });
-        addTaskLog('task-crawl', '爬虫专家完成抓取 → 共获取 142 条视频数据');
+        const crawlCount = Math.floor(Math.random() * 251) + 50;
+        addTaskLog('task-crawl', `爬虫专家完成抓取 → 共获取 ${crawlCount} 条视频数据`);
 
         // Sub 2: Analyze
         updateChild('task-crawl', 'task-crawl-analyze', { status: 'running', title: '数据专家正在分析卖点匹配度' });
