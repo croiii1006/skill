@@ -273,6 +273,7 @@ export function SkillsModule() {
                 msgId={msg.id}
                 category={state.setup.category}
                 sellingPoints={state.setup.sellingPoints}
+                memoryNames={state.setup.selectedMemoryIds.map(id => entries.find(e => e.id === id)?.title).filter(Boolean).join('、')}
               />
             );
           }
