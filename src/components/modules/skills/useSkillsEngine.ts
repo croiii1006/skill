@@ -366,27 +366,43 @@ export function useSkillsEngine() {
         updateChild('task-crawl', 'task-crawl-analyze', { status: 'done', progress: 100, title: '数据专家完成分析卖点匹配度' });
         addTaskLog('task-crawl', '数据专家完成分析 → 平均匹配度 73.2%，高匹配 28 条');
 
-        // ── Simulate error on Sub 3 ──
+        // Sub 3: Rank
         updateChild('task-crawl', 'task-crawl-rank', { status: 'running', title: '策略专家正在排序生成 Top 20' });
         updateAgentInMessages('agent-01', { progress: 75, statusText: '正在生成 Top 20 排名...' });
         updateAgent('agent-01', { progress: 75, statusText: '正在生成 Top 20 排名...' });
         await randDelay();
+        updateChild('task-crawl', 'task-crawl-rank', { status: 'done', progress: 100, title: '策略专家完成排序生成 Top 20' });
+        addTaskLog('task-crawl', '策略专家完成排序 → Top 20 候选已生成');
 
-        // Error!
-        addTaskLog('task-crawl', '❌ 网络连接超时，排序任务失败');
-        updateChild('task-crawl', 'task-crawl-rank', { status: 'done', progress: 0, title: '策略专家排序失败' });
-        updateTask('task-crawl', { status: 'error' as any, progress: 50, endAt: now() });
-        updateAgentInMessages('agent-01', { progress: 50, status: 'error', statusText: '网络异常，排序任务执行失败' });
-        updateAgent('agent-01', { progress: 50, status: 'error', statusText: '网络异常，排序任务执行失败' });
+        // Sub 4: Cover
+        updateChild('task-crawl', 'task-crawl-cover', { status: 'running', title: '视频专家正在提取视频封面' });
+        updateAgentInMessages('agent-01', { progress: 90, statusText: '正在提取视频封面...' });
+        updateAgent('agent-01', { progress: 90, statusText: '正在提取视频封面...' });
+        await subDelay();
+        updateChild('task-crawl', 'task-crawl-cover', { status: 'done', progress: 100, title: '视频专家完成提取视频封面' });
+        addTaskLog('task-crawl', '视频专家完成封面提取 → 20 张高清封面已缓存');
 
-        addMessage({ type: 'video-gen-status', content: '❌ 网络异常，请重试' });
+        updateTask('task-crawl', { status: 'done', progress: 100, endAt: now(), output: '抓取 142 条，Top 20 已排序' });
+        updateAgentInMessages('agent-01', { progress: 100, status: 'done', statusText: '已完成爆款视频匹配，请选择对标视频' });
+        updateAgent('agent-01', { progress: 100, status: 'done', statusText: '已完成爆款视频匹配，请选择对标视频' });
 
+        // Update checklist
         setState(prev => ({
           ...prev,
+          checklistDone: [true, ...prev.checklistDone.slice(1)],
+        }));
+
+        // Show video candidates
+        const videos = mockVideos();
+        setState(prev => ({
+          ...prev,
+          candidateVideos: videos,
           isProcessing: false,
           activeRightView: 'agents',
           activeAgentTab: '01',
         }));
+
+        addMessage({ type: 'video-gen-status', content: '请从右侧面板选择一条对标视频进行复刻 →' });
       });
     })();
   }, [streamText, addMessage, updateTask, addTaskLog, updateChild, updateAgent, updateAgentInMessages]);
