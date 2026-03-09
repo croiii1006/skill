@@ -300,7 +300,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           '04': props.agent04
         };
         return (
-          <div className="border-t border-border/20 shrink-0 px-[35px] gap-[15px] flex-row flex items-center justify-center py-[10px]">
+          <div className="border-t border-border/20 shrink-0 flex-row py-[14px] px-[43px] flex items-center justify-center gap-[10px]">
           {agentTabs.map((tab) => {
               const agent = agentStatusMap[tab.id];
               const status = agent?.status || 'idle';
