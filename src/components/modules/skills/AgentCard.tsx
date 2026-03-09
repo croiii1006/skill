@@ -45,12 +45,12 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
   return (
     <div
       onClick={onClick}
-      className={cn(
-        'rounded-xl border bg-card/80 p-3 transition-all',
-        onClick && 'cursor-pointer hover:bg-muted/30',
-        agent.status === 'running' && 'border-border/40',
-        agent.status === 'done' && 'border-border/20',
-        agent.status === 'idle' && 'border-border/10 opacity-50'
+      className={cn("rounded-xl border p-3 transition-all bg-neutral-100",
+
+      onClick && 'cursor-pointer hover:bg-muted/30',
+      agent.status === 'running' && 'border-border/40',
+      agent.status === 'done' && 'border-border/20',
+      agent.status === 'idle' && 'border-border/10 opacity-50'
       )}>
       
       <div className="flex items-start gap-3">
