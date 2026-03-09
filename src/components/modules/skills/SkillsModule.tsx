@@ -34,48 +34,40 @@ function AgentClusterSteps({ agents, isLast, msgId }: { agents: import('./AgentC
         const isExpanded = expandedId === agent.id;
 
         return (
-          <div key={agent.id}>
+          <div key={agent.id} className="border-b border-border/10 last:border-b-0">
             <div
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors border-b border-border/10 last:border-b-0"
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors"
               onClick={() => setExpandedId(isExpanded ? null : agent.id)}
             >
               <Users className="w-4 h-4 text-foreground/60 shrink-0" />
               <span className="text-sm text-foreground/80">创建助手</span>
               <div className="w-px h-4 bg-border/30" />
-              <div className="w-5 h-5 shrink-0">
+              <div className={cn(
+                'shrink-0 transition-all duration-200',
+                isExpanded ? 'w-8 h-8' : 'w-5 h-5'
+              )}>
                 {avatarSrc ? (
                   <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" />
                 ) : (
-                  <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[9px] font-medium">{agent.name[0]}</div>
+                  <div className="w-full h-full rounded bg-muted flex items-center justify-center text-[9px] font-medium">{agent.name[0]}</div>
                 )}
               </div>
-              <span className="text-sm text-foreground/70 flex-1">{agent.role}</span>
+              <span className={cn(
+                'flex-1 text-foreground/70 transition-all duration-200',
+                isExpanded ? 'text-base font-semibold text-foreground' : 'text-sm'
+              )}>{agent.role}</span>
               <ChevronRight className={cn(
-                'w-4 h-4 text-muted-foreground/30 transition-transform',
+                'w-4 h-4 text-muted-foreground/30 transition-transform duration-200',
                 isExpanded && 'rotate-90'
               )} />
             </div>
 
             {isExpanded && (
-              <div className="px-4 py-4 bg-muted/10 border-b border-border/10 animate-fade-in">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 shrink-0">
-                    {avatarSrc ? (
-                      <img src={avatarSrc} alt={agent.name} className="w-full h-full object-contain" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center font-pixel text-sm">{agent.name[0]}</div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground">{agent.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{agent.role}</p>
-                    {agent.statusText && (
-                      <div className="mt-3 text-xs text-foreground/70 leading-relaxed whitespace-pre-wrap">
-                        {agent.statusText}
-                      </div>
-                    )}
-                  </div>
-                </div>
+              <div className="px-4 pb-4 pl-[72px] animate-fade-in">
+                <p className="text-xs text-muted-foreground/60 mb-1">{agent.role}</p>
+                <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+                  {agent.statusText}
+                </p>
               </div>
             )}
           </div>
