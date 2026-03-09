@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { PixelProgress } from './PixelProgress';
 import { ChevronRight } from 'lucide-react';
+import pixelAgent from '@/assets/pixel-agent.svg';
 
 import pixelSearch from '@/assets/pixel-search.svg';
 import pixelMemory from '@/assets/pixel-memory.svg';
