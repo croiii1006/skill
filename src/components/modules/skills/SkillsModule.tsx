@@ -313,7 +313,7 @@ export function SkillsModule() {
                   {msg.type === 'read-memory' && (
                     <>
                       <div className="w-px h-4 bg-border/30" />
-                      <span className="text-foreground/70">{msg.content}</span>
+                      <span className="text-foreground/70">{entries.find(e => e.id === msg.memoryId)?.title || msg.content}</span>
                     </>
                   )}
                   {msg.type === 'checklist' && (
