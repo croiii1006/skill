@@ -268,7 +268,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
               <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
               <span className="text-sm text-muted-foreground">阅读</span>
               <span className="text-sm text-muted-foreground/40">|</span>
-              <span className="text-sm text-foreground/80 font-medium truncate">{props.memoryTitle || '记忆库'}.md</span>
+              <span className="text-sm truncate text-[#5c5c5c] font-normal">{props.memoryTitle || '记忆库'}.md</span>
               {props.memoryCategory &&
                 <span className="ml-auto inline-block text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
                   {props.memoryCategory}
