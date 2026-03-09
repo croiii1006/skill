@@ -516,7 +516,8 @@ export function useSkillsEngine() {
         updateAgent('agent-03', { progress: 20, statusText: '正在分析视频帧...' });
         await randDelay();
         updateChild('task-reverse-prompt', 'rp-frame', { status: 'done', progress: 100, title: '视频专家完成视频帧分析' });
-        addTaskLog('task-reverse-prompt', '视频专家完成视频帧分析 → 提取 48 个关键帧');
+        const keyFrames = Math.floor(Math.random() * 41) + 20;
+        addTaskLog('task-reverse-prompt', `视频专家完成视频帧分析 → 提取 ${keyFrames} 个关键帧`);
 
         updateChild('task-reverse-prompt', 'rp-style', { status: 'running', title: '设计专家正在提取风格特征' });
         updateAgentInMessages('agent-03', { progress: 50, statusText: '正在提取风格特征...' });
