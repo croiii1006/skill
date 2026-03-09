@@ -1,20 +1,15 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useMemory } from '@/contexts/MemoryContext';
-import { useSkillsEngine, CandidateVideo, SessionSetup, SkillsState } from './useSkillsEngine';
+import { useSkillsEngine, SessionSetup, SkillsState } from './useSkillsEngine';
 import { SetupSummary } from './SetupSummary';
-import { ChecklistCard } from './ChecklistCard';
-import { VideoCandidateCollapsible } from './VideoCandidateCollapsible';
-import { VideoCandidateRow } from './VideoCandidateRow';
-import { PromptEditorBlock } from './PromptEditorBlock';
-import { ResultPreviewBlock } from './ResultPreviewBlock';
-import { TaskDetailPanel } from './TaskDetailPanel';
-
+import { AgentCard, AgentClusterCard } from './AgentCard';
+import { RightWorkspace, type RightView } from './RightWorkspace';
 import { ChatInputBar } from './ChatInputBar';
-import { Loader2, Zap, CheckCircle2, SkipForward, RefreshCw, ArrowLeft, Clapperboard, PartyPopper, Search, ListChecks, Check, ChevronRight, X, History } from 'lucide-react';
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from
-'@/components/ui/sheet';
+  Loader2, CheckCircle2, RefreshCw, ArrowLeft, PartyPopper, Search, ListChecks, Check, X, History,
+} from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 /* ─── History helpers ─── */
 interface SkillsHistoryItem {
@@ -25,108 +20,65 @@ interface SkillsHistoryItem {
   memoryEnabled: boolean;
   selectedMemoryIds: string[];
   date: string;
-  /** Full state snapshot for instant restore */
   snapshot: SkillsState;
 }
 
-const SKILLS_HISTORY_KEY = 'skills-solution-history-v2';
+const SKILLS_HISTORY_KEY = 'skills-solution-history-v3';
 
 function loadSkillsHistory(): SkillsHistoryItem[] {
   try {
     const raw = localStorage.getItem(SKILLS_HISTORY_KEY);
     return raw ? JSON.parse(raw) : [];
-  } catch {return [];}
+  } catch { return []; }
 }
 
 function saveSkillsHistory(items: SkillsHistoryItem[]) {
   localStorage.setItem(SKILLS_HISTORY_KEY, JSON.stringify(items));
 }
 
-/** Derive a short summary label from the state */
 function deriveStatusLabel(snapshot: SkillsState): string {
   if (snapshot.resultVideo) return '已完成';
   if (snapshot.generatedPrompt) return '提示词已生成';
   if (snapshot.selectedVideo) return '已选择视频';
   if (snapshot.candidateVideos.length > 0) return '候选视频已生成';
-  const doneTasks = snapshot.tasks.filter((t) => t.status === 'done').length;
-  if (doneTasks > 0) return `${doneTasks}/${snapshot.tasks.length} 任务完成`;
   return '进行中';
 }
 
 export function SkillsModule() {
   const {
-    state,
-    CATEGORIES,
-    completeSetup,
-    refreshCandidates,
-    selectVideo,
-    updatePrompt,
-    confirmGenerate,
-    regenerate,
-    backToVideoSelect,
-    setActiveTaskId,
-    handleUserInput,
-    resetSession,
-    restoreState
+    state, CATEGORIES, completeSetup, refreshCandidates, selectVideo,
+    updatePrompt, confirmGenerate, regenerate, backToVideoSelect,
+    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState,
   } = useSkillsEngine();
 
   const { entries } = useMemory();
-  const memoryItems = useMemo(() => entries.map((e) => ({
+  const memoryItems = useMemo(() => entries.map(e => ({
     id: e.id,
     name: e.title,
     desc: e.content.slice(0, 60) + (e.content.length > 60 ? '...' : ''),
     tag: e.category,
-    charCount: e.content.length
+    charCount: e.content.length,
   })), [entries]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
-  // Track the active history item id so we can update its snapshot in real-time
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
-      const el = scrollRef.current;
-      el.scrollTop = el.scrollHeight;
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [state.messages.length]);
 
-  // Auto-save snapshot to active history item whenever state changes meaningfully
+  // Auto-save snapshot
   useEffect(() => {
-    if (!activeHistoryId || !state.setupCompleted) return;
-    // Only save when not processing (to avoid saving intermediate states)
-    if (state.isProcessing) return;
-
-    setHistory((prev) => {
-      const updated = prev.map((h) =>
-      h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h
-      );
+    if (!activeHistoryId || !state.setupCompleted || state.isProcessing) return;
+    setHistory(prev => {
+      const updated = prev.map(h => h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h);
       saveSkillsHistory(updated);
       return updated;
     });
   }, [activeHistoryId, state.setupCompleted, state.isProcessing, state.tasks, state.messages, state.candidateVideos, state.selectedVideo, state.generatedPrompt, state.resultVideo]);
-
-  const activeTask = state.tasks.find((t) => t.id === state.activeTaskId);
-
-  const [videoPanelOpen, setVideoPanelOpen] = useState(false);
-  const hasVideoCandidates = state.candidateVideos.length > 0;
-  const showRightPanel = activeTask || hasVideoCandidates && videoPanelOpen;
-
-  // Auto-expand the detail panel for the currently running parent task
-  useEffect(() => {
-    const runningParent = state.tasks.find((t) => t.status === 'running' && t.children.length > 0);
-    if (runningParent && runningParent.id !== state.activeTaskId) {
-      setActiveTaskId(runningParent.id);
-    }
-  }, [state.tasks, state.activeTaskId, setActiveTaskId]);
-
-  // Auto-show video panel when candidates arrive, and clear task detail
-  useEffect(() => {
-    if (hasVideoCandidates) {
-      setVideoPanelOpen(true);
-      setActiveTaskId(null);
-    }
-  }, [hasVideoCandidates, setActiveTaskId]);
 
   const addHistory = useCallback((setup: SessionSetup) => {
     const newItem: SkillsHistoryItem = {
@@ -137,7 +89,7 @@ export function SkillsModule() {
       memoryEnabled: setup.memoryEnabled,
       selectedMemoryIds: setup.selectedMemoryIds,
       date: new Date().toISOString(),
-      snapshot: { ...state } // will be updated as flow progresses
+      snapshot: { ...state },
     };
     const updated = [newItem, ...history].slice(0, 20);
     setHistory(updated);
@@ -147,7 +99,7 @@ export function SkillsModule() {
   }, [history, state]);
 
   const deleteHistory = useCallback((id: string) => {
-    const updated = history.filter((h) => h.id !== id);
+    const updated = history.filter(h => h.id !== id);
     setHistory(updated);
     saveSkillsHistory(updated);
     if (activeHistoryId === id) setActiveHistoryId(null);
@@ -161,7 +113,7 @@ export function SkillsModule() {
         memoryEnabled: memoryIds && memoryIds.length > 0 || false,
         selectedMemoryIds: memoryIds || [],
         sellingPoints: text || '',
-        category: category || '其它'
+        category: category || '其它',
       };
       addHistory(setup);
       completeSetup(setup);
@@ -171,13 +123,8 @@ export function SkillsModule() {
   };
 
   const handleRestoreHistory = (item: SkillsHistoryItem) => {
-    // Restore the full snapshot directly — no re-running
     restoreState(item.snapshot);
     setActiveHistoryId(item.id);
-  };
-
-  const handleVideoSelect = (video: CandidateVideo) => {
-    selectVideo(video);
   };
 
   const handleNewSession = () => {
@@ -185,150 +132,137 @@ export function SkillsModule() {
     setActiveHistoryId(null);
   };
 
+  const showRightPanel = state.activeRightView !== 'none';
+
+  /* ─── Render message ─── */
   const renderMessage = (msg: typeof state.messages[0]) => {
     switch (msg.type) {
-      case 'setup-summary':{
-          const setup = JSON.parse(msg.content);
-          return <SetupSummary key={msg.id} setup={setup} />;
-        }
+      case 'setup-summary': {
+        const setup = JSON.parse(msg.content);
+        return <SetupSummary key={msg.id} setup={setup} />;
+      }
+
       case 'checklist':
         return (
-          <ChecklistCard
+          <div
             key={msg.id}
-            tasks={state.tasks}
-            onTaskClick={setActiveTaskId}
-            activeTaskId={state.activeTaskId} />);
-
-      case 'task-subtask-list':{
-          const parentTask = state.tasks.find((t) => t.id === msg.content);
-          if (!parentTask || parentTask.children.length === 0) return null;
-          return (
-            <div key={msg.id} className="rounded-xl border border-border/20 bg-muted/10 overflow-hidden">
-            <button
-                onClick={() => setActiveTaskId(parentTask.id)}
-                className="w-full px-3 py-2 border-b border-border/10 flex items-center gap-2 hover:bg-muted/20 transition-colors">
-              <ListChecks className="w-3.5 h-3.5 text-foreground/50" />
-              <span className="text-xs font-medium text-foreground/70">{parentTask.title}</span>
+            onClick={() => setActiveRightView('checklist')}
+            className="rounded-xl border border-border/30 bg-background px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <ListChecks className="w-4 h-4 text-foreground/60" />
+              <span className="text-xs font-medium text-foreground">编写待办清单</span>
               <span className="text-[10px] text-muted-foreground/50 ml-auto">
-                {parentTask.children.filter((c) => c.status === 'done').length}/{parentTask.children.length}
+                {state.checklistDone.filter(Boolean).length}/{state.checklistItems.length} 完成
               </span>
-              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30" />
-            </button>
-            <div className="px-3 py-1.5">
-              {parentTask.children.map((child) =>
-                <button
-                  key={child.id}
-                  onClick={() => setActiveTaskId(parentTask.id)}
-                  className="w-full flex items-center gap-2 py-1.5 px-1 rounded-md hover:bg-muted/20 transition-colors">
-                  {child.status === 'done' ?
-                  <div className="w-4 h-4 rounded-full bg-foreground flex items-center justify-center shrink-0">
-                      <Check className="w-2.5 h-2.5 text-background" strokeWidth={2.5} />
-                    </div> :
-                  child.status === 'running' ?
-                  <Loader2 className="w-4 h-4 text-foreground animate-spin shrink-0" /> :
-                  <div className="w-4 h-4 rounded-full border border-border/30 shrink-0" />
-                  }
-                  <span className={cn(
-                    'text-xs',
-                    child.status === 'done' ? 'text-foreground/70' : 'text-muted-foreground/50'
-                  )}>{child.title}</span>
-                </button>
-                )}
             </div>
-          </div>);
-        }
-      case 'video-candidates':
+            <div className="space-y-1 pl-1">
+              {state.checklistItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <span className="text-muted-foreground/40">•</span>
+                  <span className={cn(
+                    state.checklistDone[i] ? 'text-foreground/60' : 'text-muted-foreground/50'
+                  )}>{item}</span>
+                  {state.checklistDone[i] && <Check className="w-3 h-3 text-foreground/40" />}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'create-agent':
         return (
-          <VideoCandidateCollapsible
-            key={msg.id}
-            videos={state.candidateVideos}
-            onShowPanel={() => {setActiveTaskId(null);setVideoPanelOpen(true);}}
-            active={!activeTask && hasVideoCandidates && videoPanelOpen} />);
+          <div key={msg.id} className="flex items-center gap-2 text-xs text-muted-foreground/60 animate-fade-in">
+            <span className="font-pixel text-[10px]">⊞</span>
+            <span>{msg.content}</span>
+          </div>
+        );
 
-
-      case 'video-gen-status':{
-          const content = msg.content;
-          let icon = null;
-          let cleanContent = content;
-          if (content.startsWith('✅')) {
-            icon = <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          } else if (content.startsWith('🎉')) {
-            icon = <PartyPopper className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          }
-          return (
-            <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed animate-fade-in">
-              {icon}
-              <span>{cleanContent}</span>
-            </div>);
-
-        }
-      case 'prompt-editor':
+      case 'read-checklist':
         return (
-          <PromptEditorBlock
+          <div
             key={msg.id}
-            prompt={state.generatedPrompt}
-            onChange={updatePrompt}
-            onConfirm={confirmGenerate}
-            onBack={() => {
-              backToVideoSelect();
-              setActiveTaskId(null);
-              setVideoPanelOpen(true);
+            onClick={() => setActiveRightView('checklist')}
+            className="flex items-center gap-2 text-xs text-muted-foreground/60 cursor-pointer hover:text-foreground/60 transition-colors animate-fade-in"
+          >
+            <ListChecks className="w-3.5 h-3.5" />
+            <span>{msg.content}</span>
+          </div>
+        );
+
+      case 'agent-cluster':
+        return (
+          <AgentClusterCard
+            key={msg.id}
+            agents={msg.agents || []}
+            onAgentClick={(agentId) => {
+              if (agentId === 'agent-01') setActiveRightView('agent-01');
+              else if (agentId === 'agent-02' || agentId === 'agent-03') setActiveRightView('agent-02-03');
+              else if (agentId === 'agent-04') setActiveRightView('agent-04');
             }}
-            memoryEnabled={state.setup.memoryEnabled}
-            disabled={state.isProcessing} />);
+          />
+        );
 
-      case 'result-preview':
-        return <ResultPreviewBlock key={msg.id} onRegenerate={regenerate} disabled={state.isProcessing} />;
+      case 'selection-confirm':
+        return (
+          <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed animate-fade-in">
+            <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
+            <span>{msg.content}</span>
+          </div>
+        );
+
+      case 'video-gen-status': {
+        const content = msg.content;
+        let icon = null;
+        let cleanContent = content;
+        if (content.startsWith('✅')) {
+          icon = <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
+          cleanContent = content.slice(2).trim();
+        } else if (content.startsWith('🎉')) {
+          icon = <PartyPopper className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
+          cleanContent = content.slice(2).trim();
+        } else if (content.startsWith('🔄')) {
+          icon = <RefreshCw className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
+          cleanContent = content.slice(2).trim();
+        }
+        return (
+          <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed animate-fade-in">
+            {icon}
+            <span>{cleanContent}</span>
+          </div>
+        );
+      }
+
       case 'text':
-      default:{
-          const content = msg.content;
-          let icon = null;
-          let cleanContent = content;
-
-          if (content.startsWith('✅')) {
-            icon = <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          } else if (content.startsWith('⏭️')) {
-            icon = <SkipForward className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />;
-            cleanContent = content.slice(3).trim();
-          } else if (content.startsWith('🔄')) {
-            icon = <RefreshCw className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          } else if (content.startsWith('🔙')) {
-            icon = <ArrowLeft className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          } else if (content.startsWith('🎬')) {
-            icon = <Clapperboard className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          } else if (content.startsWith('🎉')) {
-            icon = <PartyPopper className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          } else if (content.startsWith('🔍') || content.startsWith('🎯')) {
-            icon = <Search className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
-            cleanContent = content.slice(2).trim();
-          } else if (content.startsWith('📋') || content.startsWith('🌐') || content.startsWith('✏️')) {
-            cleanContent = content.slice(2).trim();
-          }
-
-          return (
-            <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed">
+      default: {
+        const content = msg.content;
+        let icon = null;
+        let cleanContent = content;
+        if (content.startsWith('✅')) {
+          icon = <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" />;
+          cleanContent = content.slice(2).trim();
+        } else if (content.startsWith('🔍') || content.startsWith('🎯')) {
+          icon = <Search className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
+          cleanContent = content.slice(2).trim();
+        }
+        return (
+          <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed">
             {icon}
             <span className={cn(
-                msg.isStreaming && 'after:inline-block after:w-1 after:h-3.5 after:bg-foreground/50 after:ml-0.5 after:animate-pulse after:rounded-sm'
-              )}>
+              msg.isStreaming && 'after:inline-block after:w-1 after:h-3.5 after:bg-foreground/50 after:ml-0.5 after:animate-pulse after:rounded-sm'
+            )}>
               {cleanContent}
             </span>
-          </div>);
-        }
+          </div>
+        );
+      }
     }
   };
 
   const isEmpty = !state.setupCompleted && state.messages.length === 0;
 
-  const historySheet =
-  <Sheet>
+  const historySheet = (
+    <Sheet>
       <SheetTrigger asChild>
         <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
           <History className="w-3.5 h-3.5" />
@@ -340,20 +274,18 @@ export function SkillsModule() {
           <SheetTitle className="text-base font-medium">历史记录</SheetTitle>
         </SheetHeader>
         <div className="mt-4 space-y-3 overflow-y-auto max-h-[calc(100vh-6rem)]">
-          {history.map((item) => {
-          const statusLabel = deriveStatusLabel(item.snapshot);
-          const isActive = activeHistoryId === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleRestoreHistory(item)}
-              className={cn(
-                "w-full text-left p-3 rounded-xl border transition-all group relative",
-                isActive ?
-                "border-primary/40 bg-primary/5" :
-                "border-border/30 hover:border-border/60 hover:bg-muted/20"
-              )}>
-              
+          {history.map(item => {
+            const statusLabel = deriveStatusLabel(item.snapshot);
+            const isActive = activeHistoryId === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleRestoreHistory(item)}
+                className={cn(
+                  "w-full text-left p-3 rounded-xl border transition-all group relative",
+                  isActive ? "border-primary/40 bg-primary/5" : "border-border/30 hover:border-border/60 hover:bg-muted/20"
+                )}
+              >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-foreground">{item.category}</span>
                   <span className="text-[10px] text-muted-foreground">
@@ -363,50 +295,46 @@ export function SkillsModule() {
                 <p className="text-xs text-muted-foreground truncate">{item.sellingPoints}</p>
                 <div className="flex gap-1 mt-1.5 flex-wrap">
                   <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-full",
-                  statusLabel === '已完成' ?
-                  "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400" :
-                  "bg-muted/40 text-muted-foreground"
-                )}>
+                    "text-[10px] px-1.5 py-0.5 rounded-full",
+                    statusLabel === '已完成' ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400" : "bg-muted/40 text-muted-foreground"
+                  )}>
                     {statusLabel}
                   </span>
-                  {item.memoryEnabled &&
-                <span className="text-[10px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full">记忆库</span>
-                }
-                  {item.image &&
-                <span className="text-[10px] bg-muted/40 text-muted-foreground px-1.5 py-0.5 rounded-full">含图片</span>
-                }
                 </div>
                 <button
-                onClick={(e) => {e.stopPropagation();deleteHistory(item.id);}}
-                className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-muted/40 transition-all">
+                  onClick={(e) => { e.stopPropagation(); deleteHistory(item.id); }}
+                  className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-muted/40 transition-all"
+                >
                   <X className="w-3.5 h-3.5 text-muted-foreground/50" />
                 </button>
-              </button>);
-
-        })}
-          {history.length === 0 &&
-        <p className="text-sm text-muted-foreground text-center py-8">暂无历史记录</p>
-        }
+              </button>
+            );
+          })}
+          {history.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-8">暂无历史记录</p>
+          )}
         </div>
       </SheetContent>
-    </Sheet>;
+    </Sheet>
+  );
 
+  // Get task refs for right panel
+  const taskCrawl = state.tasks.find(t => t.id === 'task-crawl');
+  const taskMemory = state.tasks.find(t => t.id === 'task-memory');
+  const taskPrompt = state.tasks.find(t => t.id === 'task-reverse-prompt');
+  const taskGenVideo = state.tasks.find(t => t.id === 'task-generate-video');
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col bg-background">
       <div className="flex-1 flex overflow-hidden">
-        {/* Conversation column */}
+        {/* Left: Conversation column */}
         <div className={cn(
           'flex flex-col transition-all duration-300',
           showRightPanel ? 'w-1/2 border-r border-border/20' : 'w-full'
         )}>
           {isEmpty ? (
-          /* Centered composer layout */
-          <div className="relative min-h-full flex flex-col items-center p-6 md:p-8 pt-[80px]">
-              <div className="absolute top-4 right-4 z-20">
-                {historySheet}
-              </div>
+            <div className="relative min-h-full flex flex-col items-center p-6 md:p-8 pt-[80px]">
+              <div className="absolute top-4 right-4 z-20">{historySheet}</div>
               <div className="w-full max-w-2xl animate-fade-in my-[120px]">
                 <div className="text-center mb-10">
                   <h1 className="text-2xl md:text-3xl font-normal text-foreground tracking-tight">
@@ -416,30 +344,22 @@ export function SkillsModule() {
                     上传商品图开始对话，或直接输入问题
                   </p>
                 </div>
-
                 <div className="rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm shadow-sm">
-                  <ChatInputBar
-                  onSend={handleSend}
-                  disabled={state.isProcessing}
-                  memoryItems={memoryItems} />
+                  <ChatInputBar onSend={handleSend} disabled={state.isProcessing} memoryItems={memoryItems} />
                 </div>
               </div>
-            </div>) :
-
-          <>
-              {/* Top bar with history + new session */}
+            </div>
+          ) : (
+            <>
+              {/* Top bar */}
               <div className="px-4 py-2 border-b border-border/10 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleNewSession}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
+                  <button onClick={handleNewSession} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>返回</span>
                   </button>
                 </div>
-                <button
-                  onClick={handleNewSession}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
+                <button onClick={handleNewSession} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>新会话</span>
                 </button>
@@ -450,57 +370,60 @@ export function SkillsModule() {
                 <div className="px-6 py-6">
                   <div className="max-w-3xl mx-auto space-y-4">
                     {state.messages.map(renderMessage)}
-                    {state.isProcessing && state.messages.length > 0 &&
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
+                    {state.isProcessing && state.messages.length > 0 && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
                         <Loader2 className="w-3 h-3 animate-spin" />
                         <span>正在处理中...</span>
                       </div>
-                  }
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Chat input */}
-              <ChatInputBar
-              onSend={handleSend}
-              disabled={state.isProcessing}
-              memoryItems={memoryItems} />
+              <ChatInputBar onSend={handleSend} disabled={state.isProcessing} memoryItems={memoryItems} />
             </>
-          }
+          )}
         </div>
 
-        {/* Right panel: Task detail or Video list */}
-        {showRightPanel &&
-        <div className="w-1/2 animate-in slide-in-from-right-4 duration-300">
-            {activeTask ?
-          <TaskDetailPanel
-            task={activeTask}
-            onClose={() => {setActiveTaskId(null);setVideoPanelOpen(false);}}
-            selectedVideoId={state.selectedVideo?.id}
-            onVideoSelect={handleVideoSelect} /> :
-
-          hasVideoCandidates ?
-          <div className="h-full flex flex-col bg-background">
-                <div className="px-5 py-4 border-b border-border/20 flex items-center justify-between shrink-0">
-                  <span className="text-sm font-medium text-foreground">爆款参考视频</span>
-                  <button
-                onClick={() => setVideoPanelOpen(false)}
-                className="p-1 rounded-md hover:bg-muted/30 transition-colors">
-                
-                    <X className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-5">
-                  <VideoCandidateRow
-                videos={state.candidateVideos}
-                onSelect={handleVideoSelect}
-                selectedVideoId={state.selectedVideo?.id}
-                disabled={!!state.selectedVideo} />
-                </div>
-              </div> :
-          null}
+        {/* Right: Workspace panel */}
+        {showRightPanel && (
+          <div className="w-1/2 animate-in slide-in-from-right-4 duration-300">
+            <RightWorkspace
+              view={state.activeRightView as RightView}
+              onClose={() => setActiveRightView('none')}
+              // Checklist
+              checklistItems={state.checklistItems}
+              checklistDone={state.checklistDone}
+              // Agent 01
+              agent01={state.agents.find(a => a.id === 'agent-01')}
+              agent01Task={taskCrawl}
+              candidateVideos={state.candidateVideos}
+              selectedVideoId={state.selectedVideo?.id}
+              onVideoSelect={selectVideo}
+              videoSelectDisabled={!!state.selectedVideo}
+              // Agent 02/03
+              agent02={state.agents.find(a => a.id === 'agent-02')}
+              agent03={state.agents.find(a => a.id === 'agent-03')}
+              agent02Task={taskMemory}
+              agent03Task={taskPrompt}
+              generatedPrompt={state.generatedPrompt}
+              onPromptChange={updatePrompt}
+              onPromptConfirm={confirmGenerate}
+              onBackToVideoSelect={() => {
+                backToVideoSelect();
+              }}
+              memoryEnabled={state.setup.memoryEnabled}
+              isProcessing={state.isProcessing}
+              // Agent 04
+              agent04={state.agents.find(a => a.id === 'agent-04')}
+              agent04Task={taskGenVideo}
+              resultVideo={state.resultVideo}
+              onRegenerate={regenerate}
+            />
           </div>
-        }
+        )}
       </div>
-    </div>);
+    </div>
+  );
 }

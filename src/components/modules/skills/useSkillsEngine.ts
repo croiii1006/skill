@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import type { AgentInfo } from './AgentCard';
 
 export type TaskStatus = 'queued' | 'running' | 'done' | 'skipped';
 
@@ -21,7 +22,7 @@ export interface SkillTask {
   moduleChain?: string[];
   expert?: {
     name: string;
-    avatar: string; // import path key
+    avatar: string;
     role: string;
   };
 }
@@ -55,11 +56,28 @@ export interface SessionSetup {
 
 export type UIMode = 'single' | 'split';
 
+export type StreamMessageType =
+  | 'text'
+  | 'setup-summary'
+  | 'checklist'
+  | 'agent-cluster'
+  | 'agent-status'
+  | 'create-agent'
+  | 'read-checklist'
+  | 'video-candidates'
+  | 'prompt-editor'
+  | 'result-preview'
+  | 'video-gen-status'
+  | 'selection-confirm'
+  | 'final-result';
+
 export interface StreamMessage {
   id: string;
-  type: 'text' | 'setup-summary' | 'checklist' | 'video-candidates' | 'prompt-editor' | 'result-preview' | 'task-subtask-list' | 'video-gen-status';
+  type: StreamMessageType;
   content: string;
   isStreaming?: boolean;
+  /** For agent-cluster messages */
+  agents?: AgentInfo[];
 }
 
 export interface SkillsState {
@@ -75,15 +93,14 @@ export interface SkillsState {
   generatedPrompt: string;
   resultVideo: { url: string; cover: string } | null;
   isProcessing: boolean;
+  /** Agents state */
+  agents: AgentInfo[];
+  /** Active right panel view */
+  activeRightView: 'none' | 'checklist' | 'agent-01' | 'agent-02-03' | 'agent-04';
+  /** Checklist items */
+  checklistItems: string[];
+  checklistDone: boolean[];
 }
-
-const MEMORY_ITEMS = [
-  { id: 'mem-1', name: '品牌视觉资产库', desc: '包含品牌色、字体、Logo 使用规范', tag: '视觉' },
-  { id: 'mem-2', name: '爆款文案模板', desc: '历史高转化文案合集', tag: '文案' },
-  { id: 'mem-3', name: '竞品分析报告', desc: '近30天竞品投放素材分析', tag: '竞品' },
-  { id: 'mem-4', name: '用户画像数据', desc: '目标人群兴趣与行为标签', tag: '用户' },
-  { id: 'mem-5', name: '产品卖点文档', desc: '核心功能与差异化卖点', tag: '产品' },
-];
 
 const CATEGORIES = ['美妆个护', '3C数码', '服饰鞋包', '家居日用', '食品饮料', '母婴用品', '其它'];
 
@@ -99,18 +116,18 @@ function now() {
   return new Date().toLocaleTimeString('zh-CN', { hour12: false });
 }
 
+const initialAgents: AgentInfo[] = [
+  { id: 'agent-01', number: '01', name: '爆款专家', role: 'TK爆款视频匹配', avatar: 'search', statusText: '等待启动', progress: 0, status: 'idle' },
+  { id: 'agent-02', number: '02', name: '记忆库专家', role: '记忆库特征向量构建', avatar: 'memory', statusText: '等待启动', progress: 0, status: 'idle' },
+  { id: 'agent-03', number: '03', name: 'Prompt专家', role: 'TikTok爆款视频Prompt设计', avatar: 'strategist', statusText: '等待启动', progress: 0, status: 'idle' },
+  { id: 'agent-04', number: '04', name: '视频专家', role: '视频生成与合成', avatar: 'video', statusText: '等待启动', progress: 0, status: 'idle' },
+];
+
 export function useSkillsEngine() {
   const [state, setState] = useState<SkillsState>({
     sessionId: `session-${Date.now()}`,
     setupCompleted: false,
-    setup: {
-      image: null,
-      imageName: null,
-      memoryEnabled: true,
-      selectedMemoryIds: [],
-      sellingPoints: '',
-      category: '',
-    },
+    setup: { image: null, imageName: null, memoryEnabled: true, selectedMemoryIds: [], sellingPoints: '', category: '' },
     uiMode: 'single',
     activeTaskId: null,
     tasks: [],
@@ -120,6 +137,10 @@ export function useSkillsEngine() {
     generatedPrompt: '',
     resultVideo: null,
     isProcessing: false,
+    agents: [...initialAgents],
+    activeRightView: 'none',
+    checklistItems: [],
+    checklistDone: [],
   });
 
   const streamTimers = useRef<number[]>([]);
@@ -129,20 +150,11 @@ export function useSkillsEngine() {
     streamTimers.current = [];
   };
 
+  // Helpers
   const addMessage = useCallback((msg: Omit<StreamMessage, 'id'>) => {
     const id = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    setState(prev => ({
-      ...prev,
-      messages: [...prev.messages, { ...msg, id }],
-    }));
+    setState(prev => ({ ...prev, messages: [...prev.messages, { ...msg, id }] }));
     return id;
-  }, []);
-
-  const updateMessage = useCallback((id: string, updates: Partial<StreamMessage>) => {
-    setState(prev => ({
-      ...prev,
-      messages: prev.messages.map(m => m.id === id ? { ...m, ...updates } : m),
-    }));
   }, []);
 
   const streamText = useCallback((text: string, onDone?: () => void) => {
@@ -151,7 +163,6 @@ export function useSkillsEngine() {
       ...prev,
       messages: [...prev.messages, { id: msgId, type: 'text', content: '', isStreaming: true }],
     }));
-
     const chars = text.split('');
     let i = 0;
     const tick = () => {
@@ -160,24 +171,27 @@ export function useSkillsEngine() {
         i += 3;
         setState(prev => ({
           ...prev,
-          messages: prev.messages.map(m =>
-            m.id === msgId ? { ...m, content: m.content + batch } : m
-          ),
+          messages: prev.messages.map(m => m.id === msgId ? { ...m, content: m.content + batch } : m),
         }));
         const timer = window.setTimeout(tick, 30 + Math.random() * 20);
         streamTimers.current.push(timer);
       } else {
         setState(prev => ({
           ...prev,
-          messages: prev.messages.map(m =>
-            m.id === msgId ? { ...m, isStreaming: false } : m
-          ),
+          messages: prev.messages.map(m => m.id === msgId ? { ...m, isStreaming: false } : m),
         }));
         onDone?.();
       }
     };
     tick();
     return msgId;
+  }, []);
+
+  const updateAgent = useCallback((agentId: string, updates: Partial<AgentInfo>) => {
+    setState(prev => ({
+      ...prev,
+      agents: prev.agents.map(a => a.id === agentId ? { ...a, ...updates } : a),
+    }));
   }, []);
 
   const updateTask = useCallback((taskId: string, updates: Partial<SkillTask>) => {
@@ -191,41 +205,54 @@ export function useSkillsEngine() {
     setState(prev => ({
       ...prev,
       tasks: prev.tasks.map(t =>
-        t.id === taskId
-          ? { ...t, logs: [...t.logs, { time: now(), message }] }
-          : t
+        t.id === taskId ? { ...t, logs: [...t.logs, { time: now(), message }] } : t
       ),
     }));
   }, []);
 
-  // Flow 0: Complete setup
-  const completeSetup = useCallback((setup: SessionSetup) => {
-    setState(prev => ({ ...prev, setup, setupCompleted: true, isProcessing: true }));
-
-    // Add setup summary message
-    const summaryId = `msg-summary-${Date.now()}`;
+  const updateChild = useCallback((parentId: string, childId: string, updates: Partial<SkillTask>) => {
     setState(prev => ({
       ...prev,
-      messages: [
-        ...prev.messages,
-        { id: summaryId, type: 'setup-summary', content: JSON.stringify(setup) },
-      ],
+      tasks: prev.tasks.map(t => t.id === parentId ? {
+        ...t,
+        children: t.children.map(c => c.id === childId ? { ...c, ...updates } : c),
+      } : t),
     }));
+  }, []);
 
-    // Create initial tasks — merge generate-list into crawl
+  // Delay helpers
+  const randDelay = () => new Promise<void>(r => { const t = window.setTimeout(r, 1500 + Math.random() * 2000); streamTimers.current.push(t); });
+  const subDelay = () => new Promise<void>(r => { const t = window.setTimeout(r, 1000 + Math.random() * 1000); streamTimers.current.push(t); });
+  const backendDelay = () => new Promise<void>(r => { const t = window.setTimeout(r, 3000 + Math.random() * 3000); streamTimers.current.push(t); });
+  const pause = (ms = 600) => new Promise<void>(r => { const t = window.setTimeout(r, ms); streamTimers.current.push(t); });
+
+  // Update agent in cluster messages (to keep them in sync for rendering)
+  const updateAgentInMessages = useCallback((agentId: string, updates: Partial<AgentInfo>) => {
+    setState(prev => ({
+      ...prev,
+      messages: prev.messages.map(m => {
+        if (m.type === 'agent-cluster' && m.agents) {
+          return {
+            ...m,
+            agents: m.agents.map(a => a.id === agentId ? { ...a, ...updates } : a),
+          };
+        }
+        return m;
+      }),
+    }));
+  }, []);
+
+  // ─── Phase 0: Complete setup ───
+  const completeSetup = useCallback((setup: SessionSetup) => {
+    const checklistItems = [
+      '匹配对标品类和卖点的爆款视频列表',
+      '构建记忆库特征向量',
+      '设计专属TikTok爆款视频Prompt',
+      '生成专属爆款视频',
+    ];
+
+    // Create tasks
     const tasks: SkillTask[] = [
-      {
-        id: 'task-memory', title: '调用记忆库',
-        status: setup.memoryEnabled ? 'queued' : 'skipped',
-        progress: 0, logs: [], children: [
-          { id: 'task-memory-connect', title: '连接记忆库', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '记忆专家', avatar: 'memory', role: '记忆管理专家' } },
-          { id: 'task-memory-retrieve', title: '检索相关记忆', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '检索专家', avatar: 'search', role: '信息检索专家' } },
-          { id: 'task-memory-context', title: '构建上下文向量', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '数据专家', avatar: 'analyst', role: '数据分析专家' } },
-        ],
-        moduleChain: ['MemoryRetriever', 'VectorDB', 'ContextBuilder'],
-        input: setup.memoryEnabled ? `记忆库: ${setup.selectedMemoryIds.join(', ')}` : '已跳过',
-        expert: { name: '记忆库', avatar: 'memory', role: '' },
-      },
       {
         id: 'task-crawl', title: '抓取同品类 TK 爆款视频',
         status: 'queued', progress: 0, logs: [], children: [
@@ -233,598 +260,376 @@ export function useSkillsEngine() {
           { id: 'task-crawl-analyze', title: '分析卖点匹配度', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '数据专家', avatar: 'analyst', role: '数据分析专家' } },
           { id: 'task-crawl-rank', title: '排序生成 Top 20', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '策略专家', avatar: 'strategist', role: '策略专家' } },
           { id: 'task-crawl-cover', title: '提取视频封面', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '视频专家', avatar: 'video', role: '视频制作专家' } },
-          { id: 'task-crawl-meta', title: '提取元数据', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '数据专家', avatar: 'analyst', role: '数据分析专家' } },
         ],
-        moduleChain: ['TikTokCrawler', 'ContentAnalyzer', 'RankingEngine', 'ThumbnailGen', 'MetadataExtractor'],
+        moduleChain: ['TikTokCrawler', 'ContentAnalyzer', 'RankingEngine', 'ThumbnailGen'],
         input: `品类: ${setup.category}, 卖点: ${setup.sellingPoints.slice(0, 50)}`,
         expert: { name: '爬虫', avatar: 'crawler', role: '' },
       },
       {
-        id: 'task-wait-select', title: '等待用户选择参考视频',
-        status: 'queued', progress: 0, logs: [], children: [],
-        expert: { name: '策略', avatar: 'strategist', role: '' },
+        id: 'task-memory', title: '构建记忆库特征向量',
+        status: setup.memoryEnabled ? 'queued' : 'skipped',
+        progress: 0, logs: [], children: [
+          { id: 'task-memory-connect', title: '连接记忆库', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '记忆专家', avatar: 'memory', role: '记忆管理专家' } },
+          { id: 'task-memory-retrieve', title: '检索相关记忆', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '检索专家', avatar: 'search', role: '信息检索专家' } },
+          { id: 'task-memory-context', title: '构建上下文向量', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '数据专家', avatar: 'analyst', role: '数据分析专家' } },
+        ],
+        expert: { name: '记忆库', avatar: 'memory', role: '' },
       },
       {
-        id: 'task-reverse-prompt', title: '反推提示词（Reverse Prompt）',
+        id: 'task-reverse-prompt', title: '设计专属Prompt',
         status: 'queued', progress: 0, logs: [], children: [
           { id: 'rp-frame', title: '视频帧分析', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '视频专家', avatar: 'video', role: '视频制作专家' } },
           { id: 'rp-style', title: '风格特征提取', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '设计专家', avatar: 'designer', role: '创意制作专家' } },
           { id: 'rp-prompt', title: '提示词生成', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '策略专家', avatar: 'strategist', role: '策略专家' } },
         ],
-        moduleChain: ['VideoAnalyzer', 'PromptExtractor', 'StyleMatcher'],
-        expert: { name: '提示词', avatar: 'video', role: '' },
+        expert: { name: '提示词', avatar: 'strategist', role: '' },
       },
       {
-        id: 'task-generate-video', title: '爆款视频正在生成',
+        id: 'task-generate-video', title: '生成爆款视频',
         status: 'queued', progress: 0, logs: [], children: [
-          { id: 'sub-scene', title: '设计专家正在渲染场景', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '设计专家', avatar: 'designer', role: '创意制作专家' } },
+          { id: 'sub-scene', title: '渲染场景', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '设计专家', avatar: 'designer', role: '创意制作专家' } },
           { id: 'sub-audio', title: '音频合成', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '音频专家', avatar: 'audio', role: '音频制作专家' } },
           { id: 'sub-compose', title: '视频合成', status: 'queued', progress: 0, logs: [], children: [], expert: { name: '视频专家', avatar: 'video', role: '视频制作专家' } },
         ],
-        moduleChain: ['SceneRenderer', 'AudioSynthesizer', 'VideoComposer', 'QualityChecker'],
-        expert: { name: '视频', avatar: 'designer', role: '' },
+        expert: { name: '视频', avatar: 'video', role: '' },
       },
     ];
 
-    // Add checklist message
-    const checklistId = `msg-checklist-${Date.now()}`;
-    // Persistent status message that overwrites throughout the flow
-    const statusMsgId = `msg-status-${Date.now()}`;
-
-    // Helper to update a child task
-    const updateChild = (parentId: string, childId: string, updates: Partial<SkillTask>) => {
-      setState(prev => ({
-        ...prev,
-        tasks: prev.tasks.map(t => t.id === parentId ? {
-          ...t,
-          children: t.children.map(c => c.id === childId ? { ...c, ...updates } : c),
-        } : t),
-      }));
-    };
-
-    // Delay helpers
-    const randDelay = () => {
-      const ms = 1500 + Math.random() * 2000;
-      return new Promise<void>(r => {
-        const t = window.setTimeout(r, ms);
-        streamTimers.current.push(t);
-      });
-    };
-    const subDelay = () => {
-      const ms = 1000 + Math.random() * 1000;
-      return new Promise<void>(r => {
-        const t = window.setTimeout(r, ms);
-        streamTimers.current.push(t);
-      });
-    };
-    const backendDelay = () => {
-      const ms = 3000 + Math.random() * 3000;
-      return new Promise<void>(r => {
-        const t = window.setTimeout(r, ms);
-        streamTimers.current.push(t);
-      });
-    };
-    const pause = (ms = 600) => new Promise<void>(r => {
-      const t = window.setTimeout(r, ms);
-      streamTimers.current.push(t);
-    });
-
-    // Helper: set status (always moves to end of messages)
-    const setStatus = (content: string) => {
-      setState(prev => {
-        const filtered = prev.messages.filter(m => m.id !== statusMsgId);
-        return { ...prev, messages: [...filtered, { id: statusMsgId, type: 'video-gen-status' as const, content }] };
-      });
-    };
-
-    const submittedAt = now();
-
-    (async () => {
-      // ─── Phase 0: Build checklist one by one ───
-      addMessage({ type: 'video-gen-status', content: '正在为您编写待办清单...' });
-      await pause(800);
-
-      // Show checklist container first (empty)
-      setState(prev => ({
-        ...prev,
-        messages: [...prev.messages, { id: checklistId, type: 'checklist', content: '' }],
-      }));
-
-      // Add tasks one by one with delay
-      for (let i = 0; i < tasks.length; i++) {
-        setState(prev => ({
-          ...prev,
-          tasks: [...prev.tasks, tasks[i]],
-        }));
-        await pause(400);
-      }
-      await pause(400);
-
-      // ─── Task 1: Memory ───
-      if (setup.memoryEnabled) {
-        // Permanent intro message
-        addMessage({ type: 'video-gen-status', content: '正在为您调用记忆库.....' });
-
-        // Show subtask list
-        setState(prev => ({
-          ...prev,
-          messages: [...prev.messages, { id: `msg-subtasks-memory-${Date.now()}`, type: 'task-subtask-list' as const, content: 'task-memory' }],
-        }));
-
-        updateTask('task-memory', { status: 'running', startAt: submittedAt });
-
-        // Sub 1: Connect
-        await pause(400);
-        updateChild('task-memory', 'task-memory-connect', { status: 'running', title: '记忆专家正在连接记忆库' });
-        addTaskLog('task-memory', '记忆专家正在连接记忆库...');
-        await subDelay();
-        updateChild('task-memory', 'task-memory-connect', { status: 'done', progress: 100, title: '记忆专家完成连接记忆库' });
-        addTaskLog('task-memory', '记忆专家完成连接记忆库 → 已建立安全连接');
-
-        // Sub 2: Retrieve
-        updateChild('task-memory', 'task-memory-retrieve', { status: 'running', title: '检索专家正在检索相关记忆' });
-        addTaskLog('task-memory', '检索专家正在检索相关记忆...');
-        await subDelay();
-        const memoryCount = setup.selectedMemoryIds.length || 4;
-        updateChild('task-memory', 'task-memory-retrieve', { status: 'done', progress: 100, title: '检索专家完成检索相关记忆' });
-        addTaskLog('task-memory', `检索专家完成检索相关记忆 → 命中 ${memoryCount} 条相关记忆`);
-
-        // Sub 3: Context
-        updateChild('task-memory', 'task-memory-context', { status: 'running', title: '数据专家正在构建上下文向量' });
-        addTaskLog('task-memory', '数据专家正在构建上下文向量...');
-        await subDelay();
-        updateChild('task-memory', 'task-memory-context', { status: 'done', progress: 100, title: '数据专家完成构建上下文向量' });
-        addTaskLog('task-memory', '数据专家完成构建上下文向量 → 生成 512 维特征向量');
-
-        const memEndAt = now();
-        updateTask('task-memory', { status: 'done', progress: 100, endAt: memEndAt, output: `已检索 ${memoryCount} 条记忆，构建上下文完成` });
-        // Permanent completion message
-        addMessage({ type: 'video-gen-status', content: `✅ 我已经完成了记忆库调用，共检索到 ${memoryCount} 条相关记忆并构建了上下文。现在让我为你抓取同品类的 TikTok 爆款视频。` });
-        await pause(800);
-      } else {
-        addMessage({ type: 'video-gen-status', content: '⏭️ 记忆库已关闭，跳过此步骤。现在让我为你抓取同品类的 TikTok 爆款视频。' });
-        updateTask('task-memory', { status: 'skipped', endAt: now() });
-        await pause(800);
-      }
-
-      // ─── Task 2: Crawl (merged with generate-list) ───
-      const crawlStartAt = now();
-      updateTask('task-crawl', { status: 'running', startAt: crawlStartAt });
-      addTaskLog('task-crawl', '爬虫专家启动 TikTok 爬虫...');
-
-      // Show crawl subtask list
-      setState(prev => ({
-        ...prev,
-        messages: [...prev.messages, { id: `msg-subtasks-crawl-${Date.now()}`, type: 'task-subtask-list' as const, content: 'task-crawl' }],
-      }));
-
-      // Sub 1: Spider — backend dependent
-      updateChild('task-crawl', 'task-crawl-spider', { status: 'running', title: '爬虫专家正在启动 TikTok 爬虫' });
-      
-      await backendDelay();
-      updateChild('task-crawl', 'task-crawl-spider', { status: 'done', progress: 100, title: '爬虫专家完成启动 TikTok 爬虫' });
-      addTaskLog('task-crawl', '爬虫专家完成抓取 → 共获取 142 条视频数据');
-      
-
-      // Sub 2: Analyze — backend dependent
-      updateChild('task-crawl', 'task-crawl-analyze', { status: 'running', title: '数据专家正在分析卖点匹配度' });
-      addTaskLog('task-crawl', '数据专家正在分析卖点匹配度...');
-      await backendDelay();
-      updateChild('task-crawl', 'task-crawl-analyze', { status: 'done', progress: 100, title: '数据专家完成分析卖点匹配度' });
-      addTaskLog('task-crawl', '数据专家完成分析 → 平均匹配度 73.2%，高匹配 28 条');
-      
-
-      // Sub 3: Rank — fixed step
-      updateChild('task-crawl', 'task-crawl-rank', { status: 'running', title: '策略专家正在排序生成 Top 20' });
-      addTaskLog('task-crawl', '策略专家正在按匹配度排序...');
-      await randDelay();
-      updateChild('task-crawl', 'task-crawl-rank', { status: 'done', progress: 100, title: '策略专家完成排序生成 Top 20' });
-      addTaskLog('task-crawl', '策略专家完成排序 → Top 20 候选已生成');
-      
-
-      // Sub 4: Cover — fixed step
-      updateChild('task-crawl', 'task-crawl-cover', { status: 'running', title: '视频专家正在提取视频封面' });
-      addTaskLog('task-crawl', '视频专家正在提取视频封面...');
-      await randDelay();
-      updateChild('task-crawl', 'task-crawl-cover', { status: 'done', progress: 100, title: '视频专家完成提取视频封面' });
-      addTaskLog('task-crawl', '视频专家完成封面提取 → 20 张高清封面已缓存');
-      
-
-      // Sub 5: Meta — fixed step
-      updateChild('task-crawl', 'task-crawl-meta', { status: 'running', title: '数据专家正在提取元数据' });
-      addTaskLog('task-crawl', '数据专家正在提取元数据...');
-      await subDelay();
-      updateChild('task-crawl', 'task-crawl-meta', { status: 'done', progress: 100, title: '数据专家完成提取元数据' });
-      addTaskLog('task-crawl', '数据专家完成元数据提取 → 含播放量、点赞、评论、转发等维度');
-
-      updateTask('task-crawl', { status: 'done', progress: 100, endAt: now(), output: '抓取 142 条，Top 20 已排序' });
-      setStatus('✅ 我已经完成了爆款视频抓取，从 142 条视频中筛选出 Top 20。现在让我为你生成候选视频预览列表。');
-      await pause(1500);
-
-      addMessage({ type: 'video-gen-status', content: '✅ 我已经完成了候选视频预览列表的生成。现在请你从以下视频中选择一条作为复刻参考：' });
-
-      // Show video candidates
-      const videos = mockVideos();
-      setState(prev => ({
-        ...prev,
-        candidateVideos: videos,
-        messages: [
-          ...prev.messages,
-          { id: `msg-videos-${Date.now()}`, type: 'video-candidates', content: '' },
-        ],
-      }));
-
-      // Task 3: Wait for user
-      updateTask('task-wait-select', { status: 'running', startAt: now() });
-      addTaskLog('task-wait-select', '等待用户选择参考视频...');
-
-      setState(prev => ({ ...prev, isProcessing: false }));
-    })();
-  }, [streamText, updateTask, addTaskLog]);
-
-  // Refresh candidates
-  const refreshCandidates = useCallback(() => {
-    setState(prev => ({ ...prev, isProcessing: true }));
-    const newVideos = mockVideos();
-    
-    // Add sub-task
-    const subTaskId = `task-refresh-${Date.now()}`;
     setState(prev => ({
       ...prev,
-      tasks: [...prev.tasks, {
-        id: subTaskId, title: '已刷新一批候选视频',
-        status: 'running', progress: 50, logs: [{ time: now(), message: '正在刷新候选集...' }],
-        children: [], startAt: now(),
-      }],
+      setup,
+      setupCompleted: true,
+      isProcessing: true,
+      tasks,
+      checklistItems,
+      checklistDone: [false, false, false, false],
     }));
 
-    const timer = window.setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        candidateVideos: newVideos,
-        isProcessing: false,
-        tasks: prev.tasks.map(t => t.id === subTaskId ? { ...t, status: 'done' as TaskStatus, progress: 100, endAt: now(), logs: [...t.logs, { time: now(), message: '候选集已更新' }] } : t),
-      }));
-      streamText('🔄 已更新候选视频列表，请重新选择。', () => {});
-    }, 1500);
-    streamTimers.current.push(timer);
-  }, [streamText]);
+    // Add setup summary
+    addMessage({ type: 'setup-summary', content: JSON.stringify(setup) });
 
-  // Select a video -> Flow C
+    (async () => {
+      // Intro text
+      streamText('现在让我为你编写专属TikTok解决方案。', async () => {
+        await pause(600);
+
+        // Show checklist
+        addMessage({ type: 'checklist', content: '' });
+        await pause(800);
+
+        // ─── Phase 1: Agent 01 - 爆款专家 ───
+        addMessage({ type: 'create-agent', content: '创建助手' });
+        await pause(400);
+
+        const agent01: AgentInfo = {
+          id: 'agent-01', number: '01', name: '爆款专家', role: 'TK爆款视频匹配',
+          avatar: 'search', status: 'running',
+          statusText: `正在为你匹配对标「${setup.category}」品类和「${setup.sellingPoints.slice(0, 20)}」卖点的爆款视频列表`,
+          progress: 10,
+        };
+
+        setState(prev => ({
+          ...prev,
+          agents: prev.agents.map(a => a.id === 'agent-01' ? agent01 : a),
+          activeRightView: 'agent-01',
+        }));
+
+        addMessage({ type: 'agent-cluster', content: '', agents: [agent01] });
+        await pause(400);
+
+        // Run crawl task
+        updateTask('task-crawl', { status: 'running', startAt: now() });
+        addTaskLog('task-crawl', '爆款专家启动 TikTok 爬虫...');
+
+        // Sub 1: Spider
+        updateChild('task-crawl', 'task-crawl-spider', { status: 'running', title: '爬虫专家正在启动 TikTok 爬虫' });
+        updateAgentInMessages('agent-01', { progress: 25, statusText: '正在抓取TikTok视频数据...' });
+        updateAgent('agent-01', { progress: 25, statusText: '正在抓取TikTok视频数据...' });
+        await backendDelay();
+        updateChild('task-crawl', 'task-crawl-spider', { status: 'done', progress: 100, title: '爬虫专家完成启动 TikTok 爬虫' });
+        addTaskLog('task-crawl', '爬虫专家完成抓取 → 共获取 142 条视频数据');
+
+        // Sub 2: Analyze
+        updateChild('task-crawl', 'task-crawl-analyze', { status: 'running', title: '数据专家正在分析卖点匹配度' });
+        addTaskLog('task-crawl', '数据专家正在分析卖点匹配度...');
+        updateAgentInMessages('agent-01', { progress: 50, statusText: '正在分析卖点匹配度...' });
+        updateAgent('agent-01', { progress: 50, statusText: '正在分析卖点匹配度...' });
+        await backendDelay();
+        updateChild('task-crawl', 'task-crawl-analyze', { status: 'done', progress: 100, title: '数据专家完成分析卖点匹配度' });
+        addTaskLog('task-crawl', '数据专家完成分析 → 平均匹配度 73.2%，高匹配 28 条');
+
+        // Sub 3: Rank
+        updateChild('task-crawl', 'task-crawl-rank', { status: 'running', title: '策略专家正在排序生成 Top 20' });
+        updateAgentInMessages('agent-01', { progress: 75, statusText: '正在生成 Top 20 排名...' });
+        updateAgent('agent-01', { progress: 75, statusText: '正在生成 Top 20 排名...' });
+        await randDelay();
+        updateChild('task-crawl', 'task-crawl-rank', { status: 'done', progress: 100, title: '策略专家完成排序生成 Top 20' });
+        addTaskLog('task-crawl', '策略专家完成排序 → Top 20 候选已生成');
+
+        // Sub 4: Cover
+        updateChild('task-crawl', 'task-crawl-cover', { status: 'running', title: '视频专家正在提取视频封面' });
+        updateAgentInMessages('agent-01', { progress: 90, statusText: '正在提取视频封面...' });
+        updateAgent('agent-01', { progress: 90, statusText: '正在提取视频封面...' });
+        await subDelay();
+        updateChild('task-crawl', 'task-crawl-cover', { status: 'done', progress: 100, title: '视频专家完成提取视频封面' });
+        addTaskLog('task-crawl', '视频专家完成封面提取 → 20 张高清封面已缓存');
+
+        updateTask('task-crawl', { status: 'done', progress: 100, endAt: now(), output: '抓取 142 条，Top 20 已排序' });
+        updateAgentInMessages('agent-01', { progress: 100, status: 'done', statusText: '已完成爆款视频匹配，请选择对标视频' });
+        updateAgent('agent-01', { progress: 100, status: 'done', statusText: '已完成爆款视频匹配，请选择对标视频' });
+
+        // Update checklist
+        setState(prev => ({
+          ...prev,
+          checklistDone: [true, ...prev.checklistDone.slice(1)],
+        }));
+
+        // Show video candidates
+        const videos = mockVideos();
+        setState(prev => ({
+          ...prev,
+          candidateVideos: videos,
+          isProcessing: false,
+          activeRightView: 'agent-01',
+        }));
+
+        addMessage({ type: 'video-gen-status', content: '请从右侧面板选择一条对标视频进行复刻 →' });
+      });
+    })();
+  }, [streamText, addMessage, updateTask, addTaskLog, updateChild, updateAgent, updateAgentInMessages]);
+
+  // ─── Select video → Phase 2: Agent 02 + 03 parallel ───
   const selectVideo = useCallback((video: CandidateVideo) => {
-    // Detect if this is a re-selection (reverse-prompt task was already done)
-    const isReselect = state.tasks.find(t => t.id === 'task-reverse-prompt')?.status === 'done';
-
-    // Reset reverse-prompt task and children to queued state, remove old related messages
     setState(prev => ({
       ...prev,
       selectedVideo: video,
       isProcessing: true,
-      generatedPrompt: '',
-      // Remove old reverse-prompt related messages on re-select
-      messages: isReselect
-        ? prev.messages.filter(m => {
-            // Remove "现在为你反推提示词" / "现在为你重新反推提示词"
-            if (m.type === 'video-gen-status' && m.content.includes('反推提示词') && !m.content.startsWith('✅')) return false;
-            // Remove reverse-prompt subtask list
-            if (m.type === 'task-subtask-list' && m.content === 'task-reverse-prompt') return false;
-            // Remove prompt editor
-            if (m.type === 'prompt-editor') return false;
-            // Remove the completion status for reverse prompt
-            if (m.type === 'video-gen-status' && m.content.includes('完成了提示词反推')) return false;
-            return true;
-          })
-        : prev.messages,
-      tasks: prev.tasks.map(t => {
-        if (t.id === 'task-reverse-prompt') {
-          return {
-            ...t,
-            status: 'queued' as TaskStatus,
-            progress: 0,
-            startAt: undefined,
-            endAt: undefined,
-            logs: [],
-            output: undefined,
-            children: t.children.map(c => ({
-              ...c,
-              status: 'queued' as TaskStatus,
-              progress: 0,
-              title: c.id === 'rp-frame' ? '视频帧分析' : c.id === 'rp-style' ? '风格特征提取' : '提示词生成',
-            })),
-          };
-        }
-        return t;
-      }),
     }));
-    updateTask('task-wait-select', { status: 'done', progress: 100, endAt: now(), output: `已选择: ${video.title}` });
 
-    // Persistent status message for this phase
-    const statusMsgId = `msg-select-status-${Date.now()}`;
-
-    const setStatus = (content: string) => {
-      setState(prev => {
-        const filtered = prev.messages.filter(m => m.id !== statusMsgId);
-        return { ...prev, messages: [...filtered, { id: statusMsgId, type: 'video-gen-status' as const, content }] };
-      });
-    };
-
-    setStatus(`✅ 我已经记录了你的选择「${video.title}」。`);
-
-    // Permanent message before subtask list
-    const addPermanentMsg = (content: string) => {
-      setState(prev => ({
-        ...prev,
-        messages: [...prev.messages, { id: `msg-${Date.now()}-${Math.random()}`, type: 'video-gen-status' as const, content }],
-      }));
-    };
-    addPermanentMsg(isReselect ? '现在为你重新反推提示词' : '现在为你反推提示词');
-
-    // Update existing reverse prompt task to running
-    const rpTaskId = 'task-reverse-prompt';
-    updateTask(rpTaskId, {
-      status: 'running', startAt: now(),
-      logs: [{ time: now(), message: '开始分析视频内容...' }],
-      input: `视频: ${video.title}`,
-    });
-
-    const randDelay = () => new Promise<void>(r => {
-      const t = window.setTimeout(r, 1500 + Math.random() * 2000);
-      streamTimers.current.push(t);
-    });
-    const backendDelay = () => new Promise<void>(r => {
-      const t = window.setTimeout(r, 3000 + Math.random() * 3000);
-      streamTimers.current.push(t);
-    });
-    const pause = (ms = 600) => new Promise<void>(r => {
-      const t = window.setTimeout(r, ms);
-      streamTimers.current.push(t);
-    });
-
-    const updateRPChild = (childId: string, updates: Partial<SkillTask>) => {
-      setState(prev => ({
-        ...prev,
-        tasks: prev.tasks.map(t => t.id === rpTaskId ? {
-          ...t, children: t.children.map(c => c.id === childId ? { ...c, ...updates } : c),
-        } : t),
-      }));
-    };
+    addMessage({ type: 'selection-confirm', content: `已选择「${video.title}」作为对标视频，现在为你生成专属爆款视频Prompt。` });
 
     (async () => {
-      await pause(800);
+      await pause(600);
+      addMessage({ type: 'read-checklist', content: '读取待办清单' });
+      await pause(400);
+      addMessage({ type: 'create-agent', content: '创建记忆库信息和Prompt设计专家代理' });
+      await pause(400);
 
-      // Show subtask list immediately
+      // Agent 02 + 03 cluster
+      const agent02: AgentInfo = {
+        id: 'agent-02', number: '02', name: '记忆库专家', role: '记忆库特征向量构建',
+        avatar: 'memory', status: 'running',
+        statusText: '正在为你构建记忆库特征向量',
+        progress: 10,
+      };
+      const agent03: AgentInfo = {
+        id: 'agent-03', number: '03', name: 'Prompt专家', role: 'Prompt设计',
+        avatar: 'strategist', status: 'running',
+        statusText: '正在为你设计专属TikTok爆款视频Prompt',
+        progress: 10,
+      };
+
       setState(prev => ({
         ...prev,
-        messages: [...prev.messages, { id: `msg-subtasks-rp-${Date.now()}`, type: 'task-subtask-list' as const, content: 'task-reverse-prompt' }],
+        agents: prev.agents.map(a => {
+          if (a.id === 'agent-02') return agent02;
+          if (a.id === 'agent-03') return agent03;
+          return a;
+        }),
+        activeRightView: 'agent-02-03',
       }));
 
-      // Frame analysis — fixed step
-      await pause(400);
-      updateRPChild('rp-frame', { status: 'running', title: '视频专家正在分析视频帧' });
-      
-      await randDelay();
-      updateRPChild('rp-frame', { status: 'done', progress: 100, title: '视频专家完成视频帧分析' });
-      addTaskLog(rpTaskId, '视频专家完成视频帧分析 → 提取 48 个关键帧，识别 5 个场景段');
-      
+      addMessage({ type: 'agent-cluster', content: '', agents: [agent02, agent03] });
 
-      // Style extraction — fixed step
-      updateRPChild('rp-style', { status: 'running', title: '设计专家正在提取风格特征' });
-      await randDelay();
-      updateRPChild('rp-style', { status: 'done', progress: 100, title: '设计专家完成风格特征提取' });
-      addTaskLog(rpTaskId, '设计专家完成风格特征提取 → 暖色调、近景特写、快节奏剪辑');
-      
+      // Run Agent 02 (memory) and Agent 03 (prompt) in parallel
+      const runAgent02 = async () => {
+        const setup = state.setup;
+        if (!setup.memoryEnabled) {
+          updateTask('task-memory', { status: 'skipped', endAt: now() });
+          updateAgentInMessages('agent-02', { status: 'done', progress: 100, statusText: '记忆库已关闭，已跳过' });
+          updateAgent('agent-02', { status: 'done', progress: 100, statusText: '记忆库已关闭，已跳过' });
+          return;
+        }
 
-      // Prompt generation — backend dependent
-      updateRPChild('rp-prompt', { status: 'running', title: '策略专家正在生成提示词' });
-      await backendDelay();
-      updateRPChild('rp-prompt', { status: 'done', progress: 100, title: '策略专家完成提示词生成' });
-      addTaskLog(rpTaskId, '策略专家完成提示词生成 → 包含镜头、节奏、结构等 6 个维度');
+        updateTask('task-memory', { status: 'running', startAt: now() });
+        addTaskLog('task-memory', '记忆专家正在连接记忆库...');
 
-      updateTask(rpTaskId, { status: 'done', progress: 100, endAt: now(), output: '提示词生成完成' });
+        updateChild('task-memory', 'task-memory-connect', { status: 'running', title: '记忆专家正在连接记忆库' });
+        updateAgentInMessages('agent-02', { progress: 20, statusText: '正在连接记忆库...' });
+        updateAgent('agent-02', { progress: 20, statusText: '正在连接记忆库...' });
+        await subDelay();
+        updateChild('task-memory', 'task-memory-connect', { status: 'done', progress: 100, title: '记忆专家完成连接记忆库' });
+        addTaskLog('task-memory', '记忆专家完成连接记忆库 → 已建立安全连接');
+
+        updateChild('task-memory', 'task-memory-retrieve', { status: 'running', title: '检索专家正在检索相关记忆' });
+        updateAgentInMessages('agent-02', { progress: 50, statusText: '正在检索相关记忆...' });
+        updateAgent('agent-02', { progress: 50, statusText: '正在检索相关记忆...' });
+        await subDelay();
+        const memoryCount = setup.selectedMemoryIds.length || 4;
+        updateChild('task-memory', 'task-memory-retrieve', { status: 'done', progress: 100, title: '检索专家完成检索相关记忆' });
+        addTaskLog('task-memory', `检索专家完成检索 → 命中 ${memoryCount} 条相关记忆`);
+
+        updateChild('task-memory', 'task-memory-context', { status: 'running', title: '数据专家正在构建上下文向量' });
+        updateAgentInMessages('agent-02', { progress: 80, statusText: '正在构建特征向量...' });
+        updateAgent('agent-02', { progress: 80, statusText: '正在构建特征向量...' });
+        await subDelay();
+        updateChild('task-memory', 'task-memory-context', { status: 'done', progress: 100, title: '数据专家完成构建上下文向量' });
+        addTaskLog('task-memory', '数据专家完成构建上下文向量 → 生成 512 维特征向量');
+
+        updateTask('task-memory', { status: 'done', progress: 100, endAt: now(), output: `已检索 ${memoryCount} 条记忆，构建上下文完成` });
+        updateAgentInMessages('agent-02', { status: 'done', progress: 100, statusText: `已完成，检索到 ${memoryCount} 条记忆` });
+        updateAgent('agent-02', { status: 'done', progress: 100, statusText: `已完成，检索到 ${memoryCount} 条记忆` });
+
+        setState(prev => ({
+          ...prev,
+          checklistDone: [prev.checklistDone[0], true, ...prev.checklistDone.slice(2)],
+        }));
+      };
+
+      const runAgent03 = async () => {
+        updateTask('task-reverse-prompt', { status: 'running', startAt: now(), input: `视频: ${video.title}` });
+        addTaskLog('task-reverse-prompt', '开始分析视频内容...');
+
+        updateChild('task-reverse-prompt', 'rp-frame', { status: 'running', title: '视频专家正在分析视频帧' });
+        updateAgentInMessages('agent-03', { progress: 20, statusText: '正在分析视频帧...' });
+        updateAgent('agent-03', { progress: 20, statusText: '正在分析视频帧...' });
+        await randDelay();
+        updateChild('task-reverse-prompt', 'rp-frame', { status: 'done', progress: 100, title: '视频专家完成视频帧分析' });
+        addTaskLog('task-reverse-prompt', '视频专家完成视频帧分析 → 提取 48 个关键帧');
+
+        updateChild('task-reverse-prompt', 'rp-style', { status: 'running', title: '设计专家正在提取风格特征' });
+        updateAgentInMessages('agent-03', { progress: 50, statusText: '正在提取风格特征...' });
+        updateAgent('agent-03', { progress: 50, statusText: '正在提取风格特征...' });
+        await randDelay();
+        updateChild('task-reverse-prompt', 'rp-style', { status: 'done', progress: 100, title: '设计专家完成风格特征提取' });
+        addTaskLog('task-reverse-prompt', '设计专家完成风格特征提取 → 暖色调、近景特写、快节奏剪辑');
+
+        updateChild('task-reverse-prompt', 'rp-prompt', { status: 'running', title: '策略专家正在生成提示词' });
+        updateAgentInMessages('agent-03', { progress: 80, statusText: '正在生成Prompt...' });
+        updateAgent('agent-03', { progress: 80, statusText: '正在生成Prompt...' });
+        await backendDelay();
+        updateChild('task-reverse-prompt', 'rp-prompt', { status: 'done', progress: 100, title: '策略专家完成提示词生成' });
+        addTaskLog('task-reverse-prompt', '策略专家完成提示词生成 → 包含镜头、节奏、结构等 6 个维度');
+
+        updateTask('task-reverse-prompt', { status: 'done', progress: 100, endAt: now(), output: '提示词生成完成' });
+        updateAgentInMessages('agent-03', { status: 'done', progress: 100, statusText: '已完成Prompt设计' });
+        updateAgent('agent-03', { status: 'done', progress: 100, statusText: '已完成Prompt设计' });
+
+        setState(prev => ({
+          ...prev,
+          checklistDone: [prev.checklistDone[0], prev.checklistDone[1], true, ...prev.checklistDone.slice(3)],
+        }));
+      };
+
+      await Promise.all([runAgent02(), runAgent03()]);
 
       const mockPrompt = `【爆款复刻 Prompt】\n\n镜头风格：近景特写 + 俯拍切换，暖色调滤镜\n节奏：快节奏剪辑，BGM 节拍同步\n内容结构：\n1. 开场 - 产品白底展示，旋转 360°（0-3s）\n2. 使用场景 - 手部特写展示质感（3-8s）\n3. 效果对比 - 使用前后对比（8-15s）\n4. 口播种草 - 真人出镜，口述卖点（15-25s）\n5. 结尾 CTA - 点击链接，限时优惠（25-30s）\n\n关键词：${state.setup.sellingPoints.slice(0, 30)}\n品类：${state.setup.category}\n参考来源：${video.title}`;
-
-      setStatus(isReselect ? '✅ 我已经重新完成了提示词反推。你可以编辑后点击「确认并生成」，让我为你制作复刻视频：' : '✅ 我已经完成了提示词反推。你可以编辑后点击「确认并生成」，让我为你制作复刻视频：');
-      await pause(500);
 
       setState(prev => ({
         ...prev,
         generatedPrompt: mockPrompt,
         isProcessing: false,
-        messages: [
-          ...prev.messages,
-          { id: `msg-prompt-${Date.now()}`, type: 'prompt-editor', content: mockPrompt },
-        ],
       }));
+
+      addMessage({ type: 'video-gen-status', content: '✅ Prompt已生成，请在右侧面板查看和编辑，确认后生成视频 →' });
     })();
-  }, [state.setup, state.tasks, streamText, updateTask, addTaskLog]);
+  }, [state.setup, addMessage, updateTask, addTaskLog, updateChild, updateAgent, updateAgentInMessages]);
+
+  // ─── Confirm prompt → Phase 3: Agent 04 ───
+  const confirmGenerate = useCallback(() => {
+    setState(prev => ({ ...prev, isProcessing: true }));
+
+    (async () => {
+      addMessage({ type: 'read-checklist', content: '读取待办清单' });
+      await pause(400);
+      addMessage({ type: 'create-agent', content: '创建视频生成专家代理' });
+      await pause(400);
+
+      const agent04: AgentInfo = {
+        id: 'agent-04', number: '04', name: '视频专家', role: '视频生成与合成',
+        avatar: 'video', status: 'running',
+        statusText: '正在为你生成专属爆款视频',
+        progress: 10,
+      };
+
+      setState(prev => ({
+        ...prev,
+        agents: prev.agents.map(a => a.id === 'agent-04' ? agent04 : a),
+        activeRightView: 'agent-04',
+      }));
+
+      addMessage({ type: 'agent-cluster', content: '', agents: [agent04] });
+
+      // Run video generation
+      const genTaskId = 'task-generate-video';
+      updateTask(genTaskId, { status: 'running', startAt: now() });
+      addTaskLog(genTaskId, '开始渲染视频...');
+
+      // Scene
+      updateChild(genTaskId, 'sub-scene', { status: 'running', title: '设计专家正在渲染场景' });
+      updateAgentInMessages('agent-04', { progress: 20, statusText: '正在渲染场景...' });
+      updateAgent('agent-04', { progress: 20, statusText: '正在渲染场景...' });
+      await backendDelay();
+      addTaskLog(genTaskId, '设计专家渲染场景 3/5...');
+      await pause(800);
+      updateChild(genTaskId, 'sub-scene', { status: 'done', progress: 100, title: '设计专家完成渲染场景' });
+      addTaskLog(genTaskId, '设计专家完成场景渲染 → 5 个场景段，总时长 30s');
+
+      // Audio
+      updateChild(genTaskId, 'sub-audio', { status: 'running', title: '音频专家正在合成音频' });
+      updateAgentInMessages('agent-04', { progress: 55, statusText: '正在合成音频...' });
+      updateAgent('agent-04', { progress: 55, statusText: '正在合成音频...' });
+      addTaskLog(genTaskId, '音频专家正在合成音频...');
+      await randDelay();
+      updateChild(genTaskId, 'sub-audio', { status: 'done', progress: 100, title: '音频专家完成合成音频' });
+      addTaskLog(genTaskId, '音频专家完成音频合成 → BGM 节拍同步，时长 30s');
+
+      // Compose
+      updateChild(genTaskId, 'sub-compose', { status: 'running', title: '视频专家正在合成视频' });
+      updateAgentInMessages('agent-04', { progress: 80, statusText: '正在合成最终视频...' });
+      updateAgent('agent-04', { progress: 80, statusText: '正在合成最终视频...' });
+      addTaskLog(genTaskId, '视频专家正在合成视频...');
+      await backendDelay();
+      updateChild(genTaskId, 'sub-compose', { status: 'done', progress: 100, title: '视频专家完成合成视频' });
+      addTaskLog(genTaskId, '视频专家完成视频合成 → 1080p，30s');
+      addTaskLog(genTaskId, '质量检测通过 → 画面清晰度 98%');
+
+      updateTask(genTaskId, { status: 'done', progress: 100, endAt: now(), output: '视频生成完成，时长 30s' });
+      updateAgentInMessages('agent-04', { status: 'done', progress: 100, statusText: '视频生成完成！' });
+      updateAgent('agent-04', { status: 'done', progress: 100, statusText: '视频生成完成！' });
+
+      setState(prev => ({
+        ...prev,
+        checklistDone: [true, true, true, true],
+        resultVideo: { url: '', cover: '' },
+        isProcessing: false,
+      }));
+
+      addMessage({ type: 'video-gen-status', content: '🎉 所有任务已完成！复刻视频已生成，请在右侧面板查看和下载。' });
+    })();
+  }, [addMessage, updateTask, addTaskLog, updateChild, updateAgent, updateAgentInMessages]);
 
   // Update prompt
   const updatePrompt = useCallback((prompt: string) => {
     setState(prev => ({ ...prev, generatedPrompt: prompt }));
   }, []);
 
-  // Confirm generate -> Flow D
-  const confirmGenerate = useCallback(() => {
+  // Refresh candidates
+  const refreshCandidates = useCallback(() => {
     setState(prev => ({ ...prev, isProcessing: true }));
-
-    const genTaskId = 'task-generate-video';
-    // Update existing task to running with first child running
-    updateTask(genTaskId, {
-      status: 'running', startAt: now(),
-      logs: [{ time: now(), message: '开始渲染视频...' }],
-    });
-    // Set first child to running
-    setState(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t => t.id === genTaskId ? {
-        ...t,
-        children: t.children.map((c, i) => i === 0 ? { ...c, status: 'running' } : c),
-      } : t),
-    }));
-
-    // Status message ID for replacing in place
-    const statusMsgId = `msg-gen-status-${Date.now()}`;
-
-    // Add initial status message and checklist subtask list
-    streamText('🎬 开始生成复刻视频，3 个子任务将依次执行...', () => {});
-
-    const randDelay = () => new Promise<void>(r => {
-      const t = window.setTimeout(r, 1500 + Math.random() * 2000);
-      streamTimers.current.push(t);
-    });
-    const backendDelay = () => new Promise<void>(r => {
-      const t = window.setTimeout(r, 3000 + Math.random() * 3000);
-      streamTimers.current.push(t);
-    });
-    const pause = (ms = 600) => new Promise<void>(r => {
-      const t = window.setTimeout(r, ms);
-      streamTimers.current.push(t);
-    });
-
-    const updateGenChild = (childId: string, updates: Partial<SkillTask>) => {
-      setState(prev => ({
-        ...prev,
-        tasks: prev.tasks.map(t => t.id === genTaskId ? {
-          ...t, children: t.children.map(c => c.id === childId ? { ...c, ...updates } : c),
-        } : t),
-      }));
-    };
-
-    (async () => {
-      await pause(800);
-
-      // Add subtask list for the generate task
-      setState(prev => ({
-        ...prev,
-        messages: [...prev.messages, { id: `msg-subtasks-gen-${Date.now()}`, type: 'task-subtask-list' as const, content: 'task-generate-video' }],
-      }));
-
-
-      // Scene rendering — backend dependent (video generation)
-      await backendDelay();
-      addTaskLog(genTaskId, '设计专家渲染场景 1/5...');
-      await pause(800);
-      addTaskLog(genTaskId, '设计专家渲染场景 2/5...');
-      await pause(800);
-      addTaskLog(genTaskId, '设计专家渲染场景 3/5...');
-      await pause(600);
-      updateGenChild('sub-scene', { status: 'done', progress: 100, title: '设计专家完成渲染场景' });
-      addTaskLog(genTaskId, '设计专家完成场景渲染 → 5 个场景段，总时长 30s');
-
-      // Replace status: scene done
-      updateMessage(statusMsgId, { content: '✅ 我已经完成了场景渲染。现在让我为你合成音频。' });
-
-      // Audio synthesis — fixed step
-      updateGenChild('sub-audio', { status: 'running', title: '音频专家正在合成音频' });
-      addTaskLog(genTaskId, '音频专家正在合成音频...');
-      await randDelay();
-      updateGenChild('sub-audio', { status: 'done', progress: 100, title: '音频专家完成合成音频' });
-      addTaskLog(genTaskId, '音频专家完成音频合成 → BGM 节拍同步，时长 30s');
-
-      // Replace status: audio done
-      updateMessage(statusMsgId, { content: '✅ 我已经完成了音频合成。现在让我为你进行最终的视频合成。' });
-
-      // Video compose — backend dependent
-      updateGenChild('sub-compose', { status: 'running', title: '视频专家正在合成视频' });
-      addTaskLog(genTaskId, '视频专家正在合成视频...');
-      await backendDelay();
-      updateGenChild('sub-compose', { status: 'done', progress: 100, title: '视频专家完成合成视频' });
-      addTaskLog(genTaskId, '视频专家完成视频合成 → 1080p，30s，质量检测通过');
-      addTaskLog(genTaskId, '质量检测通过 → 画面清晰度 98%，音画同步率 99.2%');
-
-      setState(prev => ({
-        ...prev,
-        tasks: prev.tasks.map(t => t.id === genTaskId ? {
-          ...t, status: 'done' as TaskStatus, progress: 100, endAt: now(),
-          output: '视频生成完成，时长 30s',
-        } : t),
-      }));
-
-      // Replace status: all done
-      updateMessage(statusMsgId, { content: '🎉 我已经完成了所有任务！复刻视频已生成，你可以预览或下载。' });
-
-      await pause(400);
-
-      setState(prev => ({
-        ...prev,
-        resultVideo: { url: '', cover: '' },
-        isProcessing: false,
-        messages: [
-          ...prev.messages,
-          { id: `msg-result-${Date.now()}`, type: 'result-preview', content: '' },
-        ],
-      }));
-    })();
-  }, [streamText, addTaskLog]);
-
-  // Regenerate: reset video generation task and result, then re-run confirmGenerate
-  const regenerate = useCallback(() => {
-    clearTimers();
-    setState(prev => ({
-      ...prev,
-      resultVideo: null,
-      isProcessing: false,
-      messages: prev.messages.filter(m =>
-        m.type !== 'result-preview' &&
-        !(m.type === 'task-subtask-list' && m.content === 'task-generate-video') &&
-        !(m.type === 'video-gen-status') &&
-        !(m.type === 'text' && (m.content.includes('开始生成复刻视频') || m.content.includes('已经完成了')))
-      ),
-      tasks: prev.tasks.map(t => t.id === 'task-generate-video' ? {
-        ...t,
-        status: 'pending' as TaskStatus,
-        progress: 0,
-        startAt: null,
-        endAt: null,
-        output: null,
-        logs: [],
-        children: t.children.map(c => ({ ...c, status: 'pending' as TaskStatus, progress: 0 })),
-      } : t),
-    }));
+    const newVideos = mockVideos();
     const timer = window.setTimeout(() => {
-      confirmGenerate();
-    }, 300);
+      setState(prev => ({
+        ...prev,
+        candidateVideos: newVideos,
+        isProcessing: false,
+      }));
+      streamText('🔄 已更新候选视频列表，请重新选择。');
+    }, 1500);
     streamTimers.current.push(timer);
-  }, [confirmGenerate]);
+  }, [streamText]);
 
-  // UI mode
-  const setUIMode = useCallback((mode: UIMode) => {
-    setState(prev => ({ ...prev, uiMode: mode }));
-  }, []);
-
-  const setActiveTaskId = useCallback((id: string | null) => {
-    setState(prev => ({
-      ...prev,
-      activeTaskId: id,
-      uiMode: id ? 'split' : 'single',
-    }));
-  }, []);
-
-  // Handle user chat input
-  const handleUserInput = useCallback((text: string) => {
-    // Add user message
-    setState(prev => ({
-      ...prev,
-      messages: [...prev.messages, { id: `msg-user-${Date.now()}`, type: 'text', content: `👤 ${text}` }],
-    }));
-
-    const lower = text.toLowerCase();
-    if (lower.includes('换一批') || lower.includes('refresh')) {
-      refreshCandidates();
-    } else if (lower.includes('重选') || lower.includes('返回')) {
-      streamText('🔙 好的，请重新从候选视频中选择一条参考。', () => {});
-    } else {
-      streamText(`收到指令「${text}」，正在处理中...`, () => {
-        const timer = window.setTimeout(() => {
-          streamText('✅ 已完成处理。还有其他需要调整的吗？', () => {});
-        }, 1500);
-        streamTimers.current.push(timer);
-      });
-    }
-  }, [refreshCandidates, streamText]);
-
-  // Back to video selection: clear prompt, generated video, and related tasks/messages
+  // Back to video select
   const backToVideoSelect = useCallback(() => {
     clearTimers();
     setState(prev => ({
@@ -833,25 +638,84 @@ export function useSkillsEngine() {
       resultVideo: null,
       selectedVideo: null,
       isProcessing: false,
+      activeRightView: 'agent-01',
+      // Reset agents 02-04
+      agents: prev.agents.map(a => {
+        if (['agent-02', 'agent-03', 'agent-04'].includes(a.id)) {
+          return { ...a, status: 'idle' as const, progress: 0, statusText: '等待启动' };
+        }
+        return a;
+      }),
+      // Remove phase 2/3 messages
       messages: prev.messages.filter(m =>
-        m.type !== 'prompt-editor' &&
-        m.type !== 'result-preview' &&
-        !(m.type === 'task-subtask-list' && (m.content === 'task-reverse-prompt' || m.content === 'task-generate-video')) &&
-        !(m.type === 'video-gen-status')
+        !(m.type === 'selection-confirm') &&
+        !(m.type === 'read-checklist') &&
+        !(m.type === 'create-agent' && m.content.includes('记忆库')) &&
+        !(m.type === 'create-agent' && m.content.includes('视频生成')) &&
+        !(m.type === 'agent-cluster' && m.agents?.some(a => ['agent-02', 'agent-03', 'agent-04'].includes(a.id))) &&
+        !(m.type === 'video-gen-status' && (m.content.includes('Prompt') || m.content.includes('🎉')))
       ),
       tasks: prev.tasks.map(t => {
-        if (t.id === 'task-reverse-prompt' || t.id === 'task-generate-video') {
+        if (['task-memory', 'task-reverse-prompt', 'task-generate-video'].includes(t.id)) {
           return { ...t, status: 'queued' as TaskStatus, progress: 0, startAt: undefined, endAt: undefined, output: undefined, logs: [], children: t.children.map(c => ({ ...c, status: 'queued' as TaskStatus, progress: 0 })) };
-        }
-        if (t.id === 'task-wait-select') {
-          return { ...t, status: 'running' as TaskStatus, progress: 0, endAt: undefined, output: undefined };
         }
         return t;
       }),
+      checklistDone: [true, false, false, false],
     }));
   }, []);
 
-  // Reset session
+  // Regenerate
+  const regenerate = useCallback(() => {
+    clearTimers();
+    setState(prev => ({
+      ...prev,
+      resultVideo: null,
+      isProcessing: false,
+      activeRightView: 'agent-04',
+      agents: prev.agents.map(a => a.id === 'agent-04' ? { ...a, status: 'idle' as const, progress: 0, statusText: '等待启动' } : a),
+      messages: prev.messages.filter(m =>
+        !(m.type === 'agent-cluster' && m.agents?.some(a => a.id === 'agent-04')) &&
+        !(m.type === 'create-agent' && m.content.includes('视频生成')) &&
+        !(m.type === 'read-checklist' && prev.messages.indexOf(m) > prev.messages.length - 5) &&
+        !(m.type === 'video-gen-status' && m.content.includes('🎉'))
+      ),
+      tasks: prev.tasks.map(t => t.id === 'task-generate-video' ? {
+        ...t, status: 'queued' as TaskStatus, progress: 0, startAt: undefined, endAt: undefined, output: undefined, logs: [],
+        children: t.children.map(c => ({ ...c, status: 'queued' as TaskStatus, progress: 0 })),
+      } : t),
+      checklistDone: [true, true, true, false],
+    }));
+    const timer = window.setTimeout(() => confirmGenerate(), 300);
+    streamTimers.current.push(timer);
+  }, [confirmGenerate]);
+
+  const setActiveTaskId = useCallback((id: string | null) => {
+    setState(prev => ({ ...prev, activeTaskId: id }));
+  }, []);
+
+  const setActiveRightView = useCallback((view: SkillsState['activeRightView']) => {
+    setState(prev => ({ ...prev, activeRightView: view }));
+  }, []);
+
+  const handleUserInput = useCallback((text: string) => {
+    setState(prev => ({
+      ...prev,
+      messages: [...prev.messages, { id: `msg-user-${Date.now()}`, type: 'text', content: `👤 ${text}` }],
+    }));
+    const lower = text.toLowerCase();
+    if (lower.includes('换一批') || lower.includes('refresh')) {
+      refreshCandidates();
+    } else {
+      streamText(`收到指令「${text}」，正在处理中...`, () => {
+        const timer = window.setTimeout(() => {
+          streamText('✅ 已完成处理。还有其他需要调整的吗？');
+        }, 1500);
+        streamTimers.current.push(timer);
+      });
+    }
+  }, [refreshCandidates, streamText]);
+
   const resetSession = useCallback(() => {
     clearTimers();
     setState({
@@ -867,10 +731,13 @@ export function useSkillsEngine() {
       generatedPrompt: '',
       resultVideo: null,
       isProcessing: false,
+      agents: [...initialAgents],
+      activeRightView: 'none',
+      checklistItems: [],
+      checklistDone: [],
     });
   }, []);
 
-  // Restore a previously saved full state snapshot (for history)
   const restoreState = useCallback((snapshot: SkillsState) => {
     clearTimers();
     setState({ ...snapshot, isProcessing: false });
@@ -887,6 +754,7 @@ export function useSkillsEngine() {
     regenerate,
     backToVideoSelect,
     setActiveTaskId,
+    setActiveRightView,
     handleUserInput,
     resetSession,
     restoreState,
