@@ -300,7 +300,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           '04': props.agent04
         };
         return (
-          <div className="border-t border-border/20 shrink-0 flex-row py-[14px] px-[43px] flex items-center justify-center gap-[10px]">
+          <div className="border-t border-border/20 shrink-0 flex-row px-[43px] flex items-center justify-center gap-[10px] py-[7px]">
           {agentTabs.map((tab) => {
               const agent = agentStatusMap[tab.id];
               const status = agent?.status || 'idle';
@@ -309,7 +309,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <button
                   key={tab.id}
                   onClick={() => onAgentTabChange?.(tab.id)}
-                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 gap-[31px] my-0 py-[6px] px-0",
+                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 gap-[31px] my-0 px-0 py-[7px]",
 
                   isActive ?
                   'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
@@ -324,13 +324,13 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                       status === 'idle' && 'bg-muted-foreground/30'
                     )} />
                 </div>
-                <div className="flex flex-col items-start gap-0.5">
-                  <span className="font-pixel leading-none text-3xl text-right">{tab.label}</span>
-                  <span className={cn(
-                      'text-[10px] leading-none',
-                      status === 'running' && 'text-amber-600',
-                      status === 'done' && 'text-emerald-600',
-                      status === 'idle' && 'text-muted-foreground/40'
+                <div className="flex-col flex items-end justify-center gap-[5px]">
+                  <span className="font-pixel leading-none font-light text-2xl text-right mx-0 px-0">{tab.label}</span>
+                  <span className={cn("leading-none text-xs text-[#4d4d4d]",
+
+                    status === 'running' && 'text-amber-600',
+                    status === 'done' && 'text-emerald-600',
+                    status === 'idle' && 'text-muted-foreground/40'
                     )}>
                     {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
                   </span>
