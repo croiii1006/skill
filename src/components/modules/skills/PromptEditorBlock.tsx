@@ -34,7 +34,7 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
           >
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
-          <Badge variant="outline" className="text-[10px]">Editable</Badge>
+          
         </div>
       </div>
 
