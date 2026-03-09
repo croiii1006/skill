@@ -10,25 +10,25 @@ import { VideoCandidateRow } from './VideoCandidateRow';
 import type { AgentInfo } from './AgentCard';
 import type { CandidateVideo, SkillTask, TaskLog } from './useSkillsEngine';
 
-import pixelSearch from '@/assets/pixel-search.svg';
-import pixelMemory from '@/assets/pixel-memory.svg';
-import pixelPrompt from '@/assets/pixel-prompt.svg';
-import pixelVideo from '@/assets/pixel-video.svg';
+import expertMemory from '@/assets/expert-memory.png';
 import expertCrawler from '@/assets/expert-crawler.png';
+import expertVideo from '@/assets/expert-video.png';
 import expertDesigner from '@/assets/expert-designer.png';
+import expertStrategist from '@/assets/expert-strategist.png';
 import expertAnalyst from '@/assets/expert-analyst.png';
+import expertSearch from '@/assets/expert-search.png';
 import expertAudio from '@/assets/expert-audio.png';
 import pixelCheck from '@/assets/pixel-check.png';
 import pixelWait from '@/assets/pixel-wait.png';
 
 const expertAvatars: Record<string, string> = {
-  memory: pixelMemory,
+  memory: expertMemory,
   crawler: expertCrawler,
-  video: pixelVideo,
+  video: expertVideo,
   designer: expertDesigner,
-  strategist: pixelPrompt,
+  strategist: expertStrategist,
   analyst: expertAnalyst,
-  search: pixelSearch,
+  search: expertSearch,
   audio: expertAudio
 };
 
@@ -96,13 +96,13 @@ function SubTaskList({ task }: {task: SkillTask;}) {
         const avatarSrc = child.expert ? expertAvatars[child.expert.avatar] : undefined;
         const isDone = child.status === 'done';
         const isRunning = child.status === 'running';
-        return (
-          <div key={i} className="flex items-center gap-2 py-1.5 px-1">
-            {avatarSrc && <img src={avatarSrc} alt="" className="w-5 h-5 rounded-full shrink-0" />}
-            <span className="text-xs text-foreground/70 flex-1">{child.title}</span>
-            {isDone && <img src={pixelCheck} alt="done" className="w-4 h-4" />}
-            {isRunning && <img src={pixelWait} alt="running" className="w-4 h-4 animate-pulse" />}
-          </div>);
+        return;
+
+
+
+
+
+
 
       })}
     </div>);
