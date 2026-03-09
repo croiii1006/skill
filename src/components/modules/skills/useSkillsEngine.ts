@@ -659,7 +659,8 @@ export function useSkillsEngine() {
       resultVideo: null,
       selectedVideo: null,
       isProcessing: false,
-      activeRightView: 'agent-01',
+      activeRightView: 'agents',
+      activeAgentTab: '01',
       // Reset agents 02-04
       agents: prev.agents.map(a => {
         if (['agent-02', 'agent-03', 'agent-04'].includes(a.id)) {
