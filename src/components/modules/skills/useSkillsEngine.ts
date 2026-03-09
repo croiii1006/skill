@@ -122,7 +122,7 @@ function now() {
 }
 
 const initialAgents: AgentInfo[] = [
-  { id: 'agent-01', number: '01', name: '爆款专家', role: 'TK爆款视频匹配', avatar: 'search', statusText: '等待启动', progress: 0, status: 'idle' },
+  { id: 'agent-01', number: '01', name: 'TikTok爆款专家', role: 'TK爆款视频匹配', avatar: 'search', statusText: '等待启动', progress: 0, status: 'idle' },
   { id: 'agent-02', number: '02', name: '记忆库专家', role: '记忆库特征向量构建', avatar: 'memory', statusText: '等待启动', progress: 0, status: 'idle' },
   { id: 'agent-03', number: '03', name: 'Prompt专家', role: 'TikTok爆款视频Prompt设计', avatar: 'strategist', statusText: '等待启动', progress: 0, status: 'idle' },
   { id: 'agent-04', number: '04', name: '视频专家', role: '视频生成与合成', avatar: 'video', statusText: '等待启动', progress: 0, status: 'idle' },
@@ -323,11 +323,11 @@ export function useSkillsEngine() {
         await pause(800);
 
         // ─── Phase 1: Agent 01 - 爆款专家 ───
-        addMessage({ type: 'create-agent', content: '创建TK爆款专家代理', agentNames: [{ name: '爆款专家', avatar: 'search' }] });
+        addMessage({ type: 'create-agent', content: '创建TikTok爆款专家代理', agentNames: [{ name: 'TikTok爆款专家', avatar: 'search' }] });
         await pause(400);
 
         const agent01: AgentInfo = {
-          id: 'agent-01', number: '01', name: '爆款专家', role: 'TK爆款视频匹配',
+          id: 'agent-01', number: '01', name: 'TikTok爆款专家', role: 'TK爆款视频匹配',
           avatar: 'search', status: 'running',
           statusText: `正在为你匹配对标「${setup.category}」品类和「${setup.sellingPoints.slice(0, 20)}」卖点的爆款视频列表`,
           progress: 10,
@@ -344,7 +344,7 @@ export function useSkillsEngine() {
 
         // Run crawl task
         updateTask('task-crawl', { status: 'running', startAt: now() });
-        addTaskLog('task-crawl', '爆款专家启动 TikTok 爬虫...');
+        addTaskLog('task-crawl', 'TikTok爆款专家启动 TikTok 爬虫...');
 
         // Sub 1: Spider
         updateChild('task-crawl', 'task-crawl-spider', { status: 'running', title: '爬虫专家正在启动 TikTok 爬虫' });

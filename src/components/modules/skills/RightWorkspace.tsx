@@ -263,7 +263,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
   const viewTitles: Record<RightView, string> = {
     none: '',
     checklist: '编写待办清单',
-    'agent-01': '爆款专家工作台',
+    'agent-01': 'TikTok爆款专家工作台',
     'agent-02-03': '专家工作台',
     'agent-04': '视频生成工作台',
     'read-memory': props.memoryTitle || '记忆库',
