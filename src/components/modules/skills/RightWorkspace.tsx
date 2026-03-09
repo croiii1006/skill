@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, ScrollText, ChevronRight, Copy, Check, FileText } from 'lucide-react';
+import { X, ChevronRight, Copy, Check, FileText } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -316,12 +316,12 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       {!isReadMemory &&
       <div className="px-5 py-3 border-b border-border/20 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
-            <ScrollText className="w-4 h-4 text-foreground/50" />
-            {view === 'agent-04' ? (
-              <span className="font-pixel text-base font-medium text-foreground">Agent04</span>
-            ) : (
-              <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
-            )}
+            
+            {view === 'agent-04' ?
+          <span className="font-pixel text-base font-medium text-foreground">Agent04</span> :
+
+          <span className="text-sm font-medium text-foreground">{viewTitles[view]}</span>
+          }
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7">
             <X className="w-4 h-4" />
