@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, ScrollText, ChevronRight } from 'lucide-react';
+import { X, ScrollText, ChevronRight, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -120,6 +120,24 @@ function SubTaskList({ task }: { task: SkillTask }) {
         );
       })}
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute top-2 right-3 p-1.5 rounded-md hover:bg-muted/60 text-muted-foreground/40 hover:text-muted-foreground transition-colors z-10"
+      title="复制全部内容"
+    >
+      {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
   );
 }
 
@@ -260,8 +278,9 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            {/* Content with line numbers */}
-            <div className="flex-1 overflow-auto">
+            {/* Content with line numbers and copy button */}
+            <div className="flex-1 overflow-auto relative">
+              <CopyButton text={props.memoryContent || '暂无内容'} />
               <div className="px-4 py-3 font-mono text-xs leading-6">
                 {lines.map((line, i) => (
                   <div key={i} className="flex">
