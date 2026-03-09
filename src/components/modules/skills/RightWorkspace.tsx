@@ -241,19 +241,36 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           </div>
         );
 
-      case 'read-memory':
+      case 'read-memory': {
+        const lines = (props.memoryContent || '暂无内容').split('\n');
         return (
-          <div className="p-5 space-y-4">
-            {props.memoryCategory && (
-              <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                {props.memoryCategory}
-              </span>
-            )}
-            <div className="prose prose-sm max-w-none text-foreground/80 leading-relaxed whitespace-pre-wrap text-sm">
-              {props.memoryContent || '暂无内容'}
+          <div className="flex flex-col h-full">
+            {/* Document header */}
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-muted/30">
+              <ScrollText className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">阅读</span>
+              <span className="text-xs text-muted-foreground/40">|</span>
+              <span className="text-xs text-foreground/80 font-medium truncate">{props.memoryTitle || '记忆库'}.md</span>
+              {props.memoryCategory && (
+                <span className="ml-auto inline-block text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
+                  {props.memoryCategory}
+                </span>
+              )}
+            </div>
+            {/* Content with line numbers */}
+            <div className="flex-1 overflow-auto">
+              <div className="px-4 py-3 font-mono text-xs leading-6">
+                {lines.map((line, i) => (
+                  <div key={i} className="flex">
+                    <span className="w-8 shrink-0 text-right pr-4 text-muted-foreground/30 select-none">{i + 1}</span>
+                    <span className="text-foreground/80 whitespace-pre-wrap break-all">{line || '\u00A0'}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
+      }
 
       default:
         return null;
