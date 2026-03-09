@@ -105,8 +105,8 @@ function SubTaskList({ task }: {task: SkillTask;}) {
             <span className="text-sm text-foreground/70 flex-1">{child.title}</span>
             {isDone && <Check className="w-4 h-4 text-foreground/40" />}
             {isRunning && <Loader2 className="w-4 h-4 text-muted-foreground/40 animate-spin" />}
-          </div>
-        );
+          </div>);
+
       })}
     </div>);
 }
@@ -145,7 +145,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
       '01': props.agent01,
       '02': props.agent02,
       '03': props.agent03,
-      '04': props.agent04,
+      '04': props.agent04
     };
     const currentAgent = agentStatusMap[activeAgentTab];
     if (currentAgent?.status === 'error') {
@@ -154,8 +154,8 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           <img src={pixelCross} className="w-10 h-10" alt="" />
           <p className="text-sm text-destructive font-medium">状态异常</p>
           <p className="text-xs text-muted-foreground/60">{currentAgent.statusText || '任务执行过程中出现错误'}</p>
-        </div>
-      );
+        </div>);
+
     }
 
     switch (activeAgentTab) {
@@ -180,8 +180,8 @@ export function RightWorkspace(props: RightWorkspaceProps) {
             <div className="flex-1 flex flex-col items-center justify-center gap-4 p-5 text-center min-h-[300px]">
               <img src={pixelInfo} className="w-10 h-10 opacity-40" alt="" />
               <p className="text-sm text-muted-foreground/60">未选择记忆库</p>
-            </div>
-          );
+            </div>);
+
         }
         return (
           <div className="p-5 space-y-5">
@@ -189,7 +189,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           </div>);
       case '03':
         return (
-          <div className="p-5 space-y-5">
+          <div className="p-5 space-y-5 py-[20px] pb-[200px]">
             {props.agent03Task && <WorkLog logs={props.agent03Task.logs} />}
             {props.generatedPrompt &&
             <PromptEditorBlock
@@ -312,7 +312,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           '03': props.agent03,
           '04': props.agent04
         };
-        const visibleTabs = agentTabs.filter(tab => {
+        const visibleTabs = agentTabs.filter((tab) => {
           const agent = agentStatusMap[tab.id];
           return agent && agent.status !== 'idle';
         });
