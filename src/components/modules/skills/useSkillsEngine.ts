@@ -323,7 +323,7 @@ export function useSkillsEngine() {
         await pause(800);
 
         // ─── Phase 1: Agent 01 - 爆款专家 ───
-        addMessage({ type: 'create-agent', content: '创建TK爆款专家代理', agentNames: [{ name: '爆款专家', avatar: 'search' }] });
+        addMessage({ type: 'create-agent', content: '创建TikTok爆款专家代理', agentNames: [{ name: 'TikTok爆款专家', avatar: 'search' }] });
         await pause(400);
 
         const agent01: AgentInfo = {
