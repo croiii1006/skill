@@ -375,7 +375,7 @@ export function useSkillsEngine() {
         updateAgent('agent-01', { progress: 75, statusText: '正在生成 Top 20 排名...' });
         await randDelay();
         updateChild('task-crawl', 'task-crawl-rank', { status: 'done', progress: 100, title: '策略专家完成排序生成 Top 20' });
-        addTaskLog('task-crawl', '策略专家完成排序 → Top 6 候选已生成');
+        addTaskLog('task-crawl', '策略专家完成排序 → Top 6候选已生成');
 
         // Sub 4: Cover
         updateChild('task-crawl', 'task-crawl-cover', { status: 'running', title: '视频专家正在提取视频封面' });
@@ -383,7 +383,7 @@ export function useSkillsEngine() {
         updateAgent('agent-01', { progress: 90, statusText: '正在提取视频封面...' });
         await subDelay();
         updateChild('task-crawl', 'task-crawl-cover', { status: 'done', progress: 100, title: '视频专家完成提取视频封面' });
-        addTaskLog('task-crawl', '视频专家完成封面提取 → 20 张高清封面已缓存');
+        addTaskLog('task-crawl', '视频专家完成封面提取 → 26张高清封面已缓存');
 
         updateTask('task-crawl', { status: 'done', progress: 100, endAt: now(), output: '抓取 142 条，Top 20 已排序' });
         updateAgentInMessages('agent-01', { progress: 100, status: 'done', statusText: '已完成爆款视频匹配，请选择对标视频' });
