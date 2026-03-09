@@ -147,7 +147,7 @@ export function SkillsModule() {
   const showRightPanel = state.activeRightView !== 'none';
 
   /* ─── Flow-step types that get grouped into one card ─── */
-  const FLOW_STEP_TYPES = new Set<StreamMessageType>(['checklist', 'create-agent', 'read-checklist']);
+  const FLOW_STEP_TYPES = new Set<StreamMessageType>(['checklist', 'create-agent', 'read-checklist', 'agent-cluster']);
 
   /** Group consecutive flow-step messages into clusters */
   const groupedMessages = useMemo(() => {
