@@ -717,8 +717,8 @@ export function useSkillsEngine() {
     setState(prev => ({ ...prev, activeTaskId: id }));
   }, []);
 
-  const setActiveRightView = useCallback((view: SkillsState['activeRightView']) => {
-    setState(prev => ({ ...prev, activeRightView: view }));
+  const setActiveRightView = useCallback((view: SkillsState['activeRightView'], agentTab?: SkillsState['activeAgentTab']) => {
+    setState(prev => ({ ...prev, activeRightView: view, ...(agentTab ? { activeAgentTab: agentTab } : {}) }));
   }, []);
 
   const handleUserInput = useCallback((text: string) => {
