@@ -52,6 +52,7 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
       onClick && 'cursor-pointer hover:bg-muted/30',
       agent.status === 'running' && 'border-border/40',
       agent.status === 'done' && 'border-border/20',
+      agent.status === 'error' && 'border-destructive/40 bg-destructive/5',
       agent.status === 'skipped' && 'border-border/10 opacity-40 grayscale',
       agent.status === 'idle' && 'border-border/10 opacity-50'
       )}>
