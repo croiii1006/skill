@@ -78,6 +78,8 @@ export interface StreamMessage {
   isStreaming?: boolean;
   /** For agent-cluster messages */
   agents?: AgentInfo[];
+  /** For create-agent messages – inline agent names with avatars */
+  agentNames?: { name: string; avatar: string }[];
 }
 
 export interface SkillsState {
@@ -318,7 +320,7 @@ export function useSkillsEngine() {
         await pause(800);
 
         // ─── Phase 1: Agent 01 - 爆款专家 ───
-        addMessage({ type: 'create-agent', content: '创建助手' });
+        addMessage({ type: 'create-agent', content: '创建TK爆款专家代理', agentNames: [{ name: '爆款专家', avatar: 'search' }] });
         await pause(400);
 
         const agent01: AgentInfo = {
@@ -412,7 +414,7 @@ export function useSkillsEngine() {
       await pause(600);
       addMessage({ type: 'read-checklist', content: '读取待办清单' });
       await pause(400);
-      addMessage({ type: 'create-agent', content: '创建记忆库信息和Prompt设计专家代理' });
+      addMessage({ type: 'create-agent', content: '创建记忆库信息和Prompt设计专家代理', agentNames: [{ name: '记忆库专家', avatar: 'memory' }, { name: 'Prompt专家', avatar: 'strategist' }] });
       await pause(400);
 
       // Agent 02 + 03 cluster
@@ -542,7 +544,7 @@ export function useSkillsEngine() {
     (async () => {
       addMessage({ type: 'read-checklist', content: '读取待办清单' });
       await pause(400);
-      addMessage({ type: 'create-agent', content: '创建视频生成专家代理' });
+      addMessage({ type: 'create-agent', content: '创建视频生成专家代理', agentNames: [{ name: '视频专家', avatar: 'video' }] });
       await pause(400);
 
       const agent04: AgentInfo = {
