@@ -93,7 +93,7 @@ export function AgentCard({ agent, onClick, compact }: AgentCardProps) {
 
         {/* Right column: number + progress aligned */}
         <div className="shrink-0 flex flex-col items-end gap-1">
-          <span className="font-pixel text-lg font-bold text-foreground/15">{agent.number}</span>
+          <span className="font-pixel text-lg font-medium text-[#3d3d3d]">{agent.number}</span>
           {!compact &&
           <PixelProgress progress={agent.progress} status={agent.status === 'done' ? 'done' : agent.status === 'running' ? 'running' : 'idle'} />
           }
