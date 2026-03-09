@@ -121,7 +121,7 @@ function CopyButton({ text }: {text: string;}) {
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-2 right-3 p-1.5 rounded-md hover:bg-muted/60 text-muted-foreground/40 hover:text-muted-foreground transition-colors z-10"
+      className="absolute top-2 right-3 p-1.5 rounded-md bg-background/80 backdrop-blur-sm border border-border/20 hover:bg-muted/60 text-muted-foreground/40 hover:text-muted-foreground transition-colors z-10 shadow-sm"
       title="复制全部内容">
       {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
     </button>);
