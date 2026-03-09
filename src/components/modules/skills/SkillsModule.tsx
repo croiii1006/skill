@@ -494,7 +494,25 @@ export function SkillsModule() {
                   <div className="max-w-3xl mx-auto space-y-4">
                     {groupedMessages.map((group, gi) => {
                       if (group.kind === 'flow-group') {
-                        return renderFlowGroup(group.msgs, `flow-group-${gi}`);
+                        // Extract agent-cluster messages to render as standalone cards after the flow card
+                        const agentClusterMsgs = group.msgs.filter(m => m.type === 'agent-cluster');
+                        return (
+                          <div key={`flow-group-${gi}`} className="space-y-4">
+                            {renderFlowGroup(group.msgs, `flow-group-${gi}`)}
+                            {agentClusterMsgs.map(acMsg => (
+                              <div key={`ac-${acMsg.id}`} id={`agent-cluster-card-${acMsg.id}`}>
+                                <AgentClusterCard
+                                  agents={acMsg.agents || []}
+                                  onAgentClick={(agentId) => {
+                                    if (agentId === 'agent-01') setActiveRightView('agent-01');
+                                    else if (agentId === 'agent-02' || agentId === 'agent-03') setActiveRightView('agent-02-03');
+                                    else if (agentId === 'agent-04') setActiveRightView('agent-04');
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        );
                       }
                       return renderMessage(group.msg);
                     })}
