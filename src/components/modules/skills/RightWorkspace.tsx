@@ -92,31 +92,18 @@ function SubTaskList({ task }: {task: SkillTask;}) {
   if (!task || task.children.length === 0) return null;
   return (
     <div className="space-y-0">
-      {task.children.map((child) => {
+      {task.children.map((child, i) => {
         const avatarSrc = child.expert ? expertAvatars[child.expert.avatar] : undefined;
-        return;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        const isDone = child.status === 'done';
+        const isRunning = child.status === 'running';
+        return (
+          <div key={i} className="flex items-center gap-2 py-1.5 px-1">
+            {avatarSrc && <img src={avatarSrc} alt="" className="w-5 h-5 rounded-full shrink-0" />}
+            <span className="text-xs text-foreground/70 flex-1">{child.label}</span>
+            {isDone && <img src={pixelCheck} alt="done" className="w-4 h-4" />}
+            {isRunning && <img src={pixelWait} alt="running" className="w-4 h-4 animate-pulse" />}
+          </div>
+        );
       })}
     </div>);
 }
