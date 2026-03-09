@@ -159,6 +159,14 @@ export function RightWorkspace(props: RightWorkspaceProps) {
             }
           </div>);
       case '02':
+        if (!props.memoryEnabled) {
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 p-5 text-center min-h-[300px]">
+              <img src={pixelInfo} className="w-10 h-10 opacity-40" alt="" />
+              <p className="text-sm text-muted-foreground/60">未选择记忆库</p>
+            </div>
+          );
+        }
         return (
           <div className="p-5 space-y-5">
             {props.agent02Task && <SubTaskList task={props.agent02Task} />}
