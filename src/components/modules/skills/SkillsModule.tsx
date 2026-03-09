@@ -399,9 +399,12 @@ export function SkillsModule() {
         } else if (content.startsWith('🔄')) {
           icon = <RefreshCw className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />;
           cleanContent = content.slice(2).trim();
+        } else if (content.startsWith('❌')) {
+          icon = <img src={pixelCross} className="w-4 h-4 shrink-0 mt-0.5" alt="" />;
+          cleanContent = content.slice(2).trim();
         }
         return (
-          <div key={msg.id} className="flex items-start gap-2 text-sm text-foreground/80 leading-relaxed animate-fade-in">
+          <div key={msg.id} className={cn("flex items-start gap-2 text-sm leading-relaxed animate-fade-in", content.startsWith('❌') ? 'text-destructive' : 'text-foreground/80')}>
             {icon}
             <span>{cleanContent}</span>
           </div>
