@@ -283,8 +283,14 @@ export function SkillsModule() {
             label = msg.content;
             onClick = () => setActiveRightView('checklist');
           } else if (msg.type === 'read-memory') {
+            const memEntry = entries.find(e => e.id === msg.memoryId);
+            const memTitle = memEntry?.title || msg.content || '记忆库';
             icon = <FileText className="w-4 h-4 text-foreground/60" />;
             label = `阅读`;
+            onClick = () => {
+              setActiveMemoryId(msg.memoryId || null);
+              setActiveRightView('read-memory');
+            };
           } else {
             icon = <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>;
             label = msg.content;
