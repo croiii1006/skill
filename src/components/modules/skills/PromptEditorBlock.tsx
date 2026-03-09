@@ -72,9 +72,6 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
         >
           确认并生成
         </Button>
-        <Button variant="outline" onClick={onBack} className="rounded-xl h-10 border-border/60">
-          返回重选视频
-        </Button>
       </div>
     </div>
   );
