@@ -316,7 +316,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
                   )}>
                 <div className="w-6 h-6 shrink-0 relative">
-                  <img src={expertAvatars[tab.avatar]} alt={tab.name} className={cn("w-full h-full object-contain rounded-none", status === 'idle' && 'opacity-40')} />
+                  
                   
 
 
