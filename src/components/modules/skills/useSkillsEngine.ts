@@ -599,7 +599,7 @@ export function useSkillsEngine() {
       addTaskLog(genTaskId, '设计专家渲染场景');
       await pause(800);
       updateChild(genTaskId, 'sub-scene', { status: 'done', progress: 100, title: '设计专家完成渲染场景' });
-      addTaskLog(genTaskId, '设计专家完成场景渲染 → 总时长 30s');
+      addTaskLog(genTaskId, '设计专家完成场景渲染');
 
       // Audio
       updateChild(genTaskId, 'sub-audio', { status: 'running', title: '音频专家正在合成音频' });
