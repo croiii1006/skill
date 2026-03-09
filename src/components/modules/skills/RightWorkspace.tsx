@@ -264,27 +264,27 @@ export function RightWorkspace(props: RightWorkspaceProps) {
         return (
           <div className="flex flex-col h-full">
             {/* Document header with close button */}
-            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-muted/30 shrink-0">
-              <ScrollText className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-xs text-muted-foreground">阅读</span>
-              <span className="text-xs text-muted-foreground/40">|</span>
-              <span className="text-xs text-foreground/80 font-medium truncate">{props.memoryTitle || '记忆库'}.md</span>
+            <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border/30 bg-muted/30 shrink-0">
+              <ScrollText className="w-5 h-5 text-muted-foreground shrink-0" />
+              <span className="text-sm text-muted-foreground">阅读</span>
+              <span className="text-sm text-muted-foreground/40">|</span>
+              <span className="text-sm text-foreground/80 font-medium truncate">{props.memoryTitle || '记忆库'}.md</span>
               {props.memoryCategory && (
-                <span className="ml-auto inline-block text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
+                <span className="ml-auto inline-block text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
                   {props.memoryCategory}
                 </span>
               )}
-              <Button variant="ghost" size="icon" onClick={onClose} className={cn("h-7 w-7 shrink-0", !props.memoryCategory && "ml-auto")}>
+              <Button variant="ghost" size="icon" onClick={onClose} className={cn("h-8 w-8 shrink-0", !props.memoryCategory && "ml-auto")}>
                 <X className="w-4 h-4" />
               </Button>
             </div>
             {/* Content with line numbers and copy button */}
             <div className="flex-1 overflow-auto relative">
               <CopyButton text={props.memoryContent || '暂无内容'} />
-              <div className="px-4 py-3 font-mono text-xs leading-6">
+              <div className="px-5 py-4 font-mono text-sm leading-7">
                 {lines.map((line, i) => (
                   <div key={i} className="flex">
-                    <span className="w-8 shrink-0 text-right pr-4 text-muted-foreground/30 select-none">{i + 1}</span>
+                    <span className="w-10 shrink-0 text-right pr-4 text-muted-foreground/30 select-none">{i + 1}</span>
                     <span className="text-foreground/80 whitespace-pre-wrap break-all">{line || '\u00A0'}</span>
                   </div>
                 ))}
