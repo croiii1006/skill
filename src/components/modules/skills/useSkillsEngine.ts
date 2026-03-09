@@ -466,8 +466,8 @@ export function useSkillsEngine() {
         const setup = state.setup;
         if (!setup.memoryEnabled) {
           updateTask('task-memory', { status: 'skipped', endAt: now() });
-          updateAgentInMessages('agent-02', { status: 'done', progress: 100, statusText: '记忆库已关闭，已跳过' });
-          updateAgent('agent-02', { status: 'done', progress: 100, statusText: '记忆库已关闭，已跳过' });
+          updateAgentInMessages('agent-02', { status: 'skipped' as any, progress: 0, statusText: '未选择记忆库，已跳过' });
+          updateAgent('agent-02', { status: 'skipped' as any, progress: 0, statusText: '未选择记忆库，已跳过' });
           return;
         }
 

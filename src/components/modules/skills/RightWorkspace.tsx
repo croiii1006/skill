@@ -319,9 +319,10 @@ export function RightWorkspace(props: RightWorkspaceProps) {
 
                   status === 'running' && 'text-amber-600',
                   status === 'done' && 'text-emerald-600',
+                  status === 'skipped' && 'text-muted-foreground/50',
                   status === 'idle' && 'text-muted-foreground/40'
                   )}>
-                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
+                    {status === 'running' ? '思考中' : status === 'done' ? '已完成' : status === 'skipped' ? '已跳过' : '等待中'}
                   </span>
                 </button>);
             })}
