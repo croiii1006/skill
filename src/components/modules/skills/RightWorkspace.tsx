@@ -191,60 +191,29 @@ export function RightWorkspace(props: RightWorkspaceProps) {
 
       case 'agent-02-03':
         return (
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-auto p-5 space-y-5">
-              {agent0203Tab === '02' ?
-              <>
-                  {props.agent02Task && <SubTaskList task={props.agent02Task} />}
-                  {props.agent02Task && <WorkLog logs={props.agent02Task.logs} />}
-                </> :
+          <div className="p-5 space-y-5">
+            {agent0203Tab === '02' ?
+            <>
+                {props.agent02Task && <SubTaskList task={props.agent02Task} />}
+                {props.agent02Task && <WorkLog logs={props.agent02Task.logs} />}
+              </> :
 
-              <>
-                  {props.agent03Task && <SubTaskList task={props.agent03Task} />}
-                  {props.agent03Task && <WorkLog logs={props.agent03Task.logs} />}
-                  {/* Prompt editor */}
-                  {props.generatedPrompt &&
-                <PromptEditorBlock
-                  prompt={props.generatedPrompt}
-                  onChange={(val) => props.onPromptChange?.(val)}
-                  onConfirm={() => props.onPromptConfirm?.()}
-                  onBack={() => props.onBackToVideoSelect?.()}
-                  memoryEnabled={props.memoryEnabled ?? false}
-                  disabled={props.isProcessing} />
+            <>
+                {props.agent03Task && <SubTaskList task={props.agent03Task} />}
+                {props.agent03Task && <WorkLog logs={props.agent03Task.logs} />}
+                {/* Prompt editor */}
+                {props.generatedPrompt &&
+              <PromptEditorBlock
+                prompt={props.generatedPrompt}
+                onChange={(val) => props.onPromptChange?.(val)}
+                onConfirm={() => props.onPromptConfirm?.()}
+                onBack={() => props.onBackToVideoSelect?.()}
+                memoryEnabled={props.memoryEnabled ?? false}
+                disabled={props.isProcessing} />
 
-                }
-                </>
               }
-            </div>
-            {/* Bottom tab switcher */}
-            <div className="border-t border-border/20 px-4 py-2 flex items-center gap-2">
-              <button
-                onClick={() => setAgent0203Tab('02')}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors',
-                  agent0203Tab === '02' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
-                )}>
-                
-                <div className="w-5 h-5">
-                  <img src={expertMemory} alt="记忆库专家" className="w-full h-full object-contain" />
-                </div>
-                <span className="font-pixel">02</span>
-                <span>记忆库专家</span>
-              </button>
-              <button
-                onClick={() => setAgent0203Tab('03')}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors',
-                  agent0203Tab === '03' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30'
-                )}>
-                
-                <div className="w-5 h-5">
-                  <img src={expertStrategist} alt="Prompt专家" className="w-full h-full object-contain" />
-                </div>
-                <span className="font-pixel">03</span>
-                <span>Prompt专家</span>
-              </button>
-            </div>
+              </>
+            }
           </div>);
 
 
