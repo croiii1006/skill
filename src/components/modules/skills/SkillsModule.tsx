@@ -143,6 +143,7 @@ export function SkillsModule() {
     setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState,
   } = useSkillsEngine();
 
+  const { toast } = useToast();
   const { entries } = useMemory();
   const memoryItems = useMemo(() => entries.map(e => ({
     id: e.id,
