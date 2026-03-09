@@ -180,7 +180,26 @@ export function SkillsModule() {
         {msgs.map((msg, i) => {
           const isLast = i === msgs.length - 1;
 
-          // Determine icon, label, onClick
+          // agent-cluster → render as "分配专家代理" step
+          if (msg.type === 'agent-cluster') {
+            return (
+              <div key={msg.id}>
+                <div className="flex items-center justify-between px-4 py-3 text-sm text-foreground/80">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>
+                    <span>分配专家代理设计方案与执行方案</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
+                </div>
+                {!isLast && (
+                  <div className="flex justify-start pl-[26px]">
+                    <div className="w-px h-5 border-l border-dashed border-border/40" />
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           let icon: React.ReactNode;
           let label: string;
           let onClick: (() => void) | undefined;
@@ -190,14 +209,15 @@ export function SkillsModule() {
             label = '编写待办清单';
             onClick = () => setActiveRightView('checklist');
           } else if (msg.type === 'create-agent') {
-            icon = <Users className="w-4 h-4 text-foreground/60" />;
+            // Show as a bullet point step (agent details below)
+            icon = <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>;
             label = msg.content;
           } else if (msg.type === 'read-checklist') {
             icon = <ListChecks className="w-4 h-4 text-foreground/60" />;
             label = msg.content;
             onClick = () => setActiveRightView('checklist');
           } else {
-            icon = <span className="w-4 h-4 text-foreground/60">•</span>;
+            icon = <span className="w-4 h-4 text-foreground/60 flex items-center justify-center">•</span>;
             label = msg.content;
           }
 
@@ -224,31 +244,37 @@ export function SkillsModule() {
                 <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
               </div>
 
-              {/* Inline agent names for create-agent */}
+              {/* Inline agent rows for create-agent */}
               {msg.type === 'create-agent' && msg.agentNames && msg.agentNames.length > 0 && (
-                <div className="px-4 pb-1">
+                <div>
                   {msg.agentNames.map((an, ai) => (
-                    <div key={ai} className="flex items-center gap-2.5 py-2 pl-6 text-sm text-foreground/80">
-                      <Users className="w-3.5 h-3.5 text-muted-foreground/50" />
-                      <span className="text-muted-foreground/60">创建助手</span>
-                      <span className="text-muted-foreground/30">|</span>
-                      <div className="w-5 h-5 shrink-0">
-                        {avatarMap[an.avatar] ? (
-                          <img src={avatarMap[an.avatar]} alt={an.name} className="w-full h-full object-contain" />
-                        ) : (
-                          <div className="w-5 h-5 rounded bg-muted flex items-center justify-center font-pixel text-[10px]">{an.name[0]}</div>
-                        )}
+                    <div key={ai}>
+                      {/* Dotted line before agent row */}
+                      <div className="flex justify-start pl-[26px]">
+                        <div className="w-px h-4 border-l border-dashed border-border/40" />
                       </div>
-                      <span className="font-medium">{an.name}</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 ml-auto" />
+                      <div className="flex items-center gap-2.5 px-4 py-2 text-sm text-foreground/80">
+                        <Users className="w-4 h-4 text-muted-foreground/50" />
+                        <span className="text-muted-foreground/60">创建助手</span>
+                        <span className="text-muted-foreground/30">|</span>
+                        <div className="w-5 h-5 shrink-0">
+                          {avatarMap[an.avatar] ? (
+                            <img src={avatarMap[an.avatar]} alt={an.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center font-pixel text-[10px]">{an.name[0]}</div>
+                          )}
+                        </div>
+                        <span className="font-medium">{an.name}</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 ml-auto" />
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Dotted connecting line */}
-              {!isLast && (
-                <div className="flex justify-start pl-[26px] py-0">
+              {/* Dotted connecting line to next step */}
+              {!isLast && !(msg.type === 'create-agent' && msg.agentNames && msg.agentNames.length > 0) && (
+                <div className="flex justify-start pl-[26px]">
                   <div className="w-px h-5 border-l border-dashed border-border/40" />
                 </div>
               )}
