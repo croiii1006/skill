@@ -302,12 +302,12 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                   'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
                   'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
                   )}>
-                  <span className="font-pixel text-base leading-none">{tab.label}</span>
-                  <span className={cn(
-                    "text-[10px] leading-none",
-                    status === 'running' && 'text-amber-600',
-                    status === 'done' && 'text-emerald-600',
-                    status === 'idle' && 'text-muted-foreground/40'
+                  <span className="font-pixel leading-none text-lg">{tab.label}</span>
+                  <span className={cn("text-[10px] leading-none text-[#8a8a8a]",
+
+                  status === 'running' && 'text-amber-600',
+                  status === 'done' && 'text-emerald-600',
+                  status === 'idle' && 'text-muted-foreground/40'
                   )}>
                     {status === 'running' ? '思考中' : status === 'done' ? '已完成' : '等待中'}
                   </span>
