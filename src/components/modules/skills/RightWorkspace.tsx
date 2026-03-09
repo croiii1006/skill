@@ -300,7 +300,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           '04': props.agent04
         };
         return (
-          <div className="border-t border-border/20 py-3 flex items-center shrink-0 px-[35px] gap-[15px]">
+          <div className="border-t border-border/20 shrink-0 px-[35px] gap-[15px] flex-row flex items-center justify-center py-[10px]">
           {agentTabs.map((tab) => {
               const agent = agentStatusMap[tab.id];
               const status = agent?.status || 'idle';
@@ -309,7 +309,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <button
                   key={tab.id}
                   onClick={() => onAgentTabChange?.(tab.id)}
-                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 py-[20px] px-[5px] gap-[31px]",
+                  className={cn("flex items-center text-xs transition-all flex-1 justify-center border-2 border-foreground/80 gap-[31px] my-0 py-[6px] px-0",
 
                   isActive ?
                   'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
