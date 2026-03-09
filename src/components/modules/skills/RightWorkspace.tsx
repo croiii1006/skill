@@ -21,6 +21,7 @@ import expertAudio from '@/assets/expert-audio.png';
 import pixelCheck from '@/assets/pixel-check.png';
 import pixelWait from '@/assets/pixel-wait.png';
 import pixelInfo from '@/assets/pixel-info.svg';
+import pixelCross from '@/assets/pixel-cross.png';
 
 const expertAvatars: Record<string, string> = {
   memory: pixelMemory,
