@@ -102,8 +102,8 @@ function SubTaskList({ task }: {task: SkillTask;}) {
             <span className="text-xs text-foreground/70 flex-1">{child.title}</span>
             {isDone && <img src={pixelCheck} alt="done" className="w-4 h-4" />}
             {isRunning && <img src={pixelWait} alt="running" className="w-4 h-4 animate-pulse" />}
-          </div>
-        );
+          </div>);
+
       })}
     </div>);
 }
@@ -296,11 +296,11 @@ export function RightWorkspace(props: RightWorkspaceProps) {
                 <button
                   key={tab.id}
                   onClick={() => onAgentTabChange?.(tab.id)}
-                  className={cn(
-                    "flex flex-col items-center gap-1 px-4 py-2 text-xs transition-all border-2 border-foreground/80",
-                    isActive
-                      ? 'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]'
-                      : 'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
+                  className={cn("flex flex-col items-center gap-1 px-4 py-2 text-xs transition-all border-foreground/80 border border-solid",
+
+                  isActive ?
+                  'bg-background text-foreground font-medium shadow-[3px_3px_0px_0px_hsl(var(--foreground)/0.8)] translate-x-[-1px] translate-y-[-1px]' :
+                  'text-muted-foreground border-muted-foreground/30 hover:border-foreground/60 hover:shadow-[2px_2px_0px_0px_hsl(var(--foreground)/0.4)] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px]'
                   )}>
                   <span className="font-pixel text-base leading-none">{tab.label}</span>
                   <span className={cn(
