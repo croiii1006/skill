@@ -327,7 +327,7 @@ export function useSkillsEngine() {
         await pause(400);
 
         const agent01: AgentInfo = {
-          id: 'agent-01', number: '01', name: '爆款专家', role: 'TK爆款视频匹配',
+          id: 'agent-01', number: '01', name: 'TikTok爆款专家', role: 'TK爆款视频匹配',
           avatar: 'search', status: 'running',
           statusText: `正在为你匹配对标「${setup.category}」品类和「${setup.sellingPoints.slice(0, 20)}」卖点的爆款视频列表`,
           progress: 10,
