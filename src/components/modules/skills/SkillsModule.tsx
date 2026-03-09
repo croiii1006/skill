@@ -142,6 +142,12 @@ export function SkillsModule() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
+  const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
+
+  const activeMemoryEntry = useMemo(() => {
+    if (!activeMemoryId) return null;
+    return entries.find(e => e.id === activeMemoryId) || null;
+  }, [activeMemoryId, entries]);
 
   useEffect(() => {
     if (scrollRef.current) {
