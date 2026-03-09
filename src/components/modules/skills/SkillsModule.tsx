@@ -24,9 +24,9 @@ const avatarMap: Record<string, string> = {
 };
 
 /* ─── Agent task background descriptions ─── */
-const getAgentDescriptions = (category: string, sellingPoints: string): Record<string, string> => ({
+const getAgentDescriptions = (category: string, sellingPoints: string, memoryNames: string): Record<string, string> => ({
   'agent-01': `你是一名TikTok爆款视频专家，需要为用户收集「${category}」品类下最符合「${sellingPoints}」卖点的对标爆款视频，并生成一个可供复刻的视频列表。`,
-  'agent-02': '你是一名记忆库专家，需要根据品牌记忆库中的核心信息，提取关键特征向量，为后续内容生成提供品牌一致性保障。',
+  'agent-02': `你是一名记忆库专家，需要根据「${memoryNames || '品牌记忆库'}」中的核心信息，提取关键特征向量，为后续内容生成提供品牌一致性保障。`,
   'agent-03': '你是一名Prompt设计专家，需要基于爆款视频结构和品牌记忆，设计出高质量的TikTok视频生成Prompt。',
   'agent-04': '你是一名视频生成专家，需要根据Prompt和素材，生成高质量的TikTok短视频内容。',
 });
