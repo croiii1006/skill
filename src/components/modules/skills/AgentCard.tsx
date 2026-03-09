@@ -117,7 +117,7 @@ export function AgentClusterCard({ agents, title, onAgentClick }: AgentClusterCa
     <div className="rounded-xl border border-border/30 bg-background overflow-hidden">
       {/* Header */}
       <div className="px-4 py-2.5 border-b border-border/20 flex items-center gap-2">
-        <span className="font-pixel text-xs text-foreground/60">⚡</span>
+        <img src={pixelAgent} className="w-4 h-4" alt="" />
         <span className="text-xs font-medium text-foreground">Agent 集群</span>
         <span className="text-[10px] text-muted-foreground/50 ml-1">
           {totalCount} 个{runningCount > 0 ? '并行' : ''}任务
