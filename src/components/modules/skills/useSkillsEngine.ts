@@ -618,7 +618,7 @@ export function useSkillsEngine() {
       await backendDelay();
       updateChild(genTaskId, 'sub-compose', { status: 'done', progress: 100, title: '视频专家完成合成视频' });
       addTaskLog(genTaskId, '视频专家完成视频合成 → 1080p，30s');
-      addTaskLog(genTaskId, '质量检测通过 → 画面清晰度 98%');
+      addTaskLog(genTaskId, '质量检测通过');
 
       updateTask(genTaskId, { status: 'done', progress: 100, endAt: now(), output: '视频生成完成，时长 30s' });
       updateAgentInMessages('agent-04', { status: 'done', progress: 100, statusText: '视频生成完成！' });
