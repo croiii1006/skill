@@ -38,8 +38,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const [imageName, setImageName] = useState<string | null>(null);
   const [category, setCategory] = useState('');
   const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState(MODELS[0]);
-  const [modelOpen, setModelOpen] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
   const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
