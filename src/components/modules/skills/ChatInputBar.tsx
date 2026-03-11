@@ -173,8 +173,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
 
             {/* Credits display */}
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span>剩余额度 40</span>
+              <span>预计消耗：约 200 credit</span>
             </div>
           </div>
 
