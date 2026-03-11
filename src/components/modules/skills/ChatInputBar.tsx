@@ -39,7 +39,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const [category, setCategory] = useState('');
   const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]);
   const [plusOpen, setPlusOpen] = useState(false);
-  const [plusOpen, setPlusOpen] = useState(false);
   const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
