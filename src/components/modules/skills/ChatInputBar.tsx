@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Bot, ArrowUp, X, Paperclip, Brain, ChevronDown, Check, MessageCircle } from 'lucide-react';
+import { Plus, Bot, ArrowUp, X, Paperclip, Brain, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -31,11 +31,6 @@ interface ChatInputBarProps {
   memoryItems: MemoryItem[];
 }
 
-const MODELS = [
-  { id: 'k2.5-agent', label: 'K2.5 Agent 集群' },
-  { id: 'k2.5-fast', label: 'K2.5 快速' },
-  { id: 'k2.5-pro', label: 'K2.5 专业' },
-];
 
 export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProps) {
   const [input, setInput] = useState('');
@@ -43,8 +38,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const [imageName, setImageName] = useState<string | null>(null);
   const [category, setCategory] = useState('');
   const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState(MODELS[0]);
-  const [modelOpen, setModelOpen] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
   const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -178,32 +171,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Model selector */}
-            <Popover open={modelOpen} onOpenChange={setModelOpen}>
-              <PopoverTrigger asChild>
-                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md">
-                  {selectedModel.label}
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-44 p-1 rounded-xl" sideOffset={8}>
-                {MODELS.map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => { setSelectedModel(m); setModelOpen(false); }}
-                    className={cn(
-                      'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors',
-                      selectedModel.id === m.id
-                        ? 'bg-muted text-foreground font-medium'
-                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                    )}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </PopoverContent>
-            </Popover>
-
             {/* Send button */}
             <button
               onClick={handleSend}
