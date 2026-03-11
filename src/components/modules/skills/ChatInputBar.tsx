@@ -31,11 +31,6 @@ interface ChatInputBarProps {
   memoryItems: MemoryItem[];
 }
 
-const MODELS = [
-  { id: 'k2.5-agent', label: 'K2.5 Agent 集群' },
-  { id: 'k2.5-fast', label: 'K2.5 快速' },
-  { id: 'k2.5-pro', label: 'K2.5 专业' },
-];
 
 export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProps) {
   const [input, setInput] = useState('');
