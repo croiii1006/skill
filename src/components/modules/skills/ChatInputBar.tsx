@@ -178,32 +178,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Model selector */}
-            <Popover open={modelOpen} onOpenChange={setModelOpen}>
-              <PopoverTrigger asChild>
-                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md">
-                  {selectedModel.label}
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-44 p-1 rounded-xl" sideOffset={8}>
-                {MODELS.map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => { setSelectedModel(m); setModelOpen(false); }}
-                    className={cn(
-                      'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors',
-                      selectedModel.id === m.id
-                        ? 'bg-muted text-foreground font-medium'
-                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                    )}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </PopoverContent>
-            </Popover>
-
             {/* Send button */}
             <button
               onClick={handleSend}
