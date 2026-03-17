@@ -99,10 +99,7 @@ export function MemorySelectionDialog({
                     </div>
                     <span className="font-medium text-foreground">{item.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground/50">{item.charCount}字</span>
-                    <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">{item.tag}</span>
-                  </div>
+                   <span className="text-[10px] text-muted-foreground/50">{item.charCount}字</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 ml-[30px]">{item.desc}</p>
               </button>
