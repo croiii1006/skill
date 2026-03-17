@@ -158,6 +158,7 @@ export function SkillsModule() {
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
   const [chatOnlyInput, setChatOnlyInput] = useState('');
+  const [historySheetOpen, setHistorySheetOpen] = useState(false);
 
   const activeMemoryEntry = useMemo(() => {
     if (!activeMemoryId) return null;
