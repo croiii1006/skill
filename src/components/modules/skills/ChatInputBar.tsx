@@ -182,7 +182,12 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
           <div className="flex items-center gap-2">
             <button
               onClick={() => setMemoryDialogOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted/30 text-muted-foreground/60 hover:bg-foreground/5 hover:text-muted-foreground transition-colors"
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1 rounded-full transition-colors",
+                selectedMemoryIds.length > 0
+                  ? "bg-accent/15 text-accent hover:bg-accent/20"
+                  : "bg-muted/30 text-muted-foreground/60 hover:bg-foreground/5 hover:text-muted-foreground"
+              )}
             >
               <Database className="w-3 h-3" />
               <span className="text-[11px]">记忆库{selectedMemoryIds.length > 0 ? ` (${selectedMemoryIds.length})` : ''}</span>
