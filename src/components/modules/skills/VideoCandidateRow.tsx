@@ -51,7 +51,7 @@ export function VideoCandidateRow({ videos, onSelect, onPreview, selectedVideoId
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5">
         {displayVideos.map((video, i) => (
           <div
             key={video.id}
