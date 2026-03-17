@@ -185,7 +185,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
               className={cn(
                 "flex items-center gap-1 px-2.5 py-1 rounded-full transition-colors",
                 selectedMemoryIds.length > 0
-                  ? "bg-accent/15 text-accent hover:bg-accent/20"
+                  ? "border border-accent text-accent hover:bg-accent/10"
                   : "bg-muted/30 text-muted-foreground/60 hover:bg-foreground/5 hover:text-muted-foreground"
               )}
             >
