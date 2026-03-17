@@ -99,7 +99,6 @@ export function SetupCard({ memoryItems, categories, onComplete, onReset }: Setu
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-foreground">{item.name}</span>
-                  <Badge variant="secondary" className="text-[10px] px-1.5">{item.tag}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
               </button>
