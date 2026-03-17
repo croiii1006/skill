@@ -189,7 +189,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
                   : 'w-8 border-border/40 text-muted-foreground hover:text-foreground hover:border-border'
               )}
             >
-              <Brain className="w-4 h-4" />
+              <Database className="w-4 h-4" />
               {selectedMemoryIds.length > 0 && (
                 <span className="text-[11px] font-medium whitespace-nowrap">
                   {selectedMemoryIds.length} 个记忆库
