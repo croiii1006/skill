@@ -183,18 +183,16 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
             <button
               onClick={() => setMemoryDialogOpen(true)}
               className={cn(
-                'h-8 rounded-full border flex items-center justify-center transition-all duration-300 ease-out',
+                'h-8 rounded-full border flex items-center justify-center gap-1.5 px-3 transition-all duration-300 ease-out',
                 selectedMemoryIds.length > 0
-                  ? 'border-orange-400/60 bg-orange-400/10 text-orange-400 gap-1.5 px-3'
-                  : 'w-8 border-border/40 text-muted-foreground hover:text-foreground hover:border-border'
+                  ? 'border-orange-400/60 bg-orange-400/10 text-orange-400'
+                  : 'border-border/40 text-muted-foreground hover:text-foreground hover:border-border'
               )}
             >
               <Database className="w-4 h-4" />
-              {selectedMemoryIds.length > 0 && (
-                <span className="text-[11px] font-medium whitespace-nowrap">
-                  {selectedMemoryIds.length} 个记忆库
-                </span>
-              )}
+              <span className="text-[11px] font-medium whitespace-nowrap">
+                {selectedMemoryIds.length > 0 ? `${selectedMemoryIds.length} 个记忆库` : '记忆库'}
+              </span>
             </button>
           </div>
 
