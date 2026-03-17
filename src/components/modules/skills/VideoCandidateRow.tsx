@@ -239,7 +239,7 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
               <span className="text-sm text-foreground font-light">{video.views}</span>
             </div>
             <div className="gap-2 text-right flex items-center justify-end">
-              <ShoppingCart className="w-4 h-4 text-muted-foreground" />
+              <ShoppingCart className="w-4 h-4 text-muted-foreground text-left mx-[50px] mr-[50px] ml-0" />
               <span className="text-sm text-foreground font-light">{video.salesCount ?? 0}</span>
             </div>
             <div className="flex items-center gap-2">
