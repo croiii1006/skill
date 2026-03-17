@@ -238,7 +238,7 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
               <Eye className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-foreground font-light">{video.views}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="gap-2 text-right flex items-center justify-end">
               <ShoppingCart className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-foreground font-light">{video.salesCount ?? 0}</span>
             </div>
@@ -246,7 +246,7 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
               <Heart className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-foreground font-light">{video.likes}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="gap-2 flex items-center justify-end">
               <TrendingUp className="w-4 h-4 text-orange-500" />
               <span className="text-sm text-foreground font-light">{video.growthRate ?? '0%'}</span>
             </div>
