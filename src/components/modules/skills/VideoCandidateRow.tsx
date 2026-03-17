@@ -238,7 +238,7 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
               <Eye className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-foreground font-light">{video.views}</span>
             </div>
-            <div className="gap-[40px] text-left flex items-center justify-start px-[20px] pr-0 pl-[40px]">
+            <div className="text-left pr-0 flex items-center justify-start px-[28px] gap-0 pl-[85px]">
               <ShoppingCart className="w-4 h-4 text-muted-foreground text-left mx-[50px] mr-[50px] ml-0" />
               <span className="text-sm text-foreground font-light">{video.salesCount ?? 0}</span>
             </div>
