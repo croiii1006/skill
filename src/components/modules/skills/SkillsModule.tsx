@@ -184,7 +184,7 @@ export function SkillsModule() {
   }, [state.agents.map((a) => a.status).join(',')]);
 
   useEffect(() => {
-    if (!activeHistoryId || !state.setupCompleted || state.isProcessing) return;
+    if (!activeHistoryId || !state.setupCompleted) return;
     setHistory((prev) => {
       const updated = prev.map((h) => h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h);
       saveSkillsHistory(updated);
@@ -217,8 +217,20 @@ export function SkillsModule() {
     if (activeHistoryId === id) setActiveHistoryId(null);
   }, [history, activeHistoryId]);
 
+  const hasInProgressSession = useMemo(() => {
+    return history.some((h) => h.snapshot.setupCompleted && !h.snapshot.resultVideo);
+  }, [history]);
+
   const handleSend = (text: string, image?: string | null, category?: string, memoryIds?: string[]) => {
     if (!state.setupCompleted && (image || text)) {
+      if (hasInProgressSession) {
+        toast({
+          title: '当前已有进行中的任务',
+          description: '请等待当前任务完成后再开始新任务',
+          variant: 'destructive'
+        });
+        return;
+      }
       const setup: SessionSetup = {
         image: image || null,
         imageName: image ? 'uploaded-image' : null,
@@ -235,16 +247,17 @@ export function SkillsModule() {
   };
 
   const handleRestoreHistory = (item: SkillsHistoryItem) => {
-    const isInProgress = !item.snapshot.resultVideo;
-    if (isInProgress && item.snapshot.setup) {
-      // Re-run the pipeline from setup for in-progress items
-      resetSession();
-      setActiveHistoryId(item.id);
-      completeSetup(item.snapshot.setup);
-    } else {
-      restoreState(item.snapshot);
-      setActiveHistoryId(item.id);
+    const isCurrentActive = item.id === activeHistoryId;
+    const isItemInProgress = !item.snapshot.resultVideo && item.snapshot.setupCompleted;
+
+    if (isCurrentActive && isItemInProgress) {
+      // Already viewing this in-progress session – just close sheet
+      setHistorySheetOpen(false);
+      return;
     }
+
+    restoreState(item.snapshot);
+    setActiveHistoryId(item.id);
     setHistorySheetOpen(false);
   };
 
