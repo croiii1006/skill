@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Play, ExternalLink, Copy, Volume2, Eye, Heart, ShoppingCart, TrendingUp, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Play, Pause, ExternalLink, Copy, Volume2, VolumeX, Eye, Heart, ShoppingCart, TrendingUp, X, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
