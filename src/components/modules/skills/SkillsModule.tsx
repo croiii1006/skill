@@ -463,7 +463,7 @@ export function SkillsModule() {
   const isEmpty = !state.setupCompleted && state.messages.length === 0;
 
   const historySheet =
-  <Sheet>
+  <Sheet open={historySheetOpen} onOpenChange={setHistorySheetOpen}>
       <SheetTrigger asChild>
         <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
           <History className="w-3.5 h-3.5" />
