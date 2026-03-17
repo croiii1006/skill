@@ -37,9 +37,9 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-foreground">生成的爆款复刻 Prompt</h4>
+        <h4 className="text-sm font-normal text-foreground">生成的爆款复刻 Prompt</h4>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground">{prompt.length}/{PROMPT_MAX_LENGTH}</span>
+          <span className="text-[11px] font-light text-muted-foreground">{prompt.length}/{PROMPT_MAX_LENGTH}</span>
           <button
             onClick={handleCopy}
             className="p-1 rounded-md hover:bg-muted/40 transition-colors text-muted-foreground hover:text-foreground"
