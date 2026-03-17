@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, ArrowUp, X, Brain } from 'lucide-react';
+import { Plus, ArrowUp, X, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -174,9 +174,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
                 className="flex-1 min-w-[120px] bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50"
               />
             </div>
-            <div className="text-[10px] text-muted-foreground/50 mt-0.5">
-              {tags.length}/{MAX_TAG_COUNT} 个标签 · 每个最多 {MAX_TAG_LENGTH} 字
-            </div>
           </div>
         </div>
 
@@ -192,7 +189,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
                   : 'w-8 border-border/40 text-muted-foreground hover:text-foreground hover:border-border'
               )}
             >
-              <Brain className="w-4 h-4" />
+              <Database className="w-4 h-4" />
               {selectedMemoryIds.length > 0 && (
                 <span className="text-[11px] font-medium whitespace-nowrap">
                   {selectedMemoryIds.length} 个记忆库
