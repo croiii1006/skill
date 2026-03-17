@@ -182,27 +182,15 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
           <div className="flex items-center gap-2">
             <button
               onClick={() => setMemoryDialogOpen(true)}
-              className={cn(
-                'h-8 rounded-full border flex items-center justify-center transition-all',
-                selectedMemoryIds.length > 0
-                  ? 'border-orange-400/60 bg-orange-400/10 text-orange-400 gap-1.5 px-3'
-                  : 'w-8 border-border/40 text-muted-foreground hover:text-foreground hover:border-border'
-              )}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted/30 text-muted-foreground/60 hover:bg-foreground/5 hover:text-muted-foreground transition-colors"
             >
-              <Database className="w-4 h-4" />
-              {selectedMemoryIds.length > 0 && (
-                <span className="text-[11px] font-medium whitespace-nowrap">
-                  {selectedMemoryIds.length} 个记忆库
-                </span>
-              )}
+              <Database className="w-3 h-3" />
+              <span className="text-[11px]">记忆库{selectedMemoryIds.length > 0 ? ` (${selectedMemoryIds.length})` : ''}</span>
             </button>
-
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
-              <span>预计消耗：约 200 credit</span>
-            </div>
           </div>
 
           <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground/60">预计消耗：约 200 credit</span>
             <button
               onClick={handleSend}
               disabled={!hasContent || disabled}
