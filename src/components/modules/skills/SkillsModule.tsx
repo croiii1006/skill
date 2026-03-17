@@ -256,7 +256,12 @@ export function SkillsModule() {
       return;
     }
 
-    restoreState(item.snapshot);
+    if (isItemInProgress) {
+      // Resume the pipeline from where it left off
+      restoreAndResume(item.snapshot);
+    } else {
+      restoreState(item.snapshot);
+    }
     setActiveHistoryId(item.id);
     setHistorySheetOpen(false);
   };
