@@ -155,32 +155,9 @@ export function SkillsModule() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
-  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(() => {
-    try { return localStorage.getItem('skills-active-history-id'); } catch { return null; }
-  });
+  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
   const [chatOnlyInput, setChatOnlyInput] = useState('');
-  const [historySheetOpen, setHistorySheetOpen] = useState(false);
-
-  // Persist activeHistoryId to localStorage
-  useEffect(() => {
-    if (activeHistoryId) {
-      localStorage.setItem('skills-active-history-id', activeHistoryId);
-    } else {
-      localStorage.removeItem('skills-active-history-id');
-    }
-  }, [activeHistoryId]);
-
-  // On mount: if we have an activeHistoryId but no live state, restore from history
-  useEffect(() => {
-    if (activeHistoryId && !state.setupCompleted) {
-      const item = history.find(h => h.id === activeHistoryId);
-      if (item && item.snapshot.setupCompleted) {
-        restoreState(item.snapshot);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // only on mount
 
   const activeMemoryEntry = useMemo(() => {
     if (!activeMemoryId) return null;
@@ -206,7 +183,7 @@ export function SkillsModule() {
   }, [state.agents.map((a) => a.status).join(',')]);
 
   useEffect(() => {
-    if (!activeHistoryId || !state.setupCompleted) return;
+    if (!activeHistoryId || !state.setupCompleted || state.isProcessing) return;
     setHistory((prev) => {
       const updated = prev.map((h) => h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h);
       saveSkillsHistory(updated);
@@ -239,20 +216,8 @@ export function SkillsModule() {
     if (activeHistoryId === id) setActiveHistoryId(null);
   }, [history, activeHistoryId]);
 
-  const hasInProgressSession = useMemo(() => {
-    return history.some((h) => h.snapshot.setupCompleted && !h.snapshot.resultVideo);
-  }, [history]);
-
   const handleSend = (text: string, image?: string | null, category?: string, memoryIds?: string[]) => {
     if (!state.setupCompleted && (image || text)) {
-      if (hasInProgressSession) {
-        toast({
-          title: '当前已有进行中的任务',
-          description: '请等待当前任务完成后再开始新任务',
-          variant: 'destructive'
-        });
-        return;
-      }
       const setup: SessionSetup = {
         image: image || null,
         imageName: image ? 'uploaded-image' : null,
@@ -269,19 +234,8 @@ export function SkillsModule() {
   };
 
   const handleRestoreHistory = (item: SkillsHistoryItem) => {
-    const isCurrentActive = item.id === activeHistoryId;
-    const isItemInProgress = !item.snapshot.resultVideo && item.snapshot.setupCompleted;
-
-    if (isCurrentActive && isItemInProgress) {
-      // Already viewing this in-progress session – just close sheet
-      setHistorySheetOpen(false);
-      return;
-    }
-
-    // Restore snapshot as-is; running agents will be frozen to 'done'
     restoreState(item.snapshot);
     setActiveHistoryId(item.id);
-    setHistorySheetOpen(false);
   };
 
   const handleNewSession = () => {
@@ -499,7 +453,7 @@ export function SkillsModule() {
   const isEmpty = !state.setupCompleted && state.messages.length === 0;
 
   const historySheet =
-  <Sheet open={historySheetOpen} onOpenChange={setHistorySheetOpen}>
+  <Sheet>
       <SheetTrigger asChild>
         <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted/40">
           <History className="w-3.5 h-3.5" />
