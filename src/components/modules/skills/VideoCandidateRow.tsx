@@ -255,8 +255,8 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
           {/* Selling point hit rate - highlighted */}
           <div className="rounded-xl border-orange-500/15 p-3 bg-transparent border-0">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-foreground">卖点命中率</span>
-              <span className="text-lg font-bold text-foreground">{video.sellingPointHitRate ?? 0}%
+              <span className="font-medium text-foreground text-sm">卖点命中率</span>
+              <span className="text-lg text-foreground font-light">{video.sellingPointHitRate ?? 0}%
                 
               </span>
             </div>
