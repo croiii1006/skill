@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, ArrowUp, X, Database, Brain } from 'lucide-react';
+import { Plus, ArrowUp, X, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -182,17 +182,10 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
           <div className="flex items-center gap-2">
             <button
               onClick={() => setMemoryDialogOpen(true)}
-              className={cn(
-                'flex items-center gap-1 px-2.5 py-1 rounded-full transition-colors',
-                selectedMemoryIds.length > 0
-                  ? 'bg-orange-400/10 border border-orange-400/60 text-orange-400'
-                  : 'bg-muted/30 text-muted-foreground/60 hover:bg-foreground/5 hover:text-muted-foreground'
-              )}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted/30 text-muted-foreground/60 hover:bg-foreground/5 hover:text-muted-foreground transition-colors"
             >
-              {selectedMemoryIds.length > 0 ? <Brain className="w-3 h-3" /> : <Database className="w-3 h-3" />}
-              <span className="text-[11px]">
-                {selectedMemoryIds.length > 0 ? `${selectedMemoryIds.length} 个记忆库` : '记忆库'}
-              </span>
+              <Database className="w-3 h-3" />
+              <span className="text-[11px]">记忆库{selectedMemoryIds.length > 0 ? ` (${selectedMemoryIds.length})` : ''}</span>
             </button>
           </div>
 
