@@ -375,7 +375,7 @@ export function useSkillsEngine() {
         updateAgent('agent-01', { progress: 75, statusText: '正在生成 Top 20 排名...' });
         await randDelay();
         updateChild('task-crawl', 'task-crawl-rank', { status: 'done', progress: 100, title: '策略专家完成排序生成 Top 20' });
-        addTaskLog('task-crawl', '策略专家完成排序 → Top 6候选已生成');
+        addTaskLog('task-crawl', '策略专家完成排序 → Top 4候选已生成');
 
         // Sub 4: Cover
         updateChild('task-crawl', 'task-crawl-cover', { status: 'running', title: '视频专家正在提取视频封面' });
