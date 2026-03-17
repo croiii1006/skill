@@ -140,7 +140,7 @@ export function SkillsModule() {
   const {
     state, CATEGORIES, completeSetup, refreshCandidates, selectVideo,
     updatePrompt, confirmGenerate, regenerate, backToVideoSelect,
-    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState
+    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState, restoreAndResume
   } = useSkillsEngine();
 
   const { toast } = useToast();
