@@ -246,12 +246,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
               <span className="text-sm text-muted-foreground font-normal">阅读</span>
               <span className="text-sm text-muted-foreground/40">|</span>
               <span className="text-sm truncate text-[#5c5c5c] font-normal">{props.memoryTitle || '记忆库'}.md</span>
-              {props.memoryCategory &&
-                <span className="ml-auto inline-block text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
-                  {props.memoryCategory}
-                </span>
-                }
-              <Button variant="ghost" size="icon" onClick={onClose} className={cn("h-8 w-8 shrink-0", !props.memoryCategory && "ml-auto")}>
+              <Button variant="ghost" size="icon" onClick={onClose} className="ml-auto h-8 w-8 shrink-0">
                 <X className="w-4 h-4" />
               </Button>
             </div>
