@@ -231,60 +231,56 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
         </ScrollArea>
 
         {/* Fixed bottom: stats + actions */}
-        <div className="shrink-0 border-t border-border/20 px-5 py-4 space-y-4">
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-foreground font-light">{video.views}</span>
+        <div className="shrink-0 border-t border-border/20 px-5 py-4 space-y-5">
+          {/* Stats - 2x2 grid */}
+          <div className="grid grid-cols-2 gap-y-3">
+            <div className="flex items-center gap-2.5">
+              <Eye className="w-[18px] h-[18px] text-muted-foreground/70" />
+              <span className="text-sm text-foreground">{video.views}</span>
             </div>
-            <div className="gap-2 text-right flex items-center justify-end">
-              <ShoppingCart className="w-4 h-4 text-muted-foreground text-left mx-[50px] mr-[50px] ml-0" />
-              <span className="text-sm text-foreground font-light">{video.salesCount ?? 0}</span>
+            <div className="flex items-center justify-end gap-2.5">
+              <ShoppingCart className="w-[18px] h-[18px] text-muted-foreground/70" />
+              <span className="text-sm text-foreground min-w-[40px] text-right">{video.salesCount ?? 0}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Heart className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-foreground font-light">{video.likes}</span>
+            <div className="flex items-center gap-2.5">
+              <Heart className="w-[18px] h-[18px] text-muted-foreground/70" />
+              <span className="text-sm text-foreground">{video.likes}</span>
             </div>
-            <div className="gap-2 flex items-center justify-end">
-              <TrendingUp className="w-4 h-4 text-orange-500 mr-[50px]" />
-              <span className="text-sm text-foreground font-light">{video.growthRate ?? '0%'}</span>
+            <div className="flex items-center justify-end gap-2.5">
+              <TrendingUp className="w-[18px] h-[18px] text-orange-500" />
+              <span className="text-sm text-foreground min-w-[40px] text-right">{video.growthRate ?? '0%'}</span>
             </div>
           </div>
 
-          {/* Selling point hit rate - highlighted */}
-          <div className="rounded-xl border-orange-500/15 p-3 bg-transparent border-0 px-px">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-foreground text-sm">卖点命中率</span>
-              <span className="text-lg text-foreground font-light">{video.sellingPointHitRate ?? 0}%
-                
-              </span>
+          {/* Selling point hit rate */}
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-sm font-medium text-foreground">卖点命中率</span>
+              <span className="text-sm text-foreground">{video.sellingPointHitRate ?? 0}%</span>
             </div>
-            <Progress value={video.sellingPointHitRate ?? 0} className="h-1.5 [&>div]:bg-orange-500" />
+            <Progress value={video.sellingPointHitRate ?? 0} className="h-1.5" />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             {video.tiktokUrl &&
             <a
               href={video.tiktokUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 h-11 rounded-full border border-border/50 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors">
-              
-                <ExternalLink className="w-3.5 h-3.5" />
+              className="flex-1 h-12 rounded-full border border-border/50 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:border-border transition-colors">
+                <ExternalLink className="w-4 h-4" />
                 原链接
               </a>
             }
             <Button
               onClick={() => onSelect(video)}
               className={cn(
-                'flex-1 rounded-full h-11 font-medium text-sm gap-2',
+                'flex-1 rounded-full h-12 font-medium text-sm gap-2',
                 selectedVideoId === video.id ?
                 'bg-muted text-foreground hover:bg-muted/80' :
                 'bg-foreground text-background hover:bg-foreground/90'
               )}>
-              
               <Copy className="w-4 h-4" />
               {selectedVideoId === video.id ? '已选择' : '一键复刻'}
             </Button>
