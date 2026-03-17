@@ -29,7 +29,7 @@ export function VideoCandidateRow({ videos, onSelect, onPreview, selectedVideoId
   const [fullscreenVideo, setFullscreenVideo] = useState<CandidateVideo | null>(null);
   const [fullscreenIndex, setFullscreenIndex] = useState(0);
 
-  const displayVideos = videos.slice(0, 6);
+  const displayVideos = videos.slice(0, 4);
 
   const openDetail = (video: CandidateVideo, idx: number) => {
     setDetailVideo(video);
