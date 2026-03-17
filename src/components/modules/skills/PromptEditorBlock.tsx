@@ -3,6 +3,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Database, Tag, FolderOpen, Video, Copy, Check } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+
+const PROMPT_MAX_LENGTH = 2000;
 
 interface PromptEditorBlockProps {
   prompt: string;
@@ -23,16 +26,24 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const handleChange = (val: string) => {
+    if (val.length > PROMPT_MAX_LENGTH) {
+      toast({ title: 'Prompt 超出限制', description: `最多 ${PROMPT_MAX_LENGTH} 个字符`, variant: 'destructive' });
+      return;
+    }
+    onChange(val);
+  };
+
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold text-foreground">生成的爆款复刻 Prompt</h4>
         <div className="flex items-center gap-2">
+          <span className="text-[11px] text-muted-foreground">{prompt.length}/{PROMPT_MAX_LENGTH}</span>
           <button
             onClick={handleCopy}
             className="p-1 rounded-md hover:bg-muted/40 transition-colors text-muted-foreground hover:text-foreground"
             title="复制 Prompt">
-            
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
@@ -40,7 +51,7 @@ export function PromptEditorBlock({ prompt, onChange, onConfirm, onBack, memoryE
 
       <Textarea
         value={prompt}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
         readOnly={readonly}
         className="min-h-[160px] rounded-xl border-border/40 bg-background text-sm font-mono leading-relaxed resize-none" />
       
