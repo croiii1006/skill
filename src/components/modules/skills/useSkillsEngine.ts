@@ -617,7 +617,7 @@ export function useSkillsEngine() {
       addTaskLog(genTaskId, '视频专家正在合成视频...');
       await backendDelay();
       updateChild(genTaskId, 'sub-compose', { status: 'done', progress: 100, title: '视频专家完成合成视频' });
-      addTaskLog(genTaskId, '视频专家完成视频合成 → 1080p，30s');
+      addTaskLog(genTaskId, '视频专家完成视频合成');
       addTaskLog(genTaskId, '质量检测通过');
 
       updateTask(genTaskId, { status: 'done', progress: 100, endAt: now(), output: '视频生成完成，时长 30s' });
