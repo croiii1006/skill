@@ -184,7 +184,7 @@ export function SkillsModule() {
   }, [state.agents.map((a) => a.status).join(',')]);
 
   useEffect(() => {
-    if (!activeHistoryId || !state.setupCompleted || state.isProcessing) return;
+    if (!activeHistoryId || !state.setupCompleted) return;
     setHistory((prev) => {
       const updated = prev.map((h) => h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h);
       saveSkillsHistory(updated);
