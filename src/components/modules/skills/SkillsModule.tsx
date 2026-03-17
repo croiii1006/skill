@@ -155,7 +155,9 @@ export function SkillsModule() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
-  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
+  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(() => {
+    try { return localStorage.getItem('skills-active-history-id'); } catch { return null; }
+  });
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
   const [chatOnlyInput, setChatOnlyInput] = useState('');
   const [historySheetOpen, setHistorySheetOpen] = useState(false);
