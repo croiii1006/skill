@@ -207,7 +207,7 @@ export function RightWorkspace(props: RightWorkspaceProps) {
           <div className="p-5 space-y-5">
             {props.agent04Task && <WorkLog logs={props.agent04Task.logs} />}
             {props.resultVideo &&
-            <ResultPreviewBlock onRegenerate={props.onRegenerate} disabled={props.isProcessing} />
+            <ResultPreviewBlock />
             }
           </div>);
       default:
