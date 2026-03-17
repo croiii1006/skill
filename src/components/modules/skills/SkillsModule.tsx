@@ -140,7 +140,7 @@ export function SkillsModule() {
   const {
     state, CATEGORIES, completeSetup, refreshCandidates, selectVideo,
     updatePrompt, confirmGenerate, regenerate, backToVideoSelect,
-    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState
+    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState, restoreAndResume
   } = useSkillsEngine();
 
   const { toast } = useToast();
@@ -256,7 +256,12 @@ export function SkillsModule() {
       return;
     }
 
-    restoreState(item.snapshot);
+    if (isItemInProgress) {
+      // Resume the pipeline from where it left off
+      restoreAndResume(item.snapshot);
+    } else {
+      restoreState(item.snapshot);
+    }
     setActiveHistoryId(item.id);
     setHistorySheetOpen(false);
   };
