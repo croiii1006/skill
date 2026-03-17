@@ -98,6 +98,7 @@ export interface SkillsState {
   generatedPrompt: string;
   resultVideo: { url: string; cover: string } | null;
   isProcessing: boolean;
+  runMeta: SkillsRunMeta | null;
   /** Agents state */
   agents: AgentInfo[];
   /** Active right panel view */
@@ -107,6 +108,23 @@ export interface SkillsState {
   /** Checklist items */
   checklistItems: string[];
   checklistDone: boolean[];
+}
+
+export type SkillsRunPhase =
+  | 'phase1'
+  | 'phase2'
+  | 'phase3'
+  | 'awaiting_select'
+  | 'awaiting_confirm'
+  | 'done';
+
+export type SkillsAwaitingAction = 'select_video' | 'confirm_prompt' | null;
+
+export interface SkillsRunMeta {
+  phase: SkillsRunPhase;
+  awaitingAction: SkillsAwaitingAction;
+  nextActionAt: number | null;
+  updatedAt: number;
 }
 
 const CATEGORIES = ['美妆个护', '3C数码', '服饰鞋包', '家居日用', '食品饮料', '母婴用品', '其它'];
@@ -122,6 +140,17 @@ const mockVideos = (): CandidateVideo[] => [
 function now() {
   return new Date().toLocaleTimeString('zh-CN', { hour12: false });
 }
+
+const PHASE1_MS = 12000;
+const PHASE2_MS = 9000;
+const PHASE3_MS = 12000;
+
+const makeRunMeta = (phase: SkillsRunPhase, awaitingAction: SkillsAwaitingAction, nextActionAt: number | null): SkillsRunMeta => ({
+  phase,
+  awaitingAction,
+  nextActionAt,
+  updatedAt: Date.now(),
+});
 
 const initialAgents: AgentInfo[] = [
   { id: 'agent-01', number: '01', name: 'TikTok爆款专家', role: 'TK爆款视频匹配', avatar: 'search', statusText: '等待启动', progress: 0, status: 'idle' },
@@ -144,6 +173,7 @@ export function useSkillsEngine() {
     generatedPrompt: '',
     resultVideo: null,
     isProcessing: false,
+    runMeta: null,
     agents: [...initialAgents],
     activeRightView: 'none',
     checklistItems: [],
@@ -310,6 +340,7 @@ export function useSkillsEngine() {
       tasks,
       checklistItems,
       checklistDone: [false, false, false, false],
+      runMeta: makeRunMeta('phase1', null, Date.now() + PHASE1_MS),
     }));
 
     // Add setup summary
@@ -403,6 +434,7 @@ export function useSkillsEngine() {
           isProcessing: false,
           activeRightView: 'agents',
           activeAgentTab: '01',
+          runMeta: makeRunMeta('awaiting_select', 'select_video', null),
         }));
 
         addMessage({ type: 'video-gen-status', content: '请从右侧面板选择一条对标视频进行复刻 →' });
@@ -416,6 +448,7 @@ export function useSkillsEngine() {
       ...prev,
       selectedVideo: video,
       isProcessing: true,
+      runMeta: makeRunMeta('phase2', null, Date.now() + PHASE2_MS),
     }));
 
     addMessage({ type: 'selection-confirm', content: `已选择「${video.title}」作为对标视频，现在为你生成专属爆款视频Prompt。` });
@@ -554,6 +587,7 @@ export function useSkillsEngine() {
         ...prev,
         generatedPrompt: mockPrompt,
         isProcessing: false,
+        runMeta: makeRunMeta('awaiting_confirm', 'confirm_prompt', null),
       }));
 
       addMessage({ type: 'video-gen-status', content: '✅ Prompt已生成，请在右侧面板查看和编辑，确认后生成视频 →' });
@@ -562,7 +596,11 @@ export function useSkillsEngine() {
 
   // ─── Confirm prompt → Phase 3: Agent 04 ───
   const confirmGenerate = useCallback(() => {
-    setState(prev => ({ ...prev, isProcessing: true }));
+    setState(prev => ({
+      ...prev,
+      isProcessing: true,
+      runMeta: makeRunMeta('phase3', null, Date.now() + PHASE3_MS),
+    }));
 
     (async () => {
       addMessage({ type: 'read-checklist', content: '读取待办清单' });
@@ -629,6 +667,7 @@ export function useSkillsEngine() {
         checklistDone: [true, true, true, true],
         resultVideo: { url: '', cover: '' },
         isProcessing: false,
+        runMeta: makeRunMeta('done', null, null),
       }));
 
       addMessage({ type: 'video-gen-status', content: '🎉 所有任务已完成！复刻视频已生成，请在右侧面板查看和下载。' });
@@ -690,6 +729,7 @@ export function useSkillsEngine() {
         return t;
       }),
       checklistDone: [true, false, false, false],
+      runMeta: makeRunMeta('awaiting_select', 'select_video', null),
     }));
   }, []);
 
@@ -714,6 +754,7 @@ export function useSkillsEngine() {
         children: t.children.map(c => ({ ...c, status: 'queued' as TaskStatus, progress: 0 })),
       } : t),
       checklistDone: [true, true, true, false],
+      runMeta: makeRunMeta('phase3', null, Date.now() + PHASE3_MS),
     }));
     const timer = window.setTimeout(() => confirmGenerate(), 300);
     streamTimers.current.push(timer);
@@ -760,6 +801,7 @@ export function useSkillsEngine() {
       generatedPrompt: '',
       resultVideo: null,
       isProcessing: false,
+      runMeta: null,
       agents: [...initialAgents],
       activeRightView: 'none',
       checklistItems: [],
@@ -774,6 +816,469 @@ export function useSkillsEngine() {
   const restoreState = useCallback((snapshot: SkillsState) => {
     clearTimers();
 
+    const nowTs = Date.now();
+    const meta = snapshot.runMeta;
+    let restoreCounter = 0;
+    const makeRestoreId = (suffix: string) => `msg-restore-${suffix}-${Date.now()}-${restoreCounter++}`;
+
+    const normalizeMessages = (base: SkillsState): StreamMessage[] => {
+      const baseMessages = [...base.messages];
+      const hasAgentCluster = (agentId: string) =>
+        baseMessages.some(m => m.type === 'agent-cluster' && m.agents?.some(a => a.id === agentId));
+      const hasCreateAgent = (predicate: (m: StreamMessage) => boolean) =>
+        baseMessages.some(m => m.type === 'create-agent' && predicate(m));
+
+      const agent01 = base.agents.find(a => a.id === 'agent-01');
+      const agent02 = base.agents.find(a => a.id === 'agent-02');
+      const agent03 = base.agents.find(a => a.id === 'agent-03');
+      const agent04 = base.agents.find(a => a.id === 'agent-04');
+
+      const phase2Ready =
+        !!base.selectedVideo ||
+        base.runMeta?.phase === 'phase2' ||
+        base.runMeta?.awaitingAction === 'confirm_prompt' ||
+        !!base.generatedPrompt ||
+        base.runMeta?.phase === 'phase3' ||
+        base.runMeta?.phase === 'done' ||
+        !!base.resultVideo;
+
+      const phase3Ready =
+        base.runMeta?.phase === 'phase3' ||
+        base.runMeta?.phase === 'done' ||
+        !!base.resultVideo ||
+        base.agents.find(a => a.id === 'agent-04')?.status === 'running';
+
+      const shouldShowSelect = base.candidateVideos.length > 0 && !base.selectedVideo && !base.generatedPrompt;
+      const shouldShowPrompt = !!base.generatedPrompt;
+      const shouldShowFinal = !!base.resultVideo;
+
+      const pickFirst = (predicate: (m: StreamMessage) => boolean) => baseMessages.find(predicate) || null;
+
+      const flow: StreamMessage[] = [];
+      const push = (m: StreamMessage | null) => { if (m) flow.push(m); };
+
+      push(pickFirst(m => m.type === 'setup-summary') || {
+        id: makeRestoreId('setup-summary'),
+        type: 'setup-summary',
+        content: JSON.stringify(base.setup),
+      });
+      push(pickFirst(m => m.type === 'checklist') || {
+        id: makeRestoreId('checklist'),
+        type: 'checklist',
+        content: '',
+      });
+      push(
+        pickFirst(m => m.type === 'create-agent' && (m.agentNames?.some(n => n.avatar === 'search') || (m.content || '').includes('TikTok')))
+          || (agent01 ? {
+            id: makeRestoreId('create-agent-01'),
+            type: 'create-agent',
+            content: '创建TikTok爆款专家代理',
+            agentNames: [{ name: agent01.name, avatar: agent01.avatar }],
+          } : null)
+      );
+      push(
+        pickFirst(m => m.type === 'agent-cluster' && m.agents?.some(a => a.id === 'agent-01'))
+          || (agent01 && !hasAgentCluster('agent-01')
+            ? { id: makeRestoreId('agent-cluster-01'), type: 'agent-cluster', content: '', agents: [agent01] }
+            : null)
+      );
+
+      if (shouldShowSelect) {
+        push(
+          pickFirst(m => m.type === 'video-gen-status' && m.content.includes('对标视频')) || {
+            id: makeRestoreId('select-video'),
+            type: 'video-gen-status',
+            content: '请从右侧面板选择一条对标视频进行复刻 →',
+          }
+        );
+      }
+
+      if (base.selectedVideo) {
+        push(
+          pickFirst(m => m.type === 'selection-confirm') || {
+            id: makeRestoreId('selection-confirm'),
+            type: 'selection-confirm',
+            content: `已选择“${base.selectedVideo.title}”作为对标视频，现在为你生成专属爆款视频Prompt。`,
+          }
+        );
+      }
+
+      if (phase2Ready) {
+        push(pickFirst(m => m.type === 'read-checklist') || {
+          id: makeRestoreId('read-checklist-1'),
+          type: 'read-checklist',
+          content: '读取待办清单',
+        });
+
+        if (base.setup.memoryEnabled && base.setup.selectedMemoryIds.length > 0) {
+          for (const memId of base.setup.selectedMemoryIds) {
+            push(
+              pickFirst(m => m.type === 'read-memory' && m.memoryId === memId) || {
+                id: makeRestoreId(`read-memory-${memId}`),
+                type: 'read-memory',
+                content: '',
+                memoryId: memId,
+              }
+            );
+          }
+        }
+
+        push(
+          pickFirst(m => m.type === 'create-agent' && (m.agentNames?.some(n => n.avatar === 'memory') || m.agentNames?.some(n => n.avatar === 'strategist')))
+            || (agent02 && agent03 ? {
+              id: makeRestoreId('create-agent-02-03'),
+              type: 'create-agent',
+              content: '创建记忆库信息和Prompt设计专家代理',
+              agentNames: [
+                { name: agent02.name, avatar: agent02.avatar },
+                { name: agent03.name, avatar: agent03.avatar },
+              ],
+            } : null)
+        );
+        push(
+          pickFirst(m => m.type === 'agent-cluster' && m.agents?.some(a => a.id === 'agent-02' || a.id === 'agent-03'))
+            || (agent02 && agent03 && !hasAgentCluster('agent-02') && !hasAgentCluster('agent-03')
+              ? { id: makeRestoreId('agent-cluster-02-03'), type: 'agent-cluster', content: '', agents: [agent02, agent03] }
+              : null)
+        );
+        if (shouldShowPrompt) {
+          push(
+            pickFirst(m => m.type === 'video-gen-status' && m.content.includes('Prompt')) || {
+              id: makeRestoreId('prompt-ready'),
+              type: 'video-gen-status',
+              content: '✅ Prompt已生成，请在右侧面板查看和编辑，确认后生成视频 →',
+            }
+          );
+        }
+      }
+
+      if (phase3Ready) {
+        const readChecklists = baseMessages.filter(m => m.type === 'read-checklist');
+        push(readChecklists[1] || {
+          id: makeRestoreId('read-checklist-2'),
+          type: 'read-checklist',
+          content: '读取待办清单',
+        });
+        push(
+          pickFirst(m => m.type === 'create-agent' && m.agentNames?.some(n => n.avatar === 'video'))
+            || (agent04 ? {
+              id: makeRestoreId('create-agent-04'),
+              type: 'create-agent',
+              content: '创建视频生成专家代理',
+              agentNames: [{ name: agent04.name, avatar: agent04.avatar }],
+            } : null)
+        );
+        push(
+          pickFirst(m => m.type === 'agent-cluster' && m.agents?.some(a => a.id === 'agent-04'))
+            || (agent04 && !hasAgentCluster('agent-04')
+              ? { id: makeRestoreId('agent-cluster-04'), type: 'agent-cluster', content: '', agents: [agent04] }
+              : null)
+        );
+        if (shouldShowFinal) {
+          push(
+            pickFirst(m => m.type === 'video-gen-status' && m.content.includes('所有任务已完成')) || {
+              id: makeRestoreId('final'),
+              type: 'video-gen-status',
+              content: '🎉 所有任务已完成！复刻视频已生成，请在右侧面板查看和下载。',
+            }
+          );
+        }
+      }
+
+      const flowIds = new Set(flow.map(m => m.id));
+      const extras = baseMessages.filter(m => !flowIds.has(m.id));
+      // Remove invalid terminal messages
+      const filteredExtras = extras.filter((m) => {
+        if (m.type === 'video-gen-status' && m.content.includes('所有任务已完成')) return shouldShowFinal;
+        if (m.type === 'video-gen-status' && m.content.includes('Prompt')) return shouldShowPrompt;
+        if (m.type === 'video-gen-status' && m.content.includes('对标视频')) return shouldShowSelect;
+        if (m.type === 'selection-confirm') return !!base.selectedVideo;
+        return true;
+      });
+
+      return [...flow, ...filteredExtras];
+    };
+    const normalizeProgress = (base: SkillsState): SkillsState => {
+      if (!base.tasks || base.tasks.length === 0) return base;
+
+      const setTask = (task: SkillTask, status: TaskStatus, childStatus: TaskStatus) => ({
+        ...task,
+        status,
+        progress: status === 'done' ? 100 : status === 'running' ? 50 : task.progress,
+        children: task.children.map(c => ({ ...c, status: childStatus, progress: childStatus === 'done' ? 100 : childStatus === 'running' ? 50 : c.progress })),
+      });
+
+      let tasks = base.tasks.map(t => t);
+      let agents = [...base.agents];
+      let checklistDone = [...base.checklistDone];
+
+      if (base.candidateVideos.length > 0 || base.runMeta?.awaitingAction === 'select_video') {
+        tasks = tasks.map(t => t.id === 'task-crawl' ? setTask(t, 'done', 'done') : t);
+        agents = agents.map(a => a.id === 'agent-01' ? { ...a, status: 'done', progress: 100 } : a);
+        checklistDone[0] = true;
+      }
+
+      if (base.generatedPrompt || base.runMeta?.awaitingAction === 'confirm_prompt') {
+        tasks = tasks.map(t => t.id === 'task-memory' ? setTask(t, base.setup.memoryEnabled ? 'done' : 'skipped', base.setup.memoryEnabled ? 'done' : 'skipped') : t);
+        tasks = tasks.map(t => t.id === 'task-reverse-prompt' ? setTask(t, 'done', 'done') : t);
+        agents = agents.map(a => a.id === 'agent-02' ? { ...a, status: base.setup.memoryEnabled ? 'done' : 'skipped', progress: base.setup.memoryEnabled ? 100 : 0 } : a);
+        agents = agents.map(a => a.id === 'agent-03' ? { ...a, status: 'done', progress: 100 } : a);
+        checklistDone[1] = true;
+        checklistDone[2] = true;
+      } else if (base.runMeta?.phase === 'phase2') {
+        tasks = tasks.map(t => t.id === 'task-memory' ? setTask(t, base.setup.memoryEnabled ? 'running' : 'skipped', base.setup.memoryEnabled ? 'running' : 'skipped') : t);
+        tasks = tasks.map(t => t.id === 'task-reverse-prompt' ? setTask(t, 'running', 'running') : t);
+      }
+
+      if (base.resultVideo) {
+        tasks = tasks.map(t => t.id === 'task-generate-video' ? setTask(t, 'done', 'done') : t);
+        agents = agents.map(a => a.id === 'agent-04' ? { ...a, status: 'done', progress: 100 } : a);
+        checklistDone[3] = true;
+      } else if (base.runMeta?.phase === 'phase3') {
+        tasks = tasks.map(t => t.id === 'task-generate-video' ? setTask(t, 'running', 'running') : t);
+      }
+
+      return { ...base, tasks, agents, checklistDone };
+    };
+    const normalizeTasks = (base: SkillsState): SkillTask[] => {
+      if (!base.tasks || base.tasks.length === 0) return base.tasks;
+      const extractNumber = (text: string, pattern: RegExp, fallback: number) => {
+        const match = text.match(pattern);
+        if (!match) return fallback;
+        const num = Number(match[1]);
+        return Number.isFinite(num) ? num : fallback;
+      };
+
+      const withExpectedLogs = (task: SkillTask, expected: Array<{ key: string; message: string }>) => {
+        const logs = task.logs && task.logs.length > 0 ? [...task.logs] : [];
+        const hasLog = (key: string) => logs.some(l => l.message.includes(key));
+        if (task.status === 'queued' && task.children.every(c => c.status === 'queued')) {
+          return task;
+        }
+        for (const item of expected) {
+          if (!hasLog(item.key)) {
+            logs.push({ time: now(), message: item.message });
+          }
+        }
+        return { ...task, logs };
+      };
+
+      return base.tasks.map((task) => {
+        if (task.id === 'task-crawl') {
+          const existingText = (task.logs || []).map(l => l.message).join(' ');
+          const crawlCount = extractNumber(task.output || existingText, /(\d+)\s*条/, base.candidateVideos.length > 0 ? base.candidateVideos.length : 200);
+          const matchRate = extractNumber(existingText, /匹配度\s*([0-9.]+)%/, 51.8);
+          const highMatchCount = extractNumber(existingText, /高匹配\s*(\d+)\s*条/, 17);
+          return withExpectedLogs(task, [
+            { key: '启动 TikTok 爬虫', message: 'TikTok爆款专家启动 TikTok 爬虫...' },
+            { key: '完成抓取', message: `爬虫专家完成抓取 → 共获取 ${crawlCount} 条视频数据` },
+            { key: '正在分析卖点匹配度', message: '数据专家正在分析卖点匹配度...' },
+            { key: '完成分析', message: `数据专家完成分析 → 平均匹配度 ${matchRate}%，高匹配 ${highMatchCount} 条` },
+            { key: '完成排序', message: '策略专家完成排序 → Top 4候选已生成' },
+            { key: '完成封面提取', message: '视频专家完成封面提取 → 4张高清封面已缓存' },
+          ]);
+        }
+
+        if (task.id === 'task-memory') {
+          if (!base.setup.memoryEnabled) return task;
+          const existingText = (task.logs || []).map(l => l.message).join(' ');
+          const memoryCount = base.setup.selectedMemoryIds.length > 0 ? base.setup.selectedMemoryIds.length : 4;
+          const vectorDim = extractNumber(existingText, /生成\s*(\d+)\s*维/, 32);
+          return withExpectedLogs(task, [
+            { key: '正在连接记忆库', message: '记忆专家正在连接记忆库...' },
+            { key: '完成连接记忆库', message: '记忆专家完成连接记忆库 → 已建立安全连接' },
+            { key: '完成检索', message: `检索专家完成检索 → 命中 ${memoryCount} 条相关记忆` },
+            { key: '完成构建上下文向量', message: `数据专家完成构建上下文向量 → 生成 ${vectorDim} 维特征向量` },
+          ]);
+        }
+
+        if (task.id === 'task-reverse-prompt') {
+          const existingText = (task.logs || []).map(l => l.message).join(' ');
+          const keyFrames = extractNumber(existingText, /提取\s*(\d+)\s*个关键帧/, 38);
+          return withExpectedLogs(task, [
+            { key: '开始分析视频内容', message: '开始分析视频内容...' },
+            { key: '完成视频帧分析', message: `视频专家完成视频帧分析 → 提取 ${keyFrames} 个关键帧` },
+            { key: '完成风格特征提取', message: '设计专家完成风格特征提取' },
+            { key: '完成提示词生成', message: '策略专家完成提示词生成 → 包含镜头、节奏、结构等 6 个维度' },
+          ]);
+        }
+
+        if (task.id === 'task-generate-video') {
+          return withExpectedLogs(task, [
+            { key: '开始渲染视频', message: '开始渲染视频...' },
+            { key: '渲染场景', message: '设计专家渲染场景' },
+            { key: '完成场景渲染', message: '设计专家完成场景渲染' },
+            { key: '正在合成音频', message: '音频专家正在合成音频...' },
+            { key: '完成音频合成', message: '音频专家完成音频合成 → BGM 节拍同步' },
+            { key: '正在合成视频', message: '视频专家正在合成视频...' },
+            { key: '完成视频合成', message: '视频专家完成视频合成' },
+            { key: '质量检测通过', message: '质量检测通过' },
+          ]);
+        }
+
+        return task;
+      });
+    };
+    const commitState = (next: SkillsState) => {
+      const withProgress = normalizeProgress(next);
+      setState({ ...withProgress, tasks: normalizeTasks(withProgress), messages: normalizeMessages(withProgress) });
+    };
+
+    const ensureSelectMessage = (messages: StreamMessage[]) => {
+      const exists = messages.some(m => m.type === 'video-gen-status' && m.content.includes('对标视频'));
+      if (exists) return messages;
+      return [
+        ...messages,
+        { id: `msg-restore-pick-${Date.now()}`, type: 'video-gen-status', content: '请从右侧面板选择一条对标视频进行复刻 →' },
+      ];
+    };
+
+    const ensurePromptMessage = (messages: StreamMessage[]) => {
+      const exists = messages.some(m => m.type === 'video-gen-status' && m.content.includes('Prompt已生成'));
+      if (exists) return messages;
+      return [
+        ...messages,
+        { id: `msg-restore-prompt-${Date.now()}`, type: 'video-gen-status', content: '✅ Prompt已生成，请在右侧面板查看和编辑，确认后生成视频 →' },
+      ];
+    };
+
+    const ensureReadMemoryMessages = (messages: StreamMessage[]) => {
+      if (!snapshot.setup.memoryEnabled || snapshot.setup.selectedMemoryIds.length === 0) return messages;
+      const existingIds = new Set(
+        messages.filter(m => m.type === 'read-memory' && m.memoryId).map(m => m.memoryId as string)
+      );
+      const additions: StreamMessage[] = [];
+      for (const memId of snapshot.setup.selectedMemoryIds) {
+        if (!existingIds.has(memId)) {
+          additions.push({ id: `msg-restore-mem-${memId}-${Date.now()}`, type: 'read-memory', content: '', memoryId: memId });
+        }
+      }
+      if (additions.length === 0) return messages;
+      return [...messages, ...additions];
+    };
+
+    const ensureFinalMessage = (messages: StreamMessage[]) => {
+      const exists = messages.some(m => m.type === 'video-gen-status' && m.content.includes('所有任务已完成'));
+      if (exists) return messages;
+      return [
+        ...messages,
+        { id: `msg-restore-final-${Date.now()}`, type: 'video-gen-status', content: '🎉 所有任务已完成！复刻视频已生成，请在右侧面板查看和下载。' },
+      ];
+    };
+
+    const buildMockPrompt = (base: SkillsState, title: string) => `【爆款复刻Prompt】\n\n镜头风格：近景特写 + 俯拍切换，暖色调滤镜\n节奏：快节奏剪辑，BGM 节拍同步\n内容结构：\n1. 开场- 产品白底展示，旋转360°（0-3s）\n2. 使用场景 - 手部特写展示质感（3-8s）\n3. 效果对比 - 使用前后对比（8-15s）\n4. 口播种草 - 真人出镜，口述卖点（15-25s）\n5. 结尾 CTA - 点击链接，限时优惠（25-30s）\n\n关键词：${base.setup.sellingPoints.slice(0, 30)}\n品类：${base.setup.category}\n参考来源：${title}`;
+
+    const fastForwardToSelect = (base: SkillsState) => {
+      const videos = base.candidateVideos.length > 0 ? base.candidateVideos : mockVideos();
+      commitState({
+        ...base,
+        isProcessing: false,
+        candidateVideos: videos,
+        activeRightView: 'agents',
+        activeAgentTab: '01',
+        checklistDone: [true, ...base.checklistDone.slice(1)],
+        runMeta: makeRunMeta('awaiting_select', 'select_video', null),
+        agents: base.agents.map(a =>
+          a.id === 'agent-01'
+            ? { ...a, status: 'done' as const, progress: 100, statusText: '已完成爆款视频匹配，请选择对标视频' }
+            : a.status === 'running' ? { ...a, status: 'done' as const } : a
+        ),
+        messages: ensureSelectMessage(
+          base.messages.map(m => {
+            if (m.type === 'agent-cluster' && m.agents) {
+              return { ...m, agents: m.agents.map(a => a.id === 'agent-01' ? { ...a, status: 'done' as const, progress: 100, statusText: '已完成爆款视频匹配，请选择对标视频' } : a) };
+            }
+            return m;
+          })
+        ),
+      });
+    };
+
+    const fastForwardToPrompt = (base: SkillsState) => {
+      const prompt = base.generatedPrompt || buildMockPrompt(base, base.selectedVideo?.title || '');
+      commitState({
+        ...base,
+        isProcessing: false,
+        generatedPrompt: prompt,
+        checklistDone: [true, true, true, false],
+        runMeta: makeRunMeta('awaiting_confirm', 'confirm_prompt', null),
+        agents: base.agents.map(a => {
+          if (a.id === 'agent-02') return { ...a, status: 'done' as const, progress: 100, statusText: '已完成记忆库构建' };
+          if (a.id === 'agent-03') return { ...a, status: 'done' as const, progress: 100, statusText: '已完成Prompt设计' };
+          return a.status === 'running' ? { ...a, status: 'done' as const } : a;
+        }),
+        messages: ensurePromptMessage(
+          ensureReadMemoryMessages(
+            base.messages.map(m => {
+              if (m.type === 'agent-cluster' && m.agents) {
+                return { ...m, agents: m.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const, progress: 100 } : a) };
+              }
+              return m;
+            })
+          )
+        ),
+      });
+    };
+
+    const fastForwardToResult = (base: SkillsState) => {
+      commitState({
+        ...base,
+        isProcessing: false,
+        resultVideo: { url: '', cover: '' },
+        checklistDone: [true, true, true, true],
+        runMeta: makeRunMeta('done', null, null),
+        agents: base.agents.map(a =>
+          a.id === 'agent-04'
+            ? { ...a, status: 'done' as const, progress: 100, statusText: '视频生成完成！' }
+            : a.status === 'running' ? { ...a, status: 'done' as const } : a
+        ),
+        messages: ensureFinalMessage(
+          base.messages.map(m => {
+            if (m.type === 'agent-cluster' && m.agents) {
+              return { ...m, agents: m.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const, progress: 100 } : a) };
+            }
+            return m;
+          })
+        ),
+      });
+    };
+
+    const scheduleFastForward = (phase: SkillsRunPhase, remainingMs: number) => {
+      const timer = window.setTimeout(() => {
+        if (phase === 'phase1') fastForwardToSelect(snapshot);
+        if (phase === 'phase2') fastForwardToPrompt(snapshot);
+        if (phase === 'phase3') fastForwardToResult(snapshot);
+      }, Math.max(0, remainingMs));
+      streamTimers.current.push(timer);
+    };
+
+    if (meta) {
+      if (meta.phase === 'done') {
+        commitState({ ...snapshot, isProcessing: false });
+        return;
+      }
+      if (meta.awaitingAction === 'select_video') {
+        commitState({ ...snapshot, isProcessing: false });
+        return;
+      }
+      if (meta.awaitingAction === 'confirm_prompt') {
+        commitState({ ...snapshot, isProcessing: false });
+        return;
+      }
+      if ((meta.phase === 'phase1' || meta.phase === 'phase2' || meta.phase === 'phase3') && meta.nextActionAt) {
+        const remaining = meta.nextActionAt - nowTs;
+        if (remaining <= 0) {
+          if (meta.phase === 'phase1') fastForwardToSelect(snapshot);
+          if (meta.phase === 'phase2') fastForwardToPrompt(snapshot);
+          if (meta.phase === 'phase3') fastForwardToResult(snapshot);
+          return;
+        }
+        commitState({ ...snapshot, isProcessing: true });
+        scheduleFastForward(meta.phase, remaining);
+        return;
+      }
+    }
+
     // Determine which phase was active
     const hasResult = !!snapshot.resultVideo;
     const hasPrompt = !!snapshot.generatedPrompt;
@@ -783,17 +1288,18 @@ export function useSkillsEngine() {
 
     // Already completed – just restore
     if (hasResult) {
-      setState({ ...snapshot, isProcessing: false });
+      commitState({ ...snapshot, isProcessing: false, runMeta: makeRunMeta('done', null, null) });
       return;
     }
 
     // Phase 3 was running (agent 04) → fast-forward to done
     if (hasPrompt && agent04Running) {
-      setState({
+      commitState({
         ...snapshot,
         isProcessing: false,
         resultVideo: { url: '', cover: '' },
         checklistDone: [true, true, true, true],
+        runMeta: makeRunMeta('done', null, null),
         agents: snapshot.agents.map(a =>
           a.id === 'agent-04'
             ? { ...a, status: 'done' as const, progress: 100, statusText: '视频生成完成！' }
@@ -811,16 +1317,19 @@ export function useSkillsEngine() {
 
     // Has prompt, waiting for user confirm → just restore
     if (hasPrompt) {
-      setState({
+      commitState({
         ...snapshot,
         isProcessing: false,
+        runMeta: makeRunMeta('awaiting_confirm', 'confirm_prompt', null),
         agents: snapshot.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const } : a),
-        messages: snapshot.messages.map(m => {
-          if (m.type === 'agent-cluster' && m.agents) {
-            return { ...m, agents: m.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const } : a) };
-          }
-          return m;
-        }),
+        messages: ensureReadMemoryMessages(
+          snapshot.messages.map(m => {
+            if (m.type === 'agent-cluster' && m.agents) {
+              return { ...m, agents: m.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const } : a) };
+            }
+            return m;
+          })
+        ),
       });
       return;
     }
@@ -828,23 +1337,26 @@ export function useSkillsEngine() {
     // Phase 2 was running (selected video, no prompt yet) → fast-forward to prompt generated
     if (hasSelected && !hasPrompt) {
       const mockPrompt = `【爆款复刻 Prompt】\n\n镜头风格：近景特写 + 俯拍切换，暖色调滤镜\n节奏：快节奏剪辑，BGM 节拍同步\n内容结构：\n1. 开场 - 产品白底展示，旋转 360°（0-3s）\n2. 使用场景 - 手部特写展示质感（3-8s）\n3. 效果对比 - 使用前后对比（8-15s）\n4. 口播种草 - 真人出镜，口述卖点（15-25s）\n5. 结尾 CTA - 点击链接，限时优惠（25-30s）\n\n关键词：${snapshot.setup.sellingPoints.slice(0, 30)}\n品类：${snapshot.setup.category}\n参考来源：${snapshot.selectedVideo?.title || ''}`;
-      setState({
+      commitState({
         ...snapshot,
         isProcessing: false,
         generatedPrompt: mockPrompt,
         checklistDone: [true, true, true, false],
+        runMeta: makeRunMeta('awaiting_confirm', 'confirm_prompt', null),
         agents: snapshot.agents.map(a => {
           if (a.id === 'agent-02') return { ...a, status: 'done' as const, progress: 100, statusText: '已完成记忆库构建' };
           if (a.id === 'agent-03') return { ...a, status: 'done' as const, progress: 100, statusText: '已完成Prompt设计' };
           return a.status === 'running' ? { ...a, status: 'done' as const } : a;
         }),
         messages: [
-          ...snapshot.messages.map(m => {
-            if (m.type === 'agent-cluster' && m.agents) {
-              return { ...m, agents: m.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const, progress: 100 } : a) };
-            }
-            return m;
-          }),
+          ...ensureReadMemoryMessages(
+            snapshot.messages.map(m => {
+              if (m.type === 'agent-cluster' && m.agents) {
+                return { ...m, agents: m.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const, progress: 100 } : a) };
+              }
+              return m;
+            })
+          ),
           { id: `msg-restore-prompt-${Date.now()}`, type: 'video-gen-status' as const, content: '✅ Prompt已生成，请在右侧面板查看和编辑，确认后生成视频 →' },
         ],
       });
@@ -853,9 +1365,10 @@ export function useSkillsEngine() {
 
     // Has candidates, waiting for user to pick → just restore
     if (hasCandidates && !hasSelected) {
-      setState({
+      commitState({
         ...snapshot,
         isProcessing: false,
+        runMeta: makeRunMeta('awaiting_select', 'select_video', null),
         agents: snapshot.agents.map(a => a.status === 'running' ? { ...a, status: 'done' as const } : a),
         messages: snapshot.messages.map(m => {
           if (m.type === 'agent-cluster' && m.agents) {
@@ -870,13 +1383,14 @@ export function useSkillsEngine() {
     // Phase 1 was running (no candidates yet) → fast-forward to candidates generated
     if (snapshot.setupCompleted && !hasCandidates) {
       const videos = mockVideos();
-      setState({
+      commitState({
         ...snapshot,
         isProcessing: false,
         candidateVideos: videos,
         checklistDone: [true, false, false, false],
         activeRightView: 'agents',
         activeAgentTab: '01',
+        runMeta: makeRunMeta('awaiting_select', 'select_video', null),
         agents: snapshot.agents.map(a =>
           a.id === 'agent-01'
             ? { ...a, status: 'done' as const, progress: 100, statusText: '已完成爆款视频匹配，请选择对标视频' }
@@ -896,7 +1410,7 @@ export function useSkillsEngine() {
     }
 
     // Fallback: just restore
-    setState({ ...snapshot, isProcessing: false });
+    commitState({ ...snapshot, isProcessing: false });
   }, []);
 
   return {

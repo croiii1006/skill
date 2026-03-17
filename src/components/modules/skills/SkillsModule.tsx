@@ -11,6 +11,7 @@ import {
 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
+import { getSkillsHistory, upsertSkillsHistoryItem, deleteSkillsHistoryItem, type SkillsHistoryItem } from './skillsHistoryStorage';
 import pixelCross from '@/assets/pixel-cross.png';
 
 import pixelSearch from '@/assets/pixel-search.svg';
@@ -104,29 +105,6 @@ function AgentClusterSteps({ agents, isLast, msgId, category, sellingPoints, mem
 }
 
 /* ─── History helpers ─── */
-interface SkillsHistoryItem {
-  id: string;
-  category: string;
-  sellingPoints: string;
-  image: string | null;
-  memoryEnabled: boolean;
-  selectedMemoryIds: string[];
-  date: string;
-  snapshot: SkillsState;
-}
-
-const SKILLS_HISTORY_KEY = 'skills-solution-history-v3';
-
-function loadSkillsHistory(): SkillsHistoryItem[] {
-  try {
-    const raw = localStorage.getItem(SKILLS_HISTORY_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {return [];}
-}
-
-function saveSkillsHistory(items: SkillsHistoryItem[]) {
-  localStorage.setItem(SKILLS_HISTORY_KEY, JSON.stringify(items));
-}
 
 function deriveStatusLabel(snapshot: SkillsState): string {
   if (snapshot.resultVideo) return '已完成';
@@ -154,13 +132,31 @@ export function SkillsModule() {
   })), [entries]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
+  const [history, setHistory] = useState<SkillsHistoryItem[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(() => {
     try { return localStorage.getItem('skills-active-history-id'); } catch { return null; }
   });
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
   const [chatOnlyInput, setChatOnlyInput] = useState('');
   const [historySheetOpen, setHistorySheetOpen] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const items = await getSkillsHistory();
+        if (!mounted) return;
+        const sorted = items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setHistory(sorted);
+      } finally {
+        if (mounted) setHistoryLoaded(true);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Persist activeHistoryId to localStorage
   useEffect(() => {
@@ -171,16 +167,16 @@ export function SkillsModule() {
     }
   }, [activeHistoryId]);
 
-  // On mount: if we have an activeHistoryId but no live state, restore from history
+  // When history is loaded: if we have an activeHistoryId but no live state, restore from history
   useEffect(() => {
+    if (!historyLoaded) return;
     if (activeHistoryId && !state.setupCompleted) {
       const item = history.find(h => h.id === activeHistoryId);
       if (item && item.snapshot.setupCompleted) {
         restoreState(item.snapshot);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // only on mount
+  }, [historyLoaded, activeHistoryId, state.setupCompleted, history, restoreState]);
 
   const activeMemoryEntry = useMemo(() => {
     if (!activeMemoryId) return null;
@@ -209,10 +205,11 @@ export function SkillsModule() {
     if (!activeHistoryId || !state.setupCompleted) return;
     setHistory((prev) => {
       const updated = prev.map((h) => h.id === activeHistoryId ? { ...h, snapshot: { ...state } } : h);
-      saveSkillsHistory(updated);
+      const item = updated.find((h) => h.id === activeHistoryId);
+      if (item) void upsertSkillsHistoryItem(item);
       return updated;
     });
-  }, [activeHistoryId, state.setupCompleted, state.isProcessing, state.tasks, state.messages, state.candidateVideos, state.selectedVideo, state.generatedPrompt, state.resultVideo]);
+  }, [activeHistoryId, state.setupCompleted, state.isProcessing, state.tasks, state.messages, state.candidateVideos, state.selectedVideo, state.generatedPrompt, state.resultVideo, state.runMeta]);
 
   const addHistory = useCallback((setup: SessionSetup) => {
     const newItem: SkillsHistoryItem = {
@@ -225,19 +222,24 @@ export function SkillsModule() {
       date: new Date().toISOString(),
       snapshot: { ...state }
     };
-    const updated = [newItem, ...history].slice(0, 20);
-    setHistory(updated);
-    saveSkillsHistory(updated);
+    setHistory((prev) => {
+      const updated = [newItem, ...prev].slice(0, 20);
+      const removed = prev.slice(19);
+      void upsertSkillsHistoryItem(newItem);
+      removed.forEach((item) => {
+        void deleteSkillsHistoryItem(item.id);
+      });
+      return updated;
+    });
     setActiveHistoryId(newItem.id);
     return newItem.id;
-  }, [history, state]);
+  }, [state]);
 
   const deleteHistory = useCallback((id: string) => {
-    const updated = history.filter((h) => h.id !== id);
-    setHistory(updated);
-    saveSkillsHistory(updated);
+    setHistory((prev) => prev.filter((h) => h.id !== id));
+    void deleteSkillsHistoryItem(id);
     if (activeHistoryId === id) setActiveHistoryId(null);
-  }, [history, activeHistoryId]);
+  }, [activeHistoryId]);
 
   const hasInProgressSession = useMemo(() => {
     return history.some((h) => h.snapshot.setupCompleted && !h.snapshot.resultVideo);
@@ -245,6 +247,14 @@ export function SkillsModule() {
 
   const handleSend = (text: string, image?: string | null, category?: string, memoryIds?: string[]) => {
     if (!state.setupCompleted && (image || text)) {
+      if (!historyLoaded) {
+        toast({
+          title: '历史记录加载中',
+          description: '正在恢复历史记录，请稍候再试',
+          variant: 'destructive'
+        });
+        return;
+      }
       if (hasInProgressSession) {
         toast({
           title: '当前已有进行中的任务',
@@ -271,12 +281,6 @@ export function SkillsModule() {
   const handleRestoreHistory = (item: SkillsHistoryItem) => {
     const isCurrentActive = item.id === activeHistoryId;
     const isItemInProgress = !item.snapshot.resultVideo && item.snapshot.setupCompleted;
-
-    if (isCurrentActive && isItemInProgress) {
-      // Already viewing this in-progress session – just close sheet
-      setHistorySheetOpen(false);
-      return;
-    }
 
     // Restore snapshot as-is; running agents will be frozen to 'done'
     restoreState(item.snapshot);
