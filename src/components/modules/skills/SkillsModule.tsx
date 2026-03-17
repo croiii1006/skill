@@ -235,16 +235,17 @@ export function SkillsModule() {
   };
 
   const handleRestoreHistory = (item: SkillsHistoryItem) => {
-    const isInProgress = !item.snapshot.resultVideo;
-    if (isInProgress && item.snapshot.setup) {
-      // Re-run the pipeline from setup for in-progress items
-      resetSession();
-      setActiveHistoryId(item.id);
-      completeSetup(item.snapshot.setup);
-    } else {
-      restoreState(item.snapshot);
-      setActiveHistoryId(item.id);
+    const isCurrentActive = item.id === activeHistoryId;
+    const isItemInProgress = !item.snapshot.resultVideo && item.snapshot.setupCompleted;
+
+    if (isCurrentActive && isItemInProgress) {
+      // Already viewing this in-progress session – just close sheet
+      setHistorySheetOpen(false);
+      return;
     }
+
+    restoreState(item.snapshot);
+    setActiveHistoryId(item.id);
     setHistorySheetOpen(false);
   };
 
