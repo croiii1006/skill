@@ -162,6 +162,26 @@ export function SkillsModule() {
   const [chatOnlyInput, setChatOnlyInput] = useState('');
   const [historySheetOpen, setHistorySheetOpen] = useState(false);
 
+  // Persist activeHistoryId to localStorage
+  useEffect(() => {
+    if (activeHistoryId) {
+      localStorage.setItem('skills-active-history-id', activeHistoryId);
+    } else {
+      localStorage.removeItem('skills-active-history-id');
+    }
+  }, [activeHistoryId]);
+
+  // On mount: if we have an activeHistoryId but no live state, restore from history
+  useEffect(() => {
+    if (activeHistoryId && !state.setupCompleted) {
+      const item = history.find(h => h.id === activeHistoryId);
+      if (item && item.snapshot.setupCompleted) {
+        restoreState(item.snapshot);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // only on mount
+
   const activeMemoryEntry = useMemo(() => {
     if (!activeMemoryId) return null;
     return entries.find((e) => e.id === activeMemoryId) || null;
