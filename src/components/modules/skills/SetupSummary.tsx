@@ -21,9 +21,11 @@ export function SetupSummary({ setup }: SetupSummaryProps) {
         <span className="text-xs text-foreground/70">{setup.category}</span>
       </div>
       {setup.sellingPoints && (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <Tag className="w-3.5 h-3.5 text-muted-foreground/50" />
-          <span className="text-xs text-foreground/70 truncate max-w-[150px]">{setup.sellingPoints.split('\n')[0]}</span>
+          {setup.sellingPoints.split('\n').filter(Boolean).map((sp, i) => (
+            <span key={i} className="inline-flex h-5 items-center rounded-full bg-foreground/5 border border-border/30 px-2 text-[10px] text-foreground/70">{sp}</span>
+          ))}
         </div>
       )}
       <div className="flex items-center gap-1.5">

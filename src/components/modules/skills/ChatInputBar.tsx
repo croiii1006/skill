@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Bot, ArrowUp, X, Paperclip, Brain, Check } from 'lucide-react';
+import { Plus, ArrowUp, X, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { CategoryCascader, CATEGORY_TREE } from './CategoryCascader';
 import { MemorySelectionDialog } from '@/components/modules/memory/MemorySelectionDialog';
+import { toast } from '@/hooks/use-toast';
 
 export interface MemoryItem {
   id: string;
@@ -31,27 +32,51 @@ interface ChatInputBarProps {
   memoryItems: MemoryItem[];
 }
 
+const MAX_TAG_LENGTH = 20;
+const MAX_TAG_COUNT = 10;
 
 export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProps) {
-  const [input, setInput] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | null>(null);
   const [category, setCategory] = useState('');
   const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]);
-  const [plusOpen, setPlusOpen] = useState(false);
   const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
+  const addTag = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    if (trimmed.length > MAX_TAG_LENGTH) {
+      toast({ title: '标签过长', description: `每个标签最多 ${MAX_TAG_LENGTH} 个字符`, variant: 'destructive' });
+      return;
+    }
+    if (tags.length >= MAX_TAG_COUNT) {
+      toast({ title: '标签已满', description: `最多添加 ${MAX_TAG_COUNT} 个标签`, variant: 'destructive' });
+      return;
+    }
+    if (tags.includes(trimmed)) {
+      toast({ title: '标签重复', description: '该标签已存在' });
+      return;
+    }
+    setTags(prev => [...prev, trimmed]);
+    setTagInput('');
+  };
+
+  const removeTag = (index: number) => {
+    setTags(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSend = () => {
-    if (!input.trim() || !image || !category || disabled) return;
-    onSend(input.trim(), image, category || undefined, selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined);
-    setInput('');
+    if (tags.length === 0 || !image || !category || disabled) return;
+    const sellingPointsText = tags.join('\n');
+    onSend(sellingPointsText, image, category || undefined, selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined);
+    setTags([]);
+    setTagInput('');
     setImage(null);
     setImageName(null);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +86,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
       setImage(url);
       setImageName(file.name);
     }
-    setPlusOpen(false);
   };
 
   const removeImage = () => {
@@ -75,14 +99,7 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
     );
   };
 
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    const el = e.target;
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 200) + 'px';
-  };
-
-  const hasContent = input.trim() && image && category;
+  const hasContent = tags.length > 0 && image && category;
 
   return (
     <div className="border-t border-border/20 bg-transparent px-6 py-3">
@@ -123,30 +140,49 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
               />
             </div>
 
-            {/* Textarea */}
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={handleTextareaChange}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="输入商品卖点，描述产品核心优势..."
-              disabled={disabled}
-              rows={2}
-              className="w-full resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50 leading-relaxed"
-              style={{ minHeight: '48px', maxHeight: '200px' }}
-            />
+            {/* Tag input area */}
+            <div className="flex flex-wrap items-center gap-1.5 min-h-[48px] py-1.5">
+              {tags.map((tag, i) => (
+                <span
+                  key={`${tag}-${i}`}
+                  className="inline-flex items-center gap-1 h-6 rounded-full bg-foreground/5 border border-border/40 px-2.5 text-xs text-foreground/80"
+                >
+                  {tag}
+                  <button onClick={() => removeTag(i)} className="text-muted-foreground hover:text-foreground transition-colors">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              <input
+                ref={tagInputRef}
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag(tagInput);
+                  }
+                  if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+                    removeTag(tags.length - 1);
+                  }
+                }}
+                onBlur={() => {
+                  if (tagInput.trim()) addTag(tagInput);
+                }}
+                placeholder={tags.length === 0 ? '输入卖点后按回车添加标签...' : tags.length < MAX_TAG_COUNT ? '继续添加...' : ''}
+                disabled={disabled || tags.length >= MAX_TAG_COUNT}
+                className="flex-1 min-w-[120px] bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50"
+              />
+            </div>
+            <div className="text-[10px] text-muted-foreground/50 mt-0.5">
+              {tags.length}/{MAX_TAG_COUNT} 个标签 · 每个最多 {MAX_TAG_LENGTH} 字
+            </div>
           </div>
         </div>
 
         {/* Bottom toolbar */}
         <div className="flex items-center justify-between mt-2 pt-2">
           <div className="flex items-center gap-2">
-            {/* Plus menu */}
             <button
               onClick={() => setMemoryDialogOpen(true)}
               className={cn(
@@ -164,14 +200,12 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
               )}
             </button>
 
-            {/* Credits display */}
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
               <span>预计消耗：约 200 credit</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Send button */}
             <button
               onClick={handleSend}
               disabled={!hasContent || disabled}
@@ -190,7 +224,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
       </div>
 
-      {/* Memory selection dialog */}
       <MemorySelectionDialog
         open={memoryDialogOpen}
         onOpenChange={setMemoryDialogOpen}
