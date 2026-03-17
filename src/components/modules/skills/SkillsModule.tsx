@@ -140,7 +140,7 @@ export function SkillsModule() {
   const {
     state, CATEGORIES, completeSetup, refreshCandidates, selectVideo,
     updatePrompt, confirmGenerate, regenerate, backToVideoSelect,
-    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState, restoreAndResume
+    setActiveTaskId, setActiveRightView, handleUserInput, resetSession, restoreState
   } = useSkillsEngine();
 
   const { toast } = useToast();
@@ -155,10 +155,32 @@ export function SkillsModule() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<SkillsHistoryItem[]>(loadSkillsHistory);
-  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
+  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(() => {
+    try { return localStorage.getItem('skills-active-history-id'); } catch { return null; }
+  });
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
   const [chatOnlyInput, setChatOnlyInput] = useState('');
   const [historySheetOpen, setHistorySheetOpen] = useState(false);
+
+  // Persist activeHistoryId to localStorage
+  useEffect(() => {
+    if (activeHistoryId) {
+      localStorage.setItem('skills-active-history-id', activeHistoryId);
+    } else {
+      localStorage.removeItem('skills-active-history-id');
+    }
+  }, [activeHistoryId]);
+
+  // On mount: if we have an activeHistoryId but no live state, restore from history
+  useEffect(() => {
+    if (activeHistoryId && !state.setupCompleted) {
+      const item = history.find(h => h.id === activeHistoryId);
+      if (item && item.snapshot.setupCompleted) {
+        restoreState(item.snapshot);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // only on mount
 
   const activeMemoryEntry = useMemo(() => {
     if (!activeMemoryId) return null;
@@ -256,12 +278,8 @@ export function SkillsModule() {
       return;
     }
 
-    if (isItemInProgress) {
-      // Resume the pipeline from where it left off
-      restoreAndResume(item.snapshot);
-    } else {
-      restoreState(item.snapshot);
-    }
+    // Restore snapshot as-is; running agents will be frozen to 'done'
+    restoreState(item.snapshot);
     setActiveHistoryId(item.id);
     setHistorySheetOpen(false);
   };

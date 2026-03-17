@@ -769,106 +769,31 @@ export function useSkillsEngine() {
 
   const restoreState = useCallback((snapshot: SkillsState) => {
     clearTimers();
-    setState({ ...snapshot, isProcessing: false });
+    // Restore snapshot as-is, but stop processing and freeze any "running" agents
+    setState({
+      ...snapshot,
+      isProcessing: false,
+      agents: snapshot.agents.map(a =>
+        a.status === 'running'
+          ? { ...a, status: 'done' as const, statusText: a.statusText || '已恢复' }
+          : a
+      ),
+      // Also update agent statuses inside agent-cluster messages
+      messages: snapshot.messages.map(m => {
+        if (m.type === 'agent-cluster' && m.agents) {
+          return {
+            ...m,
+            agents: m.agents.map(a =>
+              a.status === 'running'
+                ? { ...a, status: 'done' as const, statusText: a.statusText || '已恢复' }
+                : a
+            ),
+          };
+        }
+        return m;
+      }),
+    });
   }, []);
-
-  /**
-   * Detect which pipeline phase was active in a snapshot.
-   * Returns: 'phase1' | 'phase2' | 'phase3' | 'waiting' | 'done'
-   *  - phase1: Agent 01 running (no candidateVideos yet)
-   *  - phase2: Agent 02+03 running (selectedVideo but no generatedPrompt)
-   *  - phase3: Agent 04 running (generatedPrompt exists, no resultVideo, agent-04 was running)
-   *  - waiting: waiting for user input (video selection or prompt confirmation)
-   *  - done: completed
-   */
-  const detectPhase = useCallback((snapshot: SkillsState): 'phase1' | 'phase2' | 'phase3' | 'waiting' | 'done' => {
-    if (snapshot.resultVideo) return 'done';
-    if (snapshot.generatedPrompt && snapshot.agents.find(a => a.id === 'agent-04')?.status === 'running') return 'phase3';
-    if (snapshot.generatedPrompt) return 'waiting'; // waiting for user to confirm prompt
-    if (snapshot.selectedVideo && !snapshot.generatedPrompt) return 'phase2';
-    if (snapshot.candidateVideos.length > 0 && !snapshot.selectedVideo) return 'waiting'; // waiting for video selection
-    if (snapshot.setupCompleted && snapshot.candidateVideos.length === 0) return 'phase1';
-    return 'waiting';
-  }, []);
-
-  /**
-   * Restore a snapshot and resume its pipeline if it was actively running.
-   */
-  const restoreAndResume = useCallback((snapshot: SkillsState) => {
-    clearTimers();
-    const phase = detectPhase(snapshot);
-
-    if (phase === 'done' || phase === 'waiting') {
-      // Just restore – no active pipeline to resume
-      setState({ ...snapshot, isProcessing: false });
-      return;
-    }
-
-    // For active phases, reset to the start of that phase and re-run
-    if (phase === 'phase1') {
-      // Reset and re-run from setup
-      setState({
-        ...snapshot,
-        candidateVideos: [],
-        selectedVideo: null,
-        generatedPrompt: '',
-        resultVideo: null,
-        isProcessing: true,
-        agents: snapshot.agents.map(a => a.id === 'agent-01'
-          ? { ...a, status: 'idle' as const, progress: 0, statusText: '等待启动' }
-          : a),
-        messages: snapshot.messages.filter(m =>
-          m.type === 'setup-summary' // keep only setup summary
-        ),
-        checklistDone: [false, false, false, false],
-      });
-      // Re-run phase 1 after a tick
-      setTimeout(() => completeSetup(snapshot.setup), 100);
-    } else if (phase === 'phase2') {
-      // Has selectedVideo, need to re-run agent 02+03
-      const video = snapshot.selectedVideo!;
-      // Reset agents 02-04 and re-run selectVideo
-      setState({
-        ...snapshot,
-        generatedPrompt: '',
-        resultVideo: null,
-        isProcessing: false,
-        agents: snapshot.agents.map(a => {
-          if (['agent-02', 'agent-03', 'agent-04'].includes(a.id)) {
-            return { ...a, status: 'idle' as const, progress: 0, statusText: '等待启动' };
-          }
-          return a;
-        }),
-        // Keep messages up to video selection
-        messages: snapshot.messages.filter(m =>
-          !(m.type === 'agent-cluster' && m.agents?.some(a => ['agent-02', 'agent-03'].includes(a.id))) &&
-          !(m.type === 'create-agent' && m.content.includes('记忆库')) &&
-          !(m.type === 'read-checklist' && snapshot.messages.indexOf(m) > 5) &&
-          !(m.type === 'read-memory') &&
-          !(m.type === 'video-gen-status' && m.content.includes('Prompt'))
-        ),
-        checklistDone: [true, false, false, false],
-      });
-      setTimeout(() => selectVideo(video), 100);
-    } else if (phase === 'phase3') {
-      // Has prompt, need to re-run agent 04
-      setState({
-        ...snapshot,
-        resultVideo: null,
-        isProcessing: false,
-        agents: snapshot.agents.map(a => a.id === 'agent-04'
-          ? { ...a, status: 'idle' as const, progress: 0, statusText: '等待启动' }
-          : a),
-        messages: snapshot.messages.filter(m =>
-          !(m.type === 'agent-cluster' && m.agents?.some(a => a.id === 'agent-04')) &&
-          !(m.type === 'create-agent' && m.content.includes('视频生成')) &&
-          !(m.type === 'video-gen-status' && m.content.includes('🎉'))
-        ),
-        checklistDone: [true, true, true, false],
-      });
-      setTimeout(() => confirmGenerate(), 100);
-    }
-  }, [detectPhase, completeSetup, selectVideo, confirmGenerate]);
 
   return {
     state,
@@ -885,6 +810,5 @@ export function useSkillsEngine() {
     handleUserInput,
     resetSession,
     restoreState,
-    restoreAndResume,
   };
 }
