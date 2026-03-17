@@ -1,12 +1,7 @@
-import { Play, Download, RefreshCw } from 'lucide-react';
+import { Play, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-interface ResultPreviewBlockProps {
-  onRegenerate?: () => void;
-  disabled?: boolean;
-}
-
-export function ResultPreviewBlock({ onRegenerate, disabled }: ResultPreviewBlockProps) {
+export function ResultPreviewBlock() {
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden">
       <div className="px-5 py-3 border-b border-border/30">
@@ -30,15 +25,6 @@ export function ResultPreviewBlock({ onRegenerate, disabled }: ResultPreviewBloc
       <div className="p-4 flex items-center gap-2 flex-wrap">
         <Button variant="outline" size="sm" className="rounded-lg gap-1.5 text-xs border-border/50">
           <Download className="w-3.5 h-3.5" /> 导出下载
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-lg gap-1.5 text-xs border-border/50"
-          onClick={onRegenerate}
-          disabled={disabled}
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> 再次生成
         </Button>
       </div>
     </div>
