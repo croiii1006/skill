@@ -608,7 +608,7 @@ export function useSkillsEngine() {
       addTaskLog(genTaskId, '音频专家正在合成音频...');
       await randDelay();
       updateChild(genTaskId, 'sub-audio', { status: 'done', progress: 100, title: '音频专家完成合成音频' });
-      addTaskLog(genTaskId, '音频专家完成音频合成 → BGM 节拍同步，时长 30s');
+      addTaskLog(genTaskId, '音频专家完成音频合成 → BGM 节拍同步');
 
       // Compose
       updateChild(genTaskId, 'sub-compose', { status: 'running', title: '视频专家正在合成视频' });
