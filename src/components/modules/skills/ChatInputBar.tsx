@@ -174,9 +174,6 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
                 className="flex-1 min-w-[120px] bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50"
               />
             </div>
-            <div className="text-[10px] text-muted-foreground/50 mt-0.5">
-              {tags.length}/{MAX_TAG_COUNT} 个标签 · 每个最多 {MAX_TAG_LENGTH} 字
-            </div>
           </div>
         </div>
 
