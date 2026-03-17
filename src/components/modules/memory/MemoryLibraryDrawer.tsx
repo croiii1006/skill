@@ -130,10 +130,7 @@ export function MemoryLibraryDrawer({ open, onOpenChange }: Props) {
                     </DropdownMenu>
                   </div>
                   <p className="text-xs text-foreground/70 mt-2 line-clamp-2 leading-relaxed">{entry.content}</p>
-                  <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-                    {entry.tags.map((tag) =>
-                    <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-5 font-normal">{tag}</Badge>
-                    )}
+                  <div className="flex items-center mt-2.5">
                     <span className="text-[10px] text-muted-foreground ml-auto">{entry.updatedAt}</span>
                   </div>
                 </div>
