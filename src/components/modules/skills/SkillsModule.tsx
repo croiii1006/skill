@@ -217,8 +217,20 @@ export function SkillsModule() {
     if (activeHistoryId === id) setActiveHistoryId(null);
   }, [history, activeHistoryId]);
 
+  const hasInProgressSession = useMemo(() => {
+    return history.some((h) => h.snapshot.setupCompleted && !h.snapshot.resultVideo);
+  }, [history]);
+
   const handleSend = (text: string, image?: string | null, category?: string, memoryIds?: string[]) => {
     if (!state.setupCompleted && (image || text)) {
+      if (hasInProgressSession) {
+        toast({
+          title: '当前已有进行中的任务',
+          description: '请等待当前任务完成后再开始新任务',
+          variant: 'destructive'
+        });
+        return;
+      }
       const setup: SessionSetup = {
         image: image || null,
         imageName: image ? 'uploaded-image' : null,
