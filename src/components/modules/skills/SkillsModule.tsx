@@ -256,12 +256,8 @@ export function SkillsModule() {
       return;
     }
 
-    if (isItemInProgress) {
-      // Resume the pipeline from where it left off
-      restoreAndResume(item.snapshot);
-    } else {
-      restoreState(item.snapshot);
-    }
+    // Restore snapshot as-is; running agents will be frozen to 'done'
+    restoreState(item.snapshot);
     setActiveHistoryId(item.id);
     setHistorySheetOpen(false);
   };
