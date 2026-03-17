@@ -16,12 +16,12 @@ interface VideoCandidateRowProps {
 }
 
 const coverColors = [
-  'from-violet-200 to-violet-100',
-  'from-blue-200 to-blue-100',
-  'from-amber-200 to-amber-100',
-  'from-emerald-200 to-emerald-100',
-  'from-rose-200 to-rose-100',
-];
+'from-violet-200 to-violet-100',
+'from-blue-200 to-blue-100',
+'from-amber-200 to-amber-100',
+'from-emerald-200 to-emerald-100',
+'from-rose-200 to-rose-100'];
+
 
 export function VideoCandidateRow({ videos, onSelect, onPreview, selectedVideoId, disabled }: VideoCandidateRowProps) {
   const [detailVideo, setDetailVideo] = useState<CandidateVideo | null>(null);
@@ -37,16 +37,16 @@ export function VideoCandidateRow({ videos, onSelect, onPreview, selectedVideoId
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2.5">
-        {displayVideos.map((video, i) => (
-          <div
-            key={video.id}
-            className="rounded-xl border border-border/30 bg-card overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
-            onClick={() => openDetail(video, i)}
-          >
+        {displayVideos.map((video, i) =>
+        <div
+          key={video.id}
+          className="rounded-xl border border-border/30 bg-card overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
+          onClick={() => openDetail(video, i)}>
+          
             {/* Cover */}
             <div
-              className={`relative aspect-[9/14] bg-gradient-to-br ${coverColors[i % coverColors.length]} flex items-center justify-center`}
-            >
+            className={`relative aspect-[9/14] bg-gradient-to-br ${coverColors[i % coverColors.length]} flex items-center justify-center`}>
+            
               <Play className="w-7 h-7 text-foreground/15" />
               <div className="absolute bottom-2 left-2 bg-foreground/75 text-background text-[10px] font-mono px-1.5 py-0.5 rounded-md">
                 {video.duration}
@@ -61,11 +61,11 @@ export function VideoCandidateRow({ videos, onSelect, onPreview, selectedVideoId
               {/* Title - no likes */}
               <p className="text-xs font-medium text-foreground leading-snug line-clamp-2">{video.title}</p>
 
-              {video.strategy && (
-                <p className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
+              {video.strategy &&
+            <p className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
                   策略:{video.strategy}
                 </p>
-              )}
+            }
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
@@ -98,55 +98,55 @@ export function VideoCandidateRow({ videos, onSelect, onPreview, selectedVideoId
 
               {/* Action buttons */}
               <div className="flex gap-1.5 pt-0.5">
-                {video.tiktokUrl && (
-                  <a
-                    href={video.tiktokUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 h-8 rounded-full border border-border/50 flex items-center justify-center gap-1 text-[11px] text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                  >
+                {video.tiktokUrl &&
+              <a
+                href={video.tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex-1 h-8 rounded-full border border-border/50 flex items-center justify-center gap-1 text-[11px] text-muted-foreground hover:text-foreground hover:border-border transition-colors">
+                
                     <ExternalLink className="w-3 h-3" />
                     原链接
                   </a>
-                )}
+              }
                 <button
-                  onClick={(e) => { e.stopPropagation(); if (!disabled) onSelect(video); }}
-                  disabled={disabled && selectedVideoId !== video.id}
-                  className={cn(
-                    'flex-1 h-8 rounded-full flex items-center justify-center gap-1 text-[11px] font-medium transition-colors',
-                    selectedVideoId === video.id
-                      ? 'bg-muted text-foreground'
-                      : disabled
-                        ? 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
-                        : 'bg-foreground text-background hover:bg-foreground/90'
-                  )}
-                >
+                onClick={(e) => {e.stopPropagation();if (!disabled) onSelect(video);}}
+                disabled={disabled && selectedVideoId !== video.id}
+                className={cn(
+                  'flex-1 h-8 rounded-full flex items-center justify-center gap-1 text-[11px] font-medium transition-colors',
+                  selectedVideoId === video.id ?
+                  'bg-muted text-foreground' :
+                  disabled ?
+                  'bg-muted/50 text-muted-foreground/50 cursor-not-allowed' :
+                  'bg-foreground text-background hover:bg-foreground/90'
+                )}>
+                
                   <Copy className="w-3 h-3" />
                   {selectedVideoId === video.id ? '已选择' : '复刻'}
                 </button>
               </div>
             </div>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Detail Dialog */}
       <Dialog open={!!detailVideo} onOpenChange={(open) => !open && setDetailVideo(null)}>
         <DialogContent className="max-w-3xl p-0 rounded-2xl overflow-hidden [&>button]:hidden border-border/30 shadow-2xl">
-          {detailVideo && (
-            <VideoDetailDialog
-              video={detailVideo}
-              colorIndex={detailIndex}
-              selectedVideoId={selectedVideoId}
-              onSelect={(v) => { onSelect(v); setDetailVideo(null); }}
-              onClose={() => setDetailVideo(null)}
-            />
-          )}
+          {detailVideo &&
+          <VideoDetailDialog
+            video={detailVideo}
+            colorIndex={detailIndex}
+            selectedVideoId={selectedVideoId}
+            onSelect={(v) => {onSelect(v);setDetailVideo(null);}}
+            onClose={() => setDetailVideo(null)} />
+
+          }
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }
 
 /* ─── Detail Dialog (extracted component) ─── */
@@ -167,16 +167,16 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
     <div className="flex h-[75vh] max-h-[680px]">
       {/* Left: Video player area */}
       <div
-        className={`relative w-[340px] shrink-0 bg-gradient-to-br ${coverColors[colorIndex % coverColors.length]} flex items-center justify-center group`}
-      >
+        className={`relative w-[340px] shrink-0 bg-gradient-to-br ${coverColors[colorIndex % coverColors.length]} flex items-center justify-center group`}>
+        
         {/* Center play/pause */}
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="w-16 h-16 rounded-full bg-foreground/20 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/30 transition-colors"
-        >
-          {isPlaying
-            ? <Pause className="w-7 h-7 text-background" />
-            : <Play className="w-7 h-7 text-background ml-1" />
+          className="w-16 h-16 rounded-full bg-foreground/20 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/30 transition-colors">
+          
+          {isPlaying ?
+          <Pause className="w-7 h-7 text-background" /> :
+          <Play className="w-7 h-7 text-background ml-1" />
           }
         </button>
 
@@ -188,16 +188,16 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="w-9 h-9 rounded-full bg-foreground/25 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/35 transition-colors"
-            >
-              {isMuted
-                ? <VolumeX className="w-4 h-4 text-background" />
-                : <Volume2 className="w-4 h-4 text-background" />
+              className="w-9 h-9 rounded-full bg-foreground/25 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/35 transition-colors">
+              
+              {isMuted ?
+              <VolumeX className="w-4 h-4 text-background" /> :
+              <Volume2 className="w-4 h-4 text-background" />
               }
             </button>
             <button
-              className="w-9 h-9 rounded-full bg-foreground/25 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/35 transition-colors"
-            >
+              className="w-9 h-9 rounded-full bg-foreground/25 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/35 transition-colors">
+              
               <Maximize2 className="w-4 h-4 text-background" />
             </button>
           </div>
@@ -211,8 +211,8 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
           <span className="text-sm font-medium text-foreground">视频详情</span>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
-          >
+            className="w-7 h-7 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
+            
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
@@ -221,12 +221,12 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
         <ScrollArea className="flex-1 min-h-0">
           <div className="px-5 py-4 space-y-4">
             <h3 className="text-base font-medium text-foreground leading-snug">{video.title}</h3>
-            {video.strategy && (
-              <div>
+            {video.strategy &&
+            <div>
                 <p className="text-xs text-muted-foreground mb-1">{video.analysis || '视频解析'}</p>
                 <p className="text-sm text-foreground/80 leading-relaxed">策略：{video.strategy}</p>
               </div>
-            )}
+            }
           </div>
         </ScrollArea>
 
@@ -253,11 +253,11 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
           </div>
 
           {/* Selling point hit rate - highlighted */}
-          <div className="rounded-xl bg-orange-500/8 border border-orange-500/15 p-3">
+          <div className="rounded-xl border border-orange-500/15 p-3 bg-transparent">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-foreground">卖点命中率</span>
               <span className="text-lg font-bold text-foreground">{video.sellingPointHitRate ?? 0}%
-                <TrendingUp className="w-4 h-4 text-orange-500 inline ml-1 -mt-0.5" />
+                
               </span>
             </div>
             <Progress value={video.sellingPointHitRate ?? 0} className="h-1.5 [&>div]:bg-orange-500" />
@@ -265,32 +265,32 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
 
           {/* Actions */}
           <div className="flex gap-2">
-            {video.tiktokUrl && (
-              <a
-                href={video.tiktokUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 h-11 rounded-full border border-border/50 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-              >
+            {video.tiktokUrl &&
+            <a
+              href={video.tiktokUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 h-11 rounded-full border border-border/50 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors">
+              
                 <ExternalLink className="w-3.5 h-3.5" />
                 原链接
               </a>
-            )}
+            }
             <Button
               onClick={() => onSelect(video)}
               className={cn(
                 'flex-1 rounded-full h-11 font-medium text-sm gap-2',
-                selectedVideoId === video.id
-                  ? 'bg-muted text-foreground hover:bg-muted/80'
-                  : 'bg-foreground text-background hover:bg-foreground/90'
-              )}
-            >
+                selectedVideoId === video.id ?
+                'bg-muted text-foreground hover:bg-muted/80' :
+                'bg-foreground text-background hover:bg-foreground/90'
+              )}>
+              
               <Copy className="w-4 h-4" />
               {selectedVideoId === video.id ? '已选择' : '一键复刻'}
             </Button>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
