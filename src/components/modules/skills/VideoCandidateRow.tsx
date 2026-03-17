@@ -247,7 +247,7 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
               <span className="text-sm text-foreground font-light">{video.likes}</span>
             </div>
             <div className="gap-2 flex items-center justify-end">
-              <TrendingUp className="w-4 h-4 text-orange-500" />
+              <TrendingUp className="w-4 h-4 text-orange-500 mr-[50px]" />
               <span className="text-sm text-foreground font-light">{video.growthRate ?? '0%'}</span>
             </div>
           </div>
