@@ -885,5 +885,6 @@ export function useSkillsEngine() {
     handleUserInput,
     resetSession,
     restoreState,
+    restoreAndResume,
   };
 }
