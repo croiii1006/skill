@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, ExternalLink, Copy, Volume2, VolumeX, Eye, Heart, ShoppingCart, TrendingUp, X, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -167,46 +167,75 @@ interface VideoDetailDialogProps {
 
 function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClose }: VideoDetailDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.play().catch(() => setIsPlaying(false));
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  const togglePlay = () => setIsPlaying(prev => !prev);
 
   return (
     <div className="flex h-[75vh] max-h-[680px]">
       {/* Left: Video player area */}
       <div
         className={`relative w-[340px] shrink-0 bg-gradient-to-br ${coverColors[colorIndex % coverColors.length]} flex items-center justify-center group overflow-hidden`}>
-        {video.cover && (
+        
+        {video.videoUrl ? (
+          <video
+            ref={videoRef}
+            src={video.videoUrl}
+            poster={video.cover}
+            loop
+            muted={isMuted}
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            onClick={togglePlay}
+          />
+        ) : video.cover ? (
           <img src={video.cover} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
-        )}
+        ) : null}
+
         {/* Center play/pause */}
         <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="w-16 h-16 rounded-full bg-foreground/20 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/30 transition-colors">
-          
+          onClick={togglePlay}
+          className={`relative w-16 h-16 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/40 transition-all ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
           {isPlaying ?
-          <Pause className="w-7 h-7 text-background" /> :
-          <Play className="w-7 h-7 text-background ml-1" />
+          <Pause className="w-7 h-7 text-white" /> :
+          <Play className="w-7 h-7 text-white ml-1" />
           }
         </button>
 
         {/* Bottom controls bar */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/40 to-transparent flex items-center justify-between">
-          <span className="bg-foreground/80 text-background text-xs font-mono px-2.5 py-1 rounded-lg">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/40 to-transparent flex items-center justify-between z-10">
+          <span className="bg-black/60 text-white text-xs font-mono px-2.5 py-1 rounded-lg backdrop-blur-sm">
             {video.duration}
           </span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="w-9 h-9 rounded-full bg-foreground/25 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/35 transition-colors">
-              
+              className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/40 transition-colors">
               {isMuted ?
-              <VolumeX className="w-4 h-4 text-background" /> :
-              <Volume2 className="w-4 h-4 text-background" />
+              <VolumeX className="w-4 h-4 text-white" /> :
+              <Volume2 className="w-4 h-4 text-white" />
               }
             </button>
             <button
-              className="w-9 h-9 rounded-full bg-foreground/25 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/35 transition-colors">
-              
-              <Maximize2 className="w-4 h-4 text-background" />
+              className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/40 transition-colors">
+              <Maximize2 className="w-4 h-4 text-white" />
             </button>
           </div>
         </div>
