@@ -45,13 +45,19 @@ export function VideoCandidateRow({ videos, onSelect, onPreview, selectedVideoId
           
             {/* Cover */}
             <div
-            className={`relative aspect-[9/14] bg-gradient-to-br ${coverColors[i % coverColors.length]} flex items-center justify-center`}>
+            className={`relative aspect-[9/14] bg-gradient-to-br ${coverColors[i % coverColors.length]} flex items-center justify-center overflow-hidden`}>
             
-              <Play className="w-7 h-7 text-foreground/15" />
-              <div className="absolute bottom-2 left-2 bg-foreground/75 text-background text-[10px] font-mono px-1.5 py-0.5 rounded-md">
+              {video.cover ? (
+                <img src={video.cover} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <Play className="w-7 h-7 text-foreground/15" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              <Play className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 text-white/60 drop-shadow-md" />
+              <div className="absolute bottom-2 left-2 bg-foreground/75 text-background text-[10px] font-mono px-1.5 py-0.5 rounded-md z-10">
                 {video.duration}
               </div>
-              <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-foreground/20 flex items-center justify-center">
+              <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-foreground/20 backdrop-blur-sm flex items-center justify-center z-10">
                 <Volume2 className="w-3 h-3 text-background" />
               </div>
             </div>
