@@ -30,6 +30,7 @@ export interface SkillTask {
 export interface CandidateVideo {
   id: string;
   cover: string;
+  videoUrl?: string;
   title: string;
   duration: string;
   tags: string[];
@@ -116,14 +117,19 @@ import mockCover2 from '@/assets/mock-cover-2.jpg';
 import mockCover3 from '@/assets/mock-cover-3.jpg';
 import mockCover4 from '@/assets/mock-cover-4.jpg';
 import mockCover5 from '@/assets/mock-cover-5.jpg';
+import mockVideo1 from '@/assets/mock-video-1.mp4.asset.json';
+import mockVideo2 from '@/assets/mock-video-2.mp4.asset.json';
+import mockVideo3 from '@/assets/mock-video-3.mp4.asset.json';
+import mockVideo4 from '@/assets/mock-video-4.mp4.asset.json';
 
 const mockCovers = [mockCover1, mockCover2, mockCover3, mockCover4, mockCover5];
+const mockVideoUrls = [mockVideo1.url, mockVideo2.url, mockVideo3.url, mockVideo4.url];
 
 const mockVideos = (): CandidateVideo[] => [
-  { id: `v-${Date.now()}-1`, cover: mockCovers[0], title: 'These come in handy daily! @MINISO #translationearbuds', duration: '0:43', tags: ['美妆', '种草'], views: '28.0M', likes: '1.1M', comments: '12.3K', shares: '8.5K', salesCount: 268, growthRate: '0.0%', analysis: '视频解析', strategy: '开场直击跑步场景痛点，展现佩戴稳固与运动舒适。', sellingPointHitRate: 0, tiktokUrl: 'https://www.tiktok.com/@miniso' },
-  { id: `v-${Date.now()}-2`, cover: mockCovers[1], title: '沉浸式开箱ASMR｜超治愈解压', duration: '0:45', tags: ['开箱', 'ASMR'], views: '15.2M', likes: '890K', comments: '6.7K', shares: '4.2K', salesCount: 1520, growthRate: '12.3%', analysis: '视频解析', strategy: '利用ASMR声效配合近景展示产品细节，引发感官共鸣。', sellingPointHitRate: 35, tiktokUrl: 'https://www.tiktok.com/' },
-  { id: `v-${Date.now()}-3`, cover: mockCovers[2], title: '日常妆容教程｜通勤必备5分钟出门', duration: '1:02', tags: ['教程', '日常'], views: '42.1M', likes: '2.3M', comments: '18.9K', shares: '15.1K', salesCount: 3890, growthRate: '8.7%', analysis: '视频解析', strategy: '以通勤场景切入，展示快速上妆流程，突出便携性。', sellingPointHitRate: 72, tiktokUrl: 'https://www.tiktok.com/' },
-  { id: `v-${Date.now()}-4`, cover: mockCovers[3], title: '产品对比测评TOP3｜真实体验分享', duration: '0:58', tags: ['测评', '对比'], views: '8.9M', likes: '520K', comments: '9.1K', shares: '3.8K', salesCount: 756, growthRate: '5.2%', analysis: '视频解析', strategy: '横向对比同类产品，通过数据和实测突出性价比优势。', sellingPointHitRate: 45, tiktokUrl: 'https://www.tiktok.com/' },
+  { id: `v-${Date.now()}-1`, cover: mockCovers[0], videoUrl: mockVideoUrls[0], title: 'These come in handy daily! @MINISO #translationearbuds', duration: '0:43', tags: ['美妆', '种草'], views: '28.0M', likes: '1.1M', comments: '12.3K', shares: '8.5K', salesCount: 268, growthRate: '0.0%', analysis: '视频解析', strategy: '开场直击跑步场景痛点，展现佩戴稳固与运动舒适。', sellingPointHitRate: 0, tiktokUrl: 'https://www.tiktok.com/@miniso' },
+  { id: `v-${Date.now()}-2`, cover: mockCovers[1], videoUrl: mockVideoUrls[1], title: '沉浸式开箱ASMR｜超治愈解压', duration: '0:45', tags: ['开箱', 'ASMR'], views: '15.2M', likes: '890K', comments: '6.7K', shares: '4.2K', salesCount: 1520, growthRate: '12.3%', analysis: '视频解析', strategy: '利用ASMR声效配合近景展示产品细节，引发感官共鸣。', sellingPointHitRate: 35, tiktokUrl: 'https://www.tiktok.com/' },
+  { id: `v-${Date.now()}-3`, cover: mockCovers[2], videoUrl: mockVideoUrls[2], title: '日常妆容教程｜通勤必备5分钟出门', duration: '1:02', tags: ['教程', '日常'], views: '42.1M', likes: '2.3M', comments: '18.9K', shares: '15.1K', salesCount: 3890, growthRate: '8.7%', analysis: '视频解析', strategy: '以通勤场景切入，展示快速上妆流程，突出便携性。', sellingPointHitRate: 72, tiktokUrl: 'https://www.tiktok.com/' },
+  { id: `v-${Date.now()}-4`, cover: mockCovers[3], videoUrl: mockVideoUrls[3], title: '产品对比测评TOP3｜真实体验分享', duration: '0:58', tags: ['测评', '对比'], views: '8.9M', likes: '520K', comments: '9.1K', shares: '3.8K', salesCount: 756, growthRate: '5.2%', analysis: '视频解析', strategy: '横向对比同类产品，通过数据和实测突出性价比优势。', sellingPointHitRate: 45, tiktokUrl: 'https://www.tiktok.com/' },
   { id: `v-${Date.now()}-5`, cover: mockCovers[4], title: '一分钟get氛围感穿搭｜秋冬必入', duration: '0:28', tags: ['穿搭', '氛围'], views: '31.2M', likes: '1.8M', comments: '14.2K', shares: '11.3K', salesCount: 2340, growthRate: '15.6%', analysis: '视频解析', strategy: '快节奏换装展示多套搭配，突出单品百搭特性。', sellingPointHitRate: 58, tiktokUrl: 'https://www.tiktok.com/' },
 ];
 
