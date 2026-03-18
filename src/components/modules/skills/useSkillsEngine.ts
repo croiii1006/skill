@@ -117,13 +117,9 @@ import mockCover2 from '@/assets/mock-cover-2.jpg';
 import mockCover3 from '@/assets/mock-cover-3.jpg';
 import mockCover4 from '@/assets/mock-cover-4.jpg';
 import mockCover5 from '@/assets/mock-cover-5.jpg';
-import mockVideo1 from '@/assets/mock-video-1.mp4.asset.json';
-import mockVideo2 from '@/assets/mock-video-2.mp4.asset.json';
-import mockVideo3 from '@/assets/mock-video-3.mp4.asset.json';
-import mockVideo4 from '@/assets/mock-video-4.mp4.asset.json';
 
 const mockCovers = [mockCover1, mockCover2, mockCover3, mockCover4, mockCover5];
-const mockVideoUrls = [mockVideo1.url, mockVideo2.url, mockVideo3.url, mockVideo4.url];
+const mockVideoUrls = ['/videos/mock-video-1.mp4', '/videos/mock-video-2.mp4', '/videos/mock-video-3.mp4', '/videos/mock-video-4.mp4'];
 
 const mockVideos = (): CandidateVideo[] => [
   { id: `v-${Date.now()}-1`, cover: mockCovers[0], videoUrl: mockVideoUrls[0], title: 'These come in handy daily! @MINISO #translationearbuds', duration: '0:43', tags: ['美妆', '种草'], views: '28.0M', likes: '1.1M', comments: '12.3K', shares: '8.5K', salesCount: 268, growthRate: '0.0%', analysis: '视频解析', strategy: '开场直击跑步场景痛点，展现佩戴稳固与运动舒适。', sellingPointHitRate: 0, tiktokUrl: 'https://www.tiktok.com/@miniso' },
