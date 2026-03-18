@@ -30,6 +30,7 @@ export interface SkillTask {
 export interface CandidateVideo {
   id: string;
   cover: string;
+  videoUrl?: string;
   title: string;
   duration: string;
   tags: string[];
