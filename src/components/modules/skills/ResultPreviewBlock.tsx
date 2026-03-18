@@ -1,5 +1,6 @@
 import { Play, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import mockResultVideo from '@/assets/mock-result-video.jpg';
 
 export function ResultPreviewBlock() {
   return (
@@ -9,11 +10,13 @@ export function ResultPreviewBlock() {
       </div>
       
       {/* Mock video player */}
-      <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
-        <div className="w-16 h-16 rounded-full bg-foreground/10 flex items-center justify-center cursor-pointer hover:bg-foreground/20 transition-colors">
-          <Play className="w-8 h-8 text-foreground/60 ml-1" />
+      <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center overflow-hidden">
+        <img src={mockResultVideo} alt="复刻视频预览" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="relative w-16 h-16 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-black/40 transition-colors">
+          <Play className="w-8 h-8 text-white ml-1" />
         </div>
-        <div className="absolute bottom-3 right-3 text-[10px] bg-foreground/70 text-background px-2 py-0.5 rounded-md font-mono">
+        <div className="absolute bottom-3 right-3 text-[10px] bg-foreground/70 text-background px-2 py-0.5 rounded-md font-mono z-10">
           0:30
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-border/30">

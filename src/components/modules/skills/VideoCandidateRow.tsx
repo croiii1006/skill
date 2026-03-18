@@ -173,8 +173,10 @@ function VideoDetailDialog({ video, colorIndex, selectedVideoId, onSelect, onClo
     <div className="flex h-[75vh] max-h-[680px]">
       {/* Left: Video player area */}
       <div
-        className={`relative w-[340px] shrink-0 bg-gradient-to-br ${coverColors[colorIndex % coverColors.length]} flex items-center justify-center group`}>
-        
+        className={`relative w-[340px] shrink-0 bg-gradient-to-br ${coverColors[colorIndex % coverColors.length]} flex items-center justify-center group overflow-hidden`}>
+        {video.cover && (
+          <img src={video.cover} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
+        )}
         {/* Center play/pause */}
         <button
           onClick={() => setIsPlaying(!isPlaying)}
