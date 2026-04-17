@@ -203,6 +203,21 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
                 {selectedMemoryIds.length > 0 ? `${selectedMemoryIds.length} 个记忆库` : '记忆库'}
               </span>
             </button>
+
+            <button
+              onClick={() => setCreatorDialogOpen(true)}
+              className={cn(
+                'h-8 rounded-full border flex items-center justify-center gap-1.5 px-3 transition-all duration-300 ease-out',
+                selectedCreatorIds.length > 0
+                  ? 'border-orange-400/60 bg-orange-400/10 text-orange-400'
+                  : 'border-border/40 text-muted-foreground hover:text-foreground hover:border-border'
+              )}
+            >
+              <Users className="w-4 h-4" />
+              <span className="text-[11px] font-medium whitespace-nowrap">
+                {selectedCreatorIds.length > 0 ? `${selectedCreatorIds.length} 位达人` : '达人库'}
+              </span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -231,6 +246,15 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
         items={memoryItems}
         selectedIds={selectedMemoryIds}
         onToggle={toggleMemory}
+        className="bg-background/40 backdrop-blur-xl border-border/20"
+      />
+
+      <CreatorSelectionDialog
+        open={creatorDialogOpen}
+        onOpenChange={setCreatorDialogOpen}
+        items={MOCK_CREATORS}
+        selectedIds={selectedCreatorIds}
+        onToggle={toggleCreator}
         className="bg-background/40 backdrop-blur-xl border-border/20"
       />
     </div>
