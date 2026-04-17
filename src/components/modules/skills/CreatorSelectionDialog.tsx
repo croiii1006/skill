@@ -57,14 +57,14 @@ export function CreatorSelectionDialog({
                     className={cn(
                       'w-full text-left p-4 rounded-2xl border transition-all flex flex-col items-center gap-3 relative',
                       selected
-                        ? 'border-orange-400/60 bg-orange-400/[0.06] ring-1 ring-orange-400/30'
+                        ? 'border-primary/60 bg-primary/[0.06] ring-1 ring-primary/30'
                         : 'border-border/30 hover:border-border/60 bg-background'
                     )}
                   >
                     {/* Selection indicator */}
                     {selected && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-orange-400 flex items-center justify-center border-2 border-background">
-                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+                        <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />
                       </div>
                     )}
 
@@ -72,7 +72,7 @@ export function CreatorSelectionDialog({
                     <div className="relative shrink-0">
                       <div className={cn(
                         'w-16 h-16 rounded-full overflow-hidden border-2 transition-all',
-                        selected ? 'border-orange-400' : 'border-border/40'
+                        selected ? 'border-primary' : 'border-border/40'
                       )}>
                         <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
                       </div>
@@ -82,7 +82,7 @@ export function CreatorSelectionDialog({
                     <div className="flex flex-col items-center text-center min-w-0 w-full">
                       <span className="font-medium text-sm text-foreground truncate w-full">{item.name}</span>
                       <span className="text-xs text-muted-foreground truncate w-full">{item.tiktokHandle}</span>
-                      <span className="text-[11px] text-orange-500/80 font-medium mt-1">
+                      <span className="text-[11px] text-primary/80 font-medium mt-1">
                         {item.followers} 粉丝
                       </span>
                     </div>
