@@ -1,6 +1,7 @@
-import { Check, Users } from 'lucide-react';
+import { Check, Users, MapPin, Eye, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { cn } from '@/lib/utils';
 
 export interface CreatorItem {
@@ -33,7 +34,7 @@ export function CreatorSelectionDialog({
 }: CreatorSelectionDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn('sm:max-w-lg rounded-2xl', className)}>
+      <DialogContent className={cn('sm:max-w-2xl rounded-2xl', className)}>
         <DialogHeader>
           <DialogTitle className="text-base font-medium flex items-center gap-2">
             <Users className="w-4 h-4" />
@@ -45,51 +46,72 @@ export function CreatorSelectionDialog({
           已选 {selectedIds.length} 位达人，将作为对标参考人物
         </p>
 
-        <div className="grid grid-cols-1 gap-2 mt-2 max-h-[55vh] overflow-y-auto scrollbar-thin pr-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2 max-h-[55vh] overflow-y-auto scrollbar-thin pr-1">
           {items.map(item => {
             const selected = selectedIds.includes(item.id);
             return (
-              <button
-                key={item.id}
-                onClick={() => onToggle(item.id)}
-                className={cn(
-                  'w-full text-left p-3 rounded-2xl border transition-all flex items-center gap-3',
-                  selected
-                    ? 'border-orange-400/60 bg-orange-400/[0.06] ring-1 ring-orange-400/30'
-                    : 'border-border/30 hover:border-border/60 bg-background'
-                )}
-              >
-                {/* Avatar */}
-                <div className="relative shrink-0">
-                  <div className={cn(
-                    'w-12 h-12 rounded-full overflow-hidden border-2 transition-all',
-                    selected ? 'border-orange-400' : 'border-border/40'
-                  )}>
-                    <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
-                  </div>
-                  {selected && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-orange-400 flex items-center justify-center border-2 border-background">
-                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                    </div>
-                  )}
-                </div>
+              <HoverCard key={item.id} openDelay={100} closeDelay={100}>
+                <HoverCardTrigger asChild>
+                  <button
+                    onClick={() => onToggle(item.id)}
+                    className={cn(
+                      'w-full text-left p-4 rounded-2xl border transition-all flex flex-col items-center gap-3 relative',
+                      selected
+                        ? 'border-primary/60 bg-primary/[0.06] ring-1 ring-primary/30'
+                        : 'border-border/30 hover:border-border/60 bg-background'
+                    )}
+                  >
+                    {/* Selection indicator */}
+                    {selected && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+                        <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />
+                      </div>
+                    )}
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-sm text-foreground truncate">{item.name}</span>
-                    <span className="text-[10px] text-muted-foreground/70 shrink-0">{item.region}</span>
+                    {/* Avatar */}
+                    <div className="relative shrink-0">
+                      <div className={cn(
+                        'w-16 h-16 rounded-full overflow-hidden border-2 transition-all',
+                        selected ? 'border-primary' : 'border-border/40'
+                      )}>
+                        <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+
+                    {/* Basic Info - Always visible */}
+                    <div className="flex flex-col items-center text-center min-w-0 w-full">
+                      <span className="font-medium text-sm text-foreground truncate w-full">{item.name}</span>
+                      <span className="text-xs text-muted-foreground truncate w-full">{item.tiktokHandle}</span>
+                      <span className="text-[11px] text-primary/80 font-medium mt-1">
+                        {item.followers} 粉丝
+                      </span>
+                    </div>
+                  </button>
+                </HoverCardTrigger>
+
+                {/* Hover content - Additional info */}
+                <HoverCardContent 
+                  side="top" 
+                  align="center"
+                  sideOffset={8}
+                  className="w-48 p-3 rounded-xl bg-background border border-border/50 shadow-lg"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span>{item.region}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Eye className="w-3.5 h-3.5 shrink-0" />
+                      <span>均播 {item.avgViews}</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Tag className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{item.niche}</span>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-0.5 truncate">{item.tiktokHandle}</div>
-                  <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground/80">
-                    <span><b className="text-foreground/80 font-semibold">{item.followers}</b> 粉丝</span>
-                    <span className="w-px h-2.5 bg-border/40" />
-                    <span>均播 <b className="text-foreground/80 font-semibold">{item.avgViews}</b></span>
-                    <span className="w-px h-2.5 bg-border/40" />
-                    <span className="truncate">{item.niche}</span>
-                  </div>
-                </div>
-              </button>
+                </HoverCardContent>
+              </HoverCard>
             );
           })}
         </div>
