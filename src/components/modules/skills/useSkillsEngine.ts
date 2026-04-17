@@ -51,6 +51,7 @@ export interface SessionSetup {
   imageName: string | null;
   memoryEnabled: boolean;
   selectedMemoryIds: string[];
+  selectedCreatorIds?: string[];
   sellingPoints: string;
   category: string;
 }

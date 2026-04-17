@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, ArrowUp, X, Database } from 'lucide-react';
+import { Plus, ArrowUp, X, Database, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { CategoryCascader, CATEGORY_TREE } from './CategoryCascader';
 import { MemorySelectionDialog } from '@/components/modules/memory/MemorySelectionDialog';
+import { CreatorSelectionDialog, MOCK_CREATORS } from './CreatorSelectionDialog';
 import { toast } from '@/hooks/use-toast';
 
 export interface MemoryItem {
