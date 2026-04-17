@@ -44,6 +44,8 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const [category, setCategory] = useState('');
   const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]);
   const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
+  const [selectedCreatorIds, setSelectedCreatorIds] = useState<string[]>([]);
+  const [creatorDialogOpen, setCreatorDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
 
@@ -97,6 +99,12 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const toggleMemory = (id: string) => {
     setSelectedMemoryIds(prev =>
       prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+    );
+  };
+
+  const toggleCreator = (id: string) => {
+    setSelectedCreatorIds(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
   };
 
