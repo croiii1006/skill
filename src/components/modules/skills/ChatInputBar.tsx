@@ -28,7 +28,7 @@ export interface MemoryItem {
 }
 
 interface ChatInputBarProps {
-  onSend: (text: string, image?: string | null, category?: string, memoryIds?: string[]) => void;
+  onSend: (text: string, image?: string | null, category?: string, memoryIds?: string[], creatorIds?: string[]) => void;
   disabled?: boolean;
   memoryItems: MemoryItem[];
 }
@@ -75,7 +75,13 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const handleSend = () => {
     if (tags.length === 0 || !image || !category || disabled) return;
     const sellingPointsText = tags.join('\n');
-    onSend(sellingPointsText, image, category || undefined, selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined);
+    onSend(
+      sellingPointsText,
+      image,
+      category || undefined,
+      selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined,
+      selectedCreatorIds.length > 0 ? selectedCreatorIds : undefined,
+    );
     setTags([]);
     setTagInput('');
     setImage(null);
