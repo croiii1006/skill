@@ -216,13 +216,14 @@ export function SkillsModule() {
     if (activeHistoryId === id) setActiveHistoryId(null);
   }, [history, activeHistoryId]);
 
-  const handleSend = (text: string, image?: string | null, category?: string, memoryIds?: string[]) => {
+  const handleSend = (text: string, image?: string | null, category?: string, memoryIds?: string[], creatorIds?: string[]) => {
     if (!state.setupCompleted && (image || text)) {
       const setup: SessionSetup = {
         image: image || null,
         imageName: image ? 'uploaded-image' : null,
         memoryEnabled: memoryIds && memoryIds.length > 0 || false,
         selectedMemoryIds: memoryIds || [],
+        selectedCreatorIds: creatorIds || [],
         sellingPoints: text || '',
         category: category || '其它'
       };

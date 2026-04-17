@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, ArrowUp, X, Database } from 'lucide-react';
+import { Plus, ArrowUp, X, Database, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { CategoryCascader, CATEGORY_TREE } from './CategoryCascader';
 import { MemorySelectionDialog } from '@/components/modules/memory/MemorySelectionDialog';
+import { CreatorSelectionDialog, MOCK_CREATORS } from './CreatorSelectionDialog';
 import { toast } from '@/hooks/use-toast';
 
 export interface MemoryItem {
@@ -27,7 +28,7 @@ export interface MemoryItem {
 }
 
 interface ChatInputBarProps {
-  onSend: (text: string, image?: string | null, category?: string, memoryIds?: string[]) => void;
+  onSend: (text: string, image?: string | null, category?: string, memoryIds?: string[], creatorIds?: string[]) => void;
   disabled?: boolean;
   memoryItems: MemoryItem[];
 }
@@ -43,6 +44,8 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const [category, setCategory] = useState('');
   const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]);
   const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
+  const [selectedCreatorIds, setSelectedCreatorIds] = useState<string[]>([]);
+  const [creatorDialogOpen, setCreatorDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,7 +75,13 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const handleSend = () => {
     if (tags.length === 0 || !image || !category || disabled) return;
     const sellingPointsText = tags.join('\n');
-    onSend(sellingPointsText, image, category || undefined, selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined);
+    onSend(
+      sellingPointsText,
+      image,
+      category || undefined,
+      selectedMemoryIds.length > 0 ? selectedMemoryIds : undefined,
+      selectedCreatorIds.length > 0 ? selectedCreatorIds : undefined,
+    );
     setTags([]);
     setTagInput('');
     setImage(null);
@@ -96,6 +105,12 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
   const toggleMemory = (id: string) => {
     setSelectedMemoryIds(prev =>
       prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+    );
+  };
+
+  const toggleCreator = (id: string) => {
+    setSelectedCreatorIds(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
   };
 
@@ -194,6 +209,21 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
                 {selectedMemoryIds.length > 0 ? `${selectedMemoryIds.length} 个记忆库` : '记忆库'}
               </span>
             </button>
+
+            <button
+              onClick={() => setCreatorDialogOpen(true)}
+              className={cn(
+                'h-8 rounded-full border flex items-center justify-center gap-1.5 px-3 transition-all duration-300 ease-out',
+                selectedCreatorIds.length > 0
+                  ? 'border-orange-400/60 bg-orange-400/10 text-orange-400'
+                  : 'border-border/40 text-muted-foreground hover:text-foreground hover:border-border'
+              )}
+            >
+              <Users className="w-4 h-4" />
+              <span className="text-[11px] font-medium whitespace-nowrap">
+                {selectedCreatorIds.length > 0 ? `${selectedCreatorIds.length} 位达人` : '达人库'}
+              </span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -222,6 +252,15 @@ export function ChatInputBar({ onSend, disabled, memoryItems }: ChatInputBarProp
         items={memoryItems}
         selectedIds={selectedMemoryIds}
         onToggle={toggleMemory}
+        className="bg-background/40 backdrop-blur-xl border-border/20"
+      />
+
+      <CreatorSelectionDialog
+        open={creatorDialogOpen}
+        onOpenChange={setCreatorDialogOpen}
+        items={MOCK_CREATORS}
+        selectedIds={selectedCreatorIds}
+        onToggle={toggleCreator}
         className="bg-background/40 backdrop-blur-xl border-border/20"
       />
     </div>
